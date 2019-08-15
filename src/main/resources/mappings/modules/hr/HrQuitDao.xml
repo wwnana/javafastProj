@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrQuitDao">
+    
+	<sql id="hrQuitColumns">
+		a.id AS "id",
+		a.quit_type AS "quitType",
+		a.quit_date AS "quitDate",
+		a.quit_cause AS "quitCause",
+		a.apply_quit_cause AS "applyQuitCause",
+		a.compensation AS "compensation",
+		a.social_over_month AS "socialOverMonth",
+		a.fund_over_month AS "fundOverMonth",
+		a.annual_leave AS "annualLeave",
+		a.rest_leave AS "restLeave",
+		a.work_content AS "workContent",
+		a.work_by AS "workBy.id",
+		a.work_status AS "workStatus",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.hr_employee_id AS "hrEmployee.id",
+		a.account_id AS "accountId",
+		h.name AS "hrEmployee.name",
+		u12.name AS "workBy.name"
+	</sql>
+	
+	<sql id="hrQuitJoins">
+		LEFT JOIN sys_user u12 ON u12.id = a.work_by
+		LEFT JOIN hr_employee h ON h.id = a.hr_employee_id
+	</sql>
+    
+	<select id="get" resultType="HrQuit">
+		SELECT 
+			<include refid="hrQuitColumns"/>
+		FROM hr_quit a
+		<include refid="hrQuitJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrQuit">
+		SELECT 
+			<include refid="hrQuitColumns"/>
+		FROM hr_quit a
+		<include refid="hrQuitJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="beginQuitDate != null and endQuitDate != null and beginQuitDate != '' and endQuitDate != ''">
+				AND a.quit_date BETWEEN #{beginQuitDate} AND #{endQuitDate}
+			</if>
+			<if test="hrEmployee != null and hrEmployee.id != null and hrEmployee.id != ''">
+				AND a.hr_employee_id = #{hrEmployee.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrQuit">
+		SELECT 
+			<include refid="hrQuitColumns"/>
+		FROM hr_quit a
+		<include refid="hrQuitJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_quit(
+			id,
+			quit_type,
+			quit_date,
+			quit_cause,
+			apply_quit_cause,
+			compensation,
+			social_over_month,
+			fund_over_month,
+			annual_leave,
+			rest_leave,
+			work_content,
+			work_by,
+			work_status,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			hr_employee_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{quitType},
+			#{quitDate},
+			#{quitCause},
+			#{applyQuitCause},
+			#{compensation},
+			#{socialOverMonth},
+			#{fundOverMonth},
+			#{annualLeave},
+			#{restLeave},
+			#{workContent},
+			#{workBy.id},
+			#{workStatus},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{hrEmployee.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_quit SET
+						quit_type = #{quitType},
+			quit_date = #{quitDate},
+			quit_cause = #{quitCause},
+			apply_quit_cause = #{applyQuitCause},
+			compensation = #{compensation},
+			social_over_month = #{socialOverMonth},
+			fund_over_month = #{fundOverMonth},
+			annual_leave = #{annualLeave},
+			rest_leave = #{restLeave},
+			work_content = #{workContent},
+			work_by = #{workBy.id},
+			work_status = #{workStatus},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			hr_employee_id = #{hrEmployee.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_quit SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrQuit" statementType="STATEMENT">
+		select * FROM hr_quit  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

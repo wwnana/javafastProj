@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrEmployeeDao">
+    
+	<sql id="hrEmployeeColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.birth_date AS "birthDate",
+		a.id_card AS "idCard",
+		a.id_card_img AS "idCardImg",
+		a.native_place AS "nativePlace",
+		a.nation AS "nation",
+		a.en_name AS "enName",
+		a.marital_status AS "maritalStatus",
+		a.birthday AS "birthday",
+		a.registration AS "registration",
+		a.political AS "political",
+		a.children AS "children",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.qq AS "qq",
+		a.wx AS "wx",
+		a.city AS "city",
+		a.address AS "address",
+		a.contact_people AS "contactPeople",
+		a.contact_phone AS "contactPhone",
+		a.social_security_no AS "socialSecurityNo",
+		a.accumulation_no AS "accumulationNo",
+		a.bank_card_no AS "bankCardNo",
+		a.bank_card_name AS "bankCardName",
+		a.education_type AS "educationType",
+		a.graduate_school AS "graduateSchool",
+		a.school_start AS "schoolStart",
+		a.school_end AS "schoolEnd",
+		a.specialty AS "specialty",
+		a.certificate_img AS "certificateImg",
+		a.last_company AS "lastCompany",
+		a.last_position AS "lastPosition",
+		a.leaving_certify AS "leavingCertify",
+		a.entry_date AS "entryDate",
+		a.regular_date AS "regularDate",
+		a.regular_status AS "regularStatus",
+		a.regular_evaluation AS "regularEvaluation",
+		a.probation_period AS "probationPeriod",
+		a.employ_type AS "employType",
+		a.position AS "position",
+		a.first_work_date AS "firstWorkDate",
+		a.work_address AS "workAddress",
+		a.contract_start_date AS "contractStartDate",
+		a.contract_end_date AS "contractEndDate",
+		a.contract_file AS "contractFile",
+		a.recruit_source AS "recruitSource",
+		a.recommend AS "recommend",
+		a.formal_salary_base AS "formalSalaryBase",
+		a.probation_salary_base AS "probationSalaryBase",
+		a.salary_remarks AS "salaryRemarks",
+		a.status AS "status",
+		a.is_edit AS "isEdit",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.sys_user_id AS "user.id",
+		a.hr_resume_id AS "hrResume.id",
+		a.account_id AS "accountId",
+		s.no AS "user.no",
+		s.no AS "user.no",
+		c.name AS "office.name"
+	</sql>
+	
+	<sql id="hrEmployeeJoins">
+		LEFT JOIN sys_user s ON s.id = a.id
+		LEFT JOIN sys_office c ON c.id = s.office_id
+	</sql>
+    
+	<select id="get" resultType="HrEmployee">
+		SELECT 
+			<include refid="hrEmployeeColumns"/>
+		FROM hr_employee a
+		<include refid="hrEmployeeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrEmployee">
+		SELECT 
+			<include refid="hrEmployeeColumns"/>
+		FROM hr_employee a
+		<include refid="hrEmployeeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="educationType != null and educationType != ''">
+				AND a.education_type = #{educationType}
+			</if>
+			<if test="beginEntryDate != null and endEntryDate != null and beginEntryDate != '' and endEntryDate != ''">
+				AND a.entry_date BETWEEN #{beginEntryDate} AND #{endEntryDate}
+			</if>
+			<if test="regularDate != null and regularDate != ''">
+				AND a.regular_date = #{regularDate}
+			</if>
+			<if test="regularStatus != null and regularStatus != ''">
+				AND a.regular_status = #{regularStatus}
+			</if>
+			<if test="employType != null and employType != ''">
+				AND a.employ_type = #{employType}
+			</if>
+			<if test="position != null and position != ''">
+				AND a.position = #{position}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginContractEndDate != null and endContractEndDate != null and beginContractEndDate != '' and endContractEndDate != ''">
+				AND a.contract_end_date BETWEEN #{beginContractEndDate} AND #{endContractEndDate}
+			</if>
+			<if test="beginRegularDate != null and endRegularDate != null and beginRegularDate != '' and endRegularDate != ''">
+				AND a.regular_date BETWEEN #{beginRegularDate} AND #{endRegularDate}
+			</if>
+			<if test="beginQuitDate != null and endQuitDate != null and beginQuitDate != '' and endQuitDate != ''">
+				AND a.quit_date BETWEEN #{beginQuitDate} AND #{endQuitDate}
+			</if>
+			<if test="hrResume != null and hrResume.id != null and hrResume.id != ''">
+				AND a.hr_resume_id = #{hrResume.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrEmployee">
+		SELECT 
+			<include refid="hrEmployeeColumns"/>
+		FROM hr_employee a
+		<include refid="hrEmployeeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_employee(
+			id,
+			name,
+			sex,
+			birth_date,
+			id_card,
+			id_card_img,
+			native_place,
+			nation,
+			en_name,
+			marital_status,
+			birthday,
+			registration,
+			political,
+			children,
+			mobile,
+			email,
+			qq,
+			wx,
+			city,
+			address,
+			contact_people,
+			contact_phone,
+			social_security_no,
+			accumulation_no,
+			bank_card_no,
+			bank_card_name,
+			education_type,
+			graduate_school,
+			school_start,
+			school_end,
+			specialty,
+			certificate_img,
+			last_company,
+			last_position,
+			leaving_certify,
+			entry_date,
+			regular_date,
+			regular_status,
+			probation_period,
+			employ_type,
+			position,
+			first_work_date,
+			work_address,
+			contract_start_date,
+			contract_end_date,
+			contract_file,
+			recruit_source,
+			recommend,
+			formal_salary_base,
+			probation_salary_base,
+			salary_remarks,
+			status,
+			is_edit,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			sys_user_id,
+			hr_resume_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{sex},
+			#{birthDate},
+			#{idCard},
+			#{idCardImg},
+			#{nativePlace},
+			#{nation},
+			#{enName},
+			#{maritalStatus},
+			#{birthday},
+			#{registration},
+			#{political},
+			#{children},
+			#{mobile},
+			#{email},
+			#{qq},
+			#{wx},
+			#{city},
+			#{address},
+			#{contactPeople},
+			#{contactPhone},
+			#{socialSecurityNo},
+			#{accumulationNo},
+			#{bankCardNo},
+			#{bankCardName},
+			#{educationType},
+			#{graduateSchool},
+			#{schoolStart},
+			#{schoolEnd},
+			#{specialty},
+			#{certificateImg},
+			#{lastCompany},
+			#{lastPosition},
+			#{leavingCertify},
+			#{entryDate},
+			#{regularDate},
+			#{regularStatus},
+			#{probationPeriod},
+			#{employType},
+			#{position},
+			#{firstWorkDate},
+			#{workAddress},
+			#{contractStartDate},
+			#{contractEndDate},
+			#{contractFile},
+			#{recruitSource},
+			#{recommend},
+			#{formalSalaryBase},
+			#{probationSalaryBase},
+			#{salaryRemarks},
+			#{status},
+			#{isEdit},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{user.id},
+			#{hrResume.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_employee SET
+						name = #{name},
+			sex = #{sex},
+			birth_date = #{birthDate},
+			id_card = #{idCard},
+			id_card_img = #{idCardImg},
+			native_place = #{nativePlace},
+			nation = #{nation},
+			en_name = #{enName},
+			marital_status = #{maritalStatus},
+			birthday = #{birthday},
+			registration = #{registration},
+			political = #{political},
+			children = #{children},
+			mobile = #{mobile},
+			email = #{email},
+			qq = #{qq},
+			wx = #{wx},
+			city = #{city},
+			address = #{address},
+			contact_people = #{contactPeople},
+			contact_phone = #{contactPhone},
+			social_security_no = #{socialSecurityNo},
+			accumulation_no = #{accumulationNo},
+			bank_card_no = #{bankCardNo},
+			bank_card_name = #{bankCardName},
+			education_type = #{educationType},
+			graduate_school = #{graduateSchool},
+			school_start = #{schoolStart},
+			school_end = #{schoolEnd},
+			specialty = #{specialty},
+			certificate_img = #{certificateImg},
+			last_company = #{lastCompany},
+			last_position = #{lastPosition},
+			leaving_certify = #{leavingCertify},
+			entry_date = #{entryDate},
+			regular_date = #{regularDate},
+			regular_status = #{regularStatus},
+			regular_evaluation = #{regularEvaluation},
+			probation_period = #{probationPeriod},
+			employ_type = #{employType},
+			position = #{position},
+			first_work_date = #{firstWorkDate},
+			work_address = #{workAddress},
+			contract_start_date = #{contractStartDate},
+			contract_end_date = #{contractEndDate},
+			contract_file = #{contractFile},
+			recruit_source = #{recruitSource},
+			recommend = #{recommend},
+			formal_salary_base = #{formalSalaryBase},
+			probation_salary_base = #{probationSalaryBase},
+			salary_remarks = #{salaryRemarks},
+			status = #{status},
+			is_edit = #{isEdit},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			sys_user_id = #{user.id},
+			hr_resume_id = #{hrResume.id} 
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_employee SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrEmployee" statementType="STATEMENT">
+		select * FROM hr_employee  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

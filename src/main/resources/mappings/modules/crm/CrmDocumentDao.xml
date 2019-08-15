@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmDocumentDao">
+    
+	<sql id="crmDocumentColumns">
+		a.id AS "id",
+		a.customer_id AS "customer.id",
+		a.name AS "name",
+		a.content AS "content",
+		a.create_by AS "createBy.id",
+		u12.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="crmDocumentJoins">
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="CrmDocument">
+		SELECT 
+			<include refid="crmDocumentColumns"/>
+		FROM crm_document a
+		<include refid="crmDocumentJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmDocument">
+		SELECT 
+			<include refid="crmDocumentColumns"/>
+		FROM crm_document a
+		<include refid="crmDocumentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmDocument">
+		SELECT 
+			<include refid="crmDocumentColumns"/>
+		FROM crm_document a
+		<include refid="crmDocumentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_document(
+			id,
+			customer_id,
+			name,
+			content,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{customer.id},
+			#{name},
+			#{content},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_document SET
+						customer_id = #{customer.id},
+			name = #{name},
+			content = #{content},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_document SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmDocument" statementType="STATEMENT">
+		select * FROM crm_document  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM crm_document a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+		</where>
+	</select>
+</mapper>

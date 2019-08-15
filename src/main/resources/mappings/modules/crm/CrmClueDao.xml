@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmClueDao">
+    
+	<sql id="crmClueColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.contacter_name AS "contacterName",
+		a.sex AS "sex",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.job_type AS "jobType",
+		a.sour_type AS "sourType",
+		a.industry_type AS "industryType",
+		a.nature_type AS "natureType",
+		a.scale_type AS "scaleType",
+		a.province AS "province",
+		a.city AS "city",
+		a.dict AS "dict",
+		a.address AS "address",
+		a.remarks AS "remarks",
+		a.nextcontact_date AS "nextcontactDate",
+		a.nextcontact_note AS "nextcontactNote",
+		a.customer_id AS "crmCustomer.id",
+		c.name AS "crmCustomer.name",
+		a.is_pool AS "isPool",
+		a.own_by AS "ownBy.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.office_id AS "officeId",
+		a.account_id AS "accountId",
+		a.del_flag AS "delFlag",
+		a.field1 AS "field1",
+		a.field2 AS "field2",
+		a.market_id AS "crmMarket.id",
+		m.name AS "crmMarket.name",
+		u20.name AS "ownBy.name",
+		u20.photo AS "ownBy.photo",
+		u21.name AS "createBy.name",
+		u22.name AS "updateBy.name"
+	</sql>
+	
+	<sql id="crmClueJoins">
+		LEFT JOIN sys_user u20 ON u20.id = a.own_by
+		LEFT JOIN sys_user u21 ON u21.id = a.create_by
+		LEFT JOIN sys_user u22 ON u22.id = a.update_by
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN crm_market m ON m.id = a.market_id
+	</sql>
+    
+	<select id="get" resultType="CrmClue">
+		SELECT 
+			<include refid="crmClueColumns"/>
+		FROM crm_clue a
+		<include refid="crmClueJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmClue">
+		SELECT 
+			<include refid="crmClueColumns"/>
+		FROM crm_clue a
+		<include refid="crmClueJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="contacterName != null and contacterName != ''">
+				AND a.contacter_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{contacterName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{contacterName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{contacterName},'%')</if>
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="sourType != null and sourType != ''">
+				AND a.sour_type = #{sourType}
+			</if>
+			<if test="province != null and province != ''">
+				AND a.province = #{province}
+			</if>
+			<if test="isChange != null and isChange == 1">
+				AND TRIM(a.customer_id) != ''
+			</if>
+			<if test="isChange != null and isChange == 0">
+				AND a.customer_id IS NULL
+			</if>
+			<if test="beginNextcontactDate != null and endNextcontactDate != null and beginNextcontactDate != '' and endNextcontactDate != ''">
+				AND a.nextcontact_date BETWEEN #{beginNextcontactDate} AND #{endNextcontactDate}
+			</if>
+			<if test="nextcontactDate != null and nextcontactDate != ''">
+				AND a.nextcontact_date = #{nextcontactDate}
+			</if>
+			<if test="isPool != null and isPool != ''">
+				AND a.is_pool = #{isPool}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="field1 != null and field1 != ''">
+				AND a.field1 = #{field1}
+			</if>
+			<if test="field2 != null and field2 != ''">
+				AND a.field2 = #{field2}
+			</if>
+			<if test="crmMarket != null and crmMarket.id != null and crmMarket.id != ''">
+				AND a.market_id = #{crmMarket.id}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmClue">
+		SELECT 
+			<include refid="crmClueColumns"/>
+		FROM crm_clue a
+		<include refid="crmClueJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_clue(
+			id,
+			name,
+			contacter_name,
+			sex,
+			mobile,
+			email,
+			job_type,
+			sour_type,
+			industry_type,
+			nature_type,
+			scale_type,
+			province,
+			city,
+			dict,
+			address,
+			market_id,
+			remarks,
+			nextcontact_date,
+			nextcontact_note,
+			is_pool,
+			own_by,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			office_id,
+			account_id,
+			del_flag,
+			field1
+		) VALUES (
+			#{id},
+			#{name},
+			#{contacterName},
+			#{sex},
+			#{mobile},
+			#{email},
+			#{jobType},
+			#{sourType},
+			#{industryType},
+			#{natureType},
+			#{scaleType},
+			#{province},
+			#{city},
+			#{dict},
+			#{address},
+			#{crmMarket.id},
+			#{remarks},
+			#{nextcontactDate},
+			#{nextcontactNote},
+			#{isPool},
+			#{ownBy.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{officeId},
+			#{accountId},
+			#{delFlag},
+			#{field1}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_clue SET
+						name = #{name},
+			contacter_name = #{contacterName},
+			sex = #{sex},
+			mobile = #{mobile},
+			email = #{email},
+			job_type = #{jobType},
+			sour_type = #{sourType},
+			industry_type = #{industryType},
+			nature_type = #{natureType},
+			scale_type = #{scaleType},
+			province = #{province},
+			city = #{city},
+			dict = #{dict},
+			address = #{address},
+			market_id = #{crmMarket.id},
+			remarks = #{remarks},
+			nextcontact_date = #{nextcontactDate},
+			nextcontact_note = #{nextcontactNote},
+			customer_id = #{crmCustomer.id},
+			is_pool = #{isPool},
+			own_by = #{ownBy.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			field1 = #{field1},
+			field2 = #{field2}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_clue SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmClue" statementType="STATEMENT">
+		select * FROM crm_clue  where ${propertyName} = '${value}'
+	</select>
+
+	
+</mapper>

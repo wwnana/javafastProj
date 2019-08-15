@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.test.dao.grid.TestDataDao">
+    
+	<sql id="listTestDataColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.address AS "address",
+		a.create_by AS "createBy.id",
+		a.create_name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_name AS "updateBy.name",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<sql id="getTestDataColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.address AS "address",
+		a.create_by AS "createBy.id",
+		a.create_name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks"	
+	</sql>
+	
+	<sql id="testDataJoins">
+	</sql>
+    
+	<select id="get" resultType="TestData">
+		SELECT 
+			<include refid="getTestDataColumns"/>
+		FROM test_data a
+		<include refid="testDataJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TestData">
+		SELECT 
+			<include refid="listTestDataColumns"/>
+		FROM test_data a
+		<include refid="testDataJoins"/>
+		<where>
+			 1=1 
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="sex != null and sex != ''">
+				AND a.sex = #{sex}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TestData">
+		SELECT 
+			<include refid="listTestDataColumns"/>
+		FROM test_data a
+		<include refid="testDataJoins"/>
+		<where>
+			 1=1 
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		 LIMIT 10000
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO test_data(
+			id,
+			name,
+			sex,
+			age,
+			mobile,
+			email,
+			address,
+			create_by,
+			create_name,
+			create_date,
+			update_by,
+			update_name,
+			update_date,
+			remarks
+		) VALUES (
+			#{id},
+			#{name},
+			#{sex},
+			#{age},
+			#{mobile},
+			#{email},
+			#{address},
+			#{createBy.id},
+			#{createBy.name},
+			#{createDate},
+			#{updateBy.id},
+			#{updateBy.name},
+			#{updateDate},
+			#{remarks}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_data SET
+						name = #{name},
+			sex = #{sex},
+			age = #{age},
+			mobile = #{mobile},
+			email = #{email},
+			address = #{address},
+			update_by = #{updateBy.id},
+			update_name = #{updateBy.name},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM test_data SET WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="TestData" statementType="STATEMENT">
+		select * FROM test_data  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

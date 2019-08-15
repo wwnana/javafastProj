@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.sys.dao.SysAccountDao">
+    
+	<sql id="sysAccountColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.enname AS "enname",
+		a.logo AS "logo",
+		a.neturl AS "neturl",
+		a.mobile AS "mobile",
+		a.phone AS "phone",
+		a.email AS "email",
+		a.fax AS "fax",
+		a.address AS "address",
+		a.bankaccountname AS "bankaccountname",
+		a.bankaccountno AS "bankaccountno",
+		a.admin_user_id AS "adminUserId",
+		a.max_user_num AS "maxUserNum",
+		a.now_user_num AS "nowUserNum",
+		a.status AS "status",
+		a.system_name AS "systemName",
+		a.api_secret AS "apiSecret",
+		a.sms_status AS "smsStatus",
+		a.pay_status AS "payStatus",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		b.balance AS "balance",
+		
+		a.permanent_code AS "permanentCode",
+		a.userid AS "userid",
+		a.corpid AS "corpid",
+		a.corp_name AS "corpName",
+		a.corp_type AS "corpType",
+		a.corp_wxqrcode AS "corpWxqrcode",
+		a.corp_scale AS "corpScale",
+		a.corp_industry AS "corpIndustry",
+		a.agentid AS "agentid",
+		
+		a.crm_retrieve_period AS "crmRetrievePeriod",
+		a.crm_contact_remind_period AS "crmContactRemindPeriod"
+	</sql>
+	
+	<sql id="sysAccountJoins">
+		LEFT JOIN pay_bankbook_balance b ON b.id = a.id
+	</sql>
+    
+	<select id="get" resultType="SysAccount">
+		SELECT 
+			<include refid="sysAccountColumns"/>
+		FROM sys_account a
+		<include refid="sysAccountJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SysAccount">
+		SELECT 
+			<include refid="sysAccountColumns"/>
+		FROM sys_account a
+		<include refid="sysAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="id != null and id != ''">
+				AND a.id LIKE 
+					<if test="dbName == 'oracle'">'%'||#{id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{id}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{id},'%')</if>
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="adminUserId != null and adminUserId != ''">
+				AND a.admin_user_id = #{adminUserId}
+			</if>
+			<if test="email != null and email != ''">
+				AND a.email = #{email}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="payStatus != null and payStatus != ''">
+				AND a.pay_status = #{payStatus}
+			</if>
+			<if test="smsStatus != null and smsStatus != ''">
+				AND a.sms_status = #{smsStatus}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysAccount">
+		SELECT 
+			<include refid="sysAccountColumns"/>
+		FROM sys_account a
+		<include refid="sysAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_account(
+			id,
+			name,
+			enname,
+			logo,
+			neturl,
+			mobile,
+			phone,
+			email,
+			fax,
+		    address,
+		    bankaccountname,
+		    bankaccountno,
+			admin_user_id,
+			max_user_num,
+			now_user_num,
+			status,
+			system_name,
+			api_secret,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			permanent_code,
+			userid,
+			corpid,
+			corp_name,
+			corp_type,
+			corp_wxqrcode,
+			corp_scale,
+			corp_industry,
+			agentid
+		) VALUES (
+			#{id},
+			#{name},
+			#{enname},
+			#{logo},
+			#{neturl},
+			#{mobile},
+			#{phone},
+			#{email},
+			#{fax},
+			#{address},
+			#{bankaccountname},
+			#{bankaccountno},
+			#{adminUserId},
+			#{maxUserNum},
+			#{nowUserNum},
+			#{status},
+			#{systemName},
+			#{apiSecret},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{permanentCode},
+			#{userid},
+			#{corpid},
+			#{corpName},
+			#{corpType},
+			#{corpWxqrcode},
+			#{corpScale},
+			#{corpIndustry},
+			#{agentid}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_account SET
+						name = #{name},
+						enname = #{enname},
+						logo = #{logo},
+						neturl = #{neturl},
+			mobile = #{mobile},
+			phone = #{phone},
+			email = #{email},
+			fax = #{fax},
+		    address = #{address},
+		    bankaccountname = #{bankaccountname},
+		    bankaccountno = #{bankaccountno},
+			admin_user_id = #{adminUserId},
+			max_user_num = #{maxUserNum},
+			now_user_num = #{nowUserNum},
+			status = #{status},
+			system_name = #{systemName},
+			api_secret = #{apiSecret},
+			sms_status = #{smsStatus},
+			pay_status = #{payStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			permanent_code = #{permanentCode},
+			userid = #{userid},
+			corpid = #{corpid},
+			corp_name = #{corpName},
+			corp_type = #{corpType},
+			corp_wxqrcode = #{corpWxqrcode},
+			corp_scale = #{corpScale},
+			corp_industry = #{corpIndustry},
+			agentid = #{agentid},
+			crm_retrieve_period = #{crmRetrievePeriod},
+			crm_contact_remind_period = #{crmContactRemindPeriod}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateStatus">
+		UPDATE sys_account SET 
+			status = #{status},
+			pay_status = #{payStatus},
+			sms_status = #{smsStatus} 
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE sys_account SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SysAccount" statementType="STATEMENT">
+		select * FROM sys_account  where ${propertyName} = '${value}'
+	</select>
+
+	<update id="updateUserNum">
+		update sys_account a set a.now_user_num=(select count(0) from sys_user u where u.account_id=#{id} and u.del_flag = '0') where a.id=#{id}
+	</update>
+	
+	<select id="findCorpList" resultType="SysAccount">
+		SELECT 
+			<include refid="sysAccountColumns"/>
+		FROM sys_account a
+		<include refid="sysAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			AND TRIM(corpid) != ''
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.gen.dao.GenReportDao">
+    
+	<sql id="genReportColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.comments AS "comments",
+		a.table_name AS "tableName",
+		a.report_type AS "reportType",
+		a.x_axis AS "xAxis",
+		a.y_axis AS "yAxis",
+		a.create_by AS "createBy.id",
+		a.query_sql AS "querySql",
+		a.sort AS "sort",
+		a.status AS "status",
+		a.count_type AS "countType",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="genReportJoins">
+	</sql>
+    
+	<select id="get" resultType="GenReport">
+		SELECT 
+			<include refid="genReportColumns"/>
+		FROM gen_report a
+		<include refid="genReportJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="GenReport">
+		SELECT 
+			<include refid="genReportColumns"/>
+		FROM gen_report a
+		<include refid="genReportJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="tableName != null and tableName != ''">
+				AND a.table_name = #{tableName}
+			</if>
+			<if test="reportType != null and reportType != ''">
+				AND a.report_type = #{reportType}
+			</if>
+			<if test="countType != null and countType != ''">
+				AND a.count_type = #{countType}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="GenReport">
+		SELECT 
+			<include refid="genReportColumns"/>
+		FROM gen_report a
+		<include refid="genReportJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO gen_report(
+			id,
+			name,
+			comments,
+			table_name,
+			report_type,
+			x_axis,
+			y_axis,
+			query_sql,
+			sort,
+			status,
+			count_type,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{comments},
+			#{tableName},
+			#{reportType},
+			#{xAxis},
+			#{yAxis},
+			#{querySql},
+			#{sort},
+			#{status},
+			#{countType},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE gen_report SET
+						name = #{name},
+			comments = #{comments},
+			table_name = #{tableName},
+			report_type = #{reportType},
+			x_axis = #{xAxis},
+			y_axis = #{yAxis},
+			query_sql = #{querySql},
+			sort = #{sort},
+			status = #{status},
+			count_type = #{countType},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE gen_report SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="GenReport" statementType="STATEMENT">
+		select * FROM gen_report  where ${propertyName} = '${value}'
+	</select>
+
+	<select id="findBySql" resultType="java.util.HashMap">
+		${sqlMap.dsf} 
+	</select>
+</mapper>

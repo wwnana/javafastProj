@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsOutstockDao">
+    
+	<sql id="wmsOutstockColumns">
+		a.id AS "id",
+		a.outstock_type AS "outstockType",
+		a.no AS "no",
+		a.order_id AS "order.id",
+		a.customer_id AS "customer.id",
+		o.no AS "order.no",
+		o.no AS "order.name",
+		a.supplier_id AS "supplier.id",
+		s.name AS "supplier.name",
+		a.content AS "content",
+		a.num AS "num",
+		a.real_num AS "realNum",
+		a.warehouse_id AS "warehouse.id",
+		w.name AS "warehouse.name",
+		a.status AS "status",
+		a.deal_by AS "dealBy.id",
+		a.deal_date AS "dealDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u10.name AS "dealBy.name",
+		u12.name AS "createBy.name",
+		u14.name AS "auditBy.name"
+	</sql>
+	
+	<sql id="wmsOutstockJoins">
+		LEFT JOIN sys_user u10 ON u10.id = a.deal_by
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+		LEFT JOIN sys_user u14 ON u14.id = a.audit_by
+		LEFT JOIN wms_supplier s ON s.id = a.supplier_id
+		LEFT JOIN wms_warehouse w ON w.id = a.warehouse_id
+		LEFT JOIN om_order o ON o.id = a.order_id
+	</sql>
+    
+	<select id="get" resultType="WmsOutstock">
+		SELECT 
+			<include refid="wmsOutstockColumns"/>
+		FROM wms_outstock a
+		<include refid="wmsOutstockJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsOutstock">
+		SELECT 
+			<include refid="wmsOutstockColumns"/>
+		FROM wms_outstock a
+		<include refid="wmsOutstockJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="outstockType != null and outstockType != ''">
+				AND a.outstock_type = #{outstockType}
+			</if>
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="order != null and order.id != null and order.id != ''">
+				AND a.order_id = #{order.id}
+			</if>
+			<if test="supplier != null and supplier.id != null and supplier.id != ''">
+				AND a.supplier_id = #{supplier.id}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="warehouse != null and warehouse.id != null and warehouse.id != ''">
+				AND a.warehouse_id = #{warehouse.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="dealBy != null and dealBy.id != null and dealBy.id != ''">
+				AND a.deal_by = #{dealBy.id}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="auditBy != null and auditBy.id != null and auditBy.id != ''">
+				AND a.audit_by = #{auditBy.id}
+			</if>
+			<if test="beginAuditDate != null and endAuditDate != null and beginAuditDate != '' and endAuditDate != ''">
+				AND a.audit_date BETWEEN #{beginAuditDate} AND #{endAuditDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsOutstock">
+		SELECT 
+			<include refid="wmsOutstockColumns"/>
+		FROM wms_outstock a
+		<include refid="wmsOutstockJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_outstock(
+			id,
+			outstock_type,
+			no,
+			order_id,
+			customer_id,
+			supplier_id,
+			content,
+			num,
+			real_num,
+			warehouse_id,
+			status,
+			deal_by,
+			deal_date,
+			create_by,
+			create_date,
+			audit_by,
+			audit_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{outstockType},
+			#{no},
+			#{order.id},
+			#{customer.id},
+			#{supplier.id},
+			#{content},
+			#{num},
+			#{realNum},
+			#{warehouse.id},
+			#{status},
+			#{dealBy.id},
+			#{dealDate},
+			#{createBy.id},
+			#{createDate},
+			#{auditBy.id},
+			#{auditDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE wms_outstock SET
+						outstock_type = #{outstockType},
+			no = #{no},
+			order_id = #{order.id},
+			customer_id = #{customer.id},
+			supplier_id = #{supplier.id},
+			content = #{content},
+			num = #{num},
+			real_num = #{realNum},
+			warehouse_id = #{warehouse.id},
+			status = #{status},
+			deal_by = #{dealBy.id},
+			deal_date = #{dealDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE wms_outstock SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsOutstock" statementType="STATEMENT">
+		select * FROM wms_outstock  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

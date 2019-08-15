@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsPurchaseDetailDao">
+    
+	<sql id="wmsPurchaseDetailColumns">
+		a.id AS "id",
+		a.purchase_id AS "purchase.id",
+		a.product_id AS "product.id",
+		p.no AS "product.no",
+		p.name AS "product.name",
+		p.spec AS "product.spec",
+		a.unit_type AS "unitType",
+		a.price AS "price",
+		a.num AS "num",
+		a.amount AS "amount",
+		a.tax_rate AS "taxRate",
+		a.tax_amt AS "taxAmt",
+		a.remarks AS "remarks",
+		a.sort AS "sort",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="wmsPurchaseDetailJoins">
+		LEFT JOIN wms_product p ON p.id = a.product_id
+	</sql>
+    
+	<select id="get" resultType="WmsPurchaseDetail">
+		SELECT 
+			<include refid="wmsPurchaseDetailColumns"/>
+		FROM wms_purchase_detail a
+		<include refid="wmsPurchaseDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsPurchaseDetail">
+		SELECT 
+			<include refid="wmsPurchaseDetailColumns"/>
+		FROM wms_purchase_detail a
+		<include refid="wmsPurchaseDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="purchase != null and purchase.id != null and purchase.id != ''">
+				AND a.purchase_id = #{purchase.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsPurchaseDetail">
+		SELECT 
+			<include refid="wmsPurchaseDetailColumns"/>
+		FROM wms_purchase_detail a
+		<include refid="wmsPurchaseDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_purchase_detail(
+			id,
+			purchase_id,
+			product_id,
+			unit_type,
+			price,
+			num,
+			amount,
+			tax_rate,
+			tax_amt,
+			remarks,
+			sort,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{purchase.id},
+			#{product.id},
+			#{unitType},
+			#{price},
+			#{num},
+			#{amount},
+			#{taxRate},
+			#{taxAmt},
+			#{remarks},
+			#{sort},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE wms_purchase_detail SET
+			purchase_id = #{purchase.id},
+			product_id = #{product.id},
+			unit_type = #{unitType},
+			price = #{price},
+			num = #{num},
+			amount = #{amount},
+			tax_rate = #{taxRate},
+			tax_amt = #{taxAmt},
+			remarks = #{remarks},
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE wms_purchase_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE purchase_id = #{purchase.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsPurchaseDetail" statementType="STATEMENT">
+		select * FROM wms_purchase_detail  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

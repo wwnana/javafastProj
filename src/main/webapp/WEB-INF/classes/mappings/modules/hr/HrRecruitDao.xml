@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrRecruitDao">
+    
+	<sql id="hrRecruitColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.depart AS "depart",
+		a.recruit_num AS "recruitNum",
+		a.education AS "education",
+		a.experience AS "experience",
+		a.schedule AS "schedule",
+		a.status AS "status",
+		a.resume_num AS "resumeNum",
+		a.interview_num AS "interviewNum",
+		a.offer_num AS "offerNum",
+		a.entry_num AS "entryNum",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u12.name AS "createBy.name"
+	</sql>
+	
+	<sql id="hrRecruitJoins">
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="HrRecruit">
+		SELECT 
+			<include refid="hrRecruitColumns"/>
+		FROM hr_recruit a
+		<include refid="hrRecruitJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrRecruit">
+		SELECT 
+			<include refid="hrRecruitColumns"/>
+		FROM hr_recruit a
+		<include refid="hrRecruitJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrRecruit">
+		SELECT 
+			<include refid="hrRecruitColumns"/>
+		FROM hr_recruit a
+		<include refid="hrRecruitJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_recruit(
+			id,
+			name,
+			depart,
+			recruit_num,
+			education,
+			experience,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{depart},
+			#{recruitNum},
+			#{education},
+			#{experience},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_recruit SET
+						name = #{name},
+			depart = #{depart},
+			recruit_num = #{recruitNum},
+			education = #{education},
+			experience = #{experience},
+			schedule = #{schedule},
+			status = #{status},
+			interview_num = #{interviewNum},
+			entry_num = #{entryNum},
+			resume_num = #{resumeNum},
+			offer_num = #{offerNum},		
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_recruit SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrRecruit" statementType="STATEMENT">
+		select * FROM hr_recruit  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

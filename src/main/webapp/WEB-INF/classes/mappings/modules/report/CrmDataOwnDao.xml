@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.report.dao.CrmDataOwnDao">
+	
+	<!-- 线索数据交接 -->
+	<update id="updateClueDataOwnBy">
+		UPDATE crm_clue SET 
+			own_by = #{ownById},
+			office_id = #{officeId} 
+		WHERE own_by = #{userId}
+	</update>
+	
+	<!-- 客户数据交接 -->
+	<update id="updateCustomerDataOwnBy">
+		UPDATE crm_customer SET 
+			own_by = #{ownById},
+			office_id = #{officeId} 
+		WHERE own_by = #{userId}
+	</update>
+	
+	<!-- 联系人数据交接 -->
+	<update id="updateContacterDataOwnBy">
+		UPDATE crm_contacter SET 
+			own_by = #{ownById},
+			office_id = #{officeId} 
+		WHERE own_by = #{userId}
+	</update>
+	
+	<!-- 商机数据交接 -->
+	<update id="updateChanceDataOwnBy">
+		UPDATE crm_chance SET 
+			own_by = #{ownById},
+			office_id = #{officeId} 
+		WHERE own_by = #{userId}
+	</update>
+	
+	<!-- 报价单数据交接 -->
+	<update id="updateQuoteDataOwnBy">
+		UPDATE crm_quote SET 
+			own_by = #{ownById},
+			office_id = #{officeId} 
+		WHERE own_by = #{userId}
+	</update>
+	
+	<!-- 合同数据交接 -->
+	<update id="updateContractDataOwnBy">
+		UPDATE om_contract SET 
+			own_by = #{ownById},
+			office_id = #{officeId} 
+		WHERE own_by = #{userId}
+	</update>
+</mapper>

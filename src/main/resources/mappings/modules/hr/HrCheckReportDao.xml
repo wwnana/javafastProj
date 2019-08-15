@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrCheckReportDao">
+    
+	<sql id="hrCheckReportColumns">
+		a.id AS "id",
+		a.groupname AS "groupname",
+		a.userid AS "userid",
+		a.attendance_day AS "attendanceDay",
+		a.normal_day AS "normalDay",
+		a.abnormal_day AS "abnormalDay",
+		a.attendance_card AS "attendanceCard",
+		a.annual_leave AS "annualLeave",
+		a.unpaid_leave AS "unpaidLeave",
+		a.sick_leave AS "sickLeave",
+		a.check_month AS "checkMonth",
+		a.overtime_Leave AS "overtimeLeave",
+		a.marital_Leave AS "maritalLeave",
+		a.maternity_Leave AS "maternityLeave",
+		a.paternity_Leave AS "paternityLeave",
+		a.other_Leave AS "otherLeave",
+		a.account_id AS "accountId",
+		a.sys_user_id AS "user.id",
+		u.name AS "user.name",
+		u.photo AS "user.photo",
+		u.office_id AS "office.id",
+		o4.name AS "office.name"
+	</sql>
+	
+	<sql id="hrCheckReportJoins">
+		LEFT JOIN sys_user u ON u.id = a.sys_user_id
+		LEFT JOIN sys_office o4 ON u.office_id=o4.id
+	</sql>
+    
+	<select id="get" resultType="HrCheckReport">
+		SELECT 
+			<include refid="hrCheckReportColumns"/>
+		FROM hr_check_report a
+		<include refid="hrCheckReportJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrCheckReport">
+		SELECT 
+			<include refid="hrCheckReportColumns"/>
+		FROM hr_check_report a
+		<include refid="hrCheckReportJoins"/>
+		<where>
+			1=1 
+			<if test="office!= null and office.id!= null and office.id != ''">
+				AND u.office_id = #{office.id}
+			</if>
+			<if test="user!= null and user.id!= null and user.id != ''">
+				AND a.sys_user_id = #{user.id}
+			</if>
+			<if test="beginCheckinDate !=null and beginCheckinDate !='' ">
+				<![CDATA[
+                and	a.check_month >= #{beginCheckinDate}
+                ]]>
+			</if>
+			<if test="endCheckinDate !=null and endCheckinDate !=''">
+				<![CDATA[
+                and	a.check_month <= #{endCheckinDate}
+                ]]>
+			</if>
+			<if test="checkinStatus != null and checkinStatus !='' and checkinStatus == 0">
+                AND a.abnormal_day = 0
+            </if>
+            <if test="checkinStatus != null and checkinStatus !='' and checkinStatus == 1">
+                AND a.abnormal_day > 0
+            </if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.check_month DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrCheckReport">
+		SELECT 
+			<include refid="hrCheckReportColumns"/>
+		FROM hr_check_report a
+		<include refid="hrCheckReportJoins"/>
+		<where>
+			1=1 
+		</where>	
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_check_report(
+			id,
+			groupname,
+			userid,
+			office_id,
+			attendance_day,
+			normal_day,
+			abnormal_day,
+			attendance_card,
+			annual_leave,
+			unpaid_leave,
+			sick_leave,
+			check_month,
+			sys_user_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{groupname},
+			#{userid},
+			#{office.id},
+			#{attendanceDay},
+			#{normalDay},
+			#{abnormalDay},
+			#{attendanceCard},
+			#{annualLeave},
+			#{unpaidLeave},
+			#{sickLeave},
+			#{checkMonth},
+			#{user.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_check_report SET
+						groupname = #{groupname},
+			userid = #{userid},
+			attendance_day = #{attendanceDay},
+			normal_day = #{normalDay},
+			abnormal_day = #{abnormalDay},
+			attendance_card = #{attendanceCard},
+			annual_leave = #{annualLeave},
+			unpaid_leave = #{unpaidLeave},
+			sick_leave = #{sickLeave},
+			check_month = #{checkMonth},
+			office_id = #{office.id},
+			sys_user_id = #{user.id} 
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM hr_check_report
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrCheckReport" statementType="STATEMENT">
+		select * FROM hr_check_report  where ${propertyName} = '${value}'
+	</select>
+
+	<update id="deleteByMonth">
+		DELETE FROM hr_check_report
+		<where>
+			<if test="checkMonth !=null and checkMonth !='' ">
+				<![CDATA[
+                and	check_month = #{checkMonth}
+                ]]>
+			</if>
+			<if test="accountId != null and accountId != '' ">
+				and account_id=#{accountId}
+			</if>
+			<if test="user!= null and user.id!= null and user.id != ''">
+				AND sys_user_id = #{user.id}
+			</if>
+		</where>
+	</update>
+	<!--，1年假；2事假；3病假；4调休假；5婚假；6产假；7陪产假；8其他-->
+	<update id="generateMonthReport">
+		INSERT INTO hr_check_report(
+		id,
+		account_id,
+		groupname,
+		sys_user_id,
+		attendance_day,
+		normal_day,
+		abnormal_day,
+		attendance_card,
+		annual_leave,
+		unpaid_leave,
+		sick_leave,
+		overtime_Leave,
+		marital_Leave,
+		maternity_Leave,
+		paternity_Leave,
+		other_Leave,
+		check_month,
+		create_time
+		)
+		select uuid(),
+		r.account_id,
+		r.groupname,
+		r.sys_user_id,
+		sum(1),
+		sum(case r.audit_status when '0' then 1 else 0 end ) normal,
+		sum(case r.audit_status when '-1' then 1 else 0 end ) abnormal,
+		sum( CASE WHEN oa_audit_id IS NOT NULL THEN 1 ELSE 0 END ) AS attendanceCard,
+		sum(case r.audit_status when '1' then r.leave_day else 0 end ) annualLeave,
+		sum(case r.audit_status when '2' then r.leave_day else 0 end ) unpaidLeave,
+		sum(case r.audit_status when '3' then r.leave_day else 0 end ) sickLeave,
+		sum(case r.audit_status when '4' then r.leave_day else 0 end ) overtimeLeave,
+		sum(case r.audit_status when '5' then r.leave_day else 0 end )  maritalLeave,
+		sum(case r.audit_status when '6' then r.leave_day else 0 end )  maternityLeave,
+		sum(case r.audit_status when '7' then r.leave_day else 0 end )  paternityLeave,
+		sum(case r.audit_status when '8' then r.leave_day else 0 end )  otherLeave,
+		DATE_FORMAT(r.checkin_date,"%Y-%m-01"),
+		now()
+		from hr_check_report_day r
+		<where>
+			<if test="beginCheckinDate !=null and beginCheckinDate !='' ">
+				<![CDATA[
+                and	r.checkin_date >= #{beginCheckinDate}
+                ]]>
+			</if>
+			<if test="endCheckinDate !=null and endCheckinDate !=''">
+				<![CDATA[
+                and	r.checkin_date <= #{endCheckinDate}
+                ]]>
+			</if>
+			<if test="accountId != null and accountId != '' ">
+				<![CDATA[
+				 and r.account_id=#{accountId}
+				 ]]>
+			</if>
+			<if test="user!= null and user.id!= null and user.id != ''">
+				AND r.sys_user_id = #{user.id}
+			</if>
+		</where>
+		group by r.account_id,r.sys_user_id,r.groupname,DATE_FORMAT(r.checkin_date,"%Y-%m-01")
+
+	</update>
+
+</mapper>

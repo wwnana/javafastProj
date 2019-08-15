@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.pay.dao.PayBankbookBalanceDao">
+    
+	<sql id="payBankbookBalanceColumns">
+		a.id AS "id",
+		a.balance AS "balance"
+	</sql>
+	
+	<sql id="payBankbookBalanceJoins">
+	</sql>
+    
+	<select id="get" resultType="PayBankbookBalance">
+		SELECT 
+			<include refid="payBankbookBalanceColumns"/>
+		FROM pay_bankbook_balance a
+		<include refid="payBankbookBalanceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PayBankbookBalance">
+		SELECT 
+			<include refid="payBankbookBalanceColumns"/>
+		FROM pay_bankbook_balance a
+		<include refid="payBankbookBalanceJoins"/>
+		<where>
+			
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PayBankbookBalance">
+		SELECT 
+			<include refid="payBankbookBalanceColumns"/>
+		FROM pay_bankbook_balance a
+		<include refid="payBankbookBalanceJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pay_bankbook_balance(
+			id,
+			balance
+		) VALUES (
+			#{id},
+			#{balance}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pay_bankbook_balance SET
+						balance = #{balance}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pay_bankbook_balance
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PayBankbookBalance" statementType="STATEMENT">
+		select * FROM pay_bankbook_balance  where ${propertyName} = '${value}'
+	</select>
+	
+	<!-- 行锁查询 -->
+	<select id="getPayBankbookBalanceForUpdate" resultType="PayBankbookBalance">
+		SELECT * FROM pay_bankbook_balance WHERE id = #{id} FOR UPDATE
+	</select>
+</mapper>

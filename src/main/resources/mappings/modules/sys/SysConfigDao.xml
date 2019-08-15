@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.sys.dao.SysConfigDao">
+    
+	<sql id="sysConfigColumns">
+		a.id AS "id",
+		a.mail_smtp AS "mailSmtp",
+		a.mail_port AS "mailPort",
+		a.mail_name AS "mailName",
+		a.mail_password AS "mailPassword",
+		a.sms_name AS "smsName",
+		a.sms_password AS "smsPassword",
+		a.account_id AS "accountId",
+		a.wx_agentid AS "wxAgentid",
+		a.wx_corpid AS "wxCorpid",
+		a.wx_corpsecret AS "wxCorpsecret",
+		a.wx_access_token AS "wxAccessToken",
+		a.wx_expires_in AS "wxExpiresIn",
+		a.wx_token_date AS "wxTokenDate",
+		a.wx_status AS "wxStatus",
+		a.checkin_secret AS "checkinSecret",
+		a.approval_secret AS "approvalSecret"
+	</sql>
+	
+	<sql id="sysConfigJoins">
+	</sql>
+    
+	<select id="get" resultType="SysConfig">
+		SELECT 
+			<include refid="sysConfigColumns"/>
+		FROM sys_config a
+		<include refid="sysConfigJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SysConfig">
+		SELECT 
+			<include refid="sysConfigColumns"/>
+		FROM sys_config a
+		<include refid="sysConfigJoins"/>
+		<where>
+			<if test="wxStatus != null and wxStatus != ''">
+				a.wx_status = #{wxStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysConfig">
+		SELECT 
+			<include refid="sysConfigColumns"/>
+		FROM sys_config a
+		<include refid="sysConfigJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_config(
+			id,
+			mail_smtp,
+			mail_port,
+			mail_name,
+			mail_password,
+			sms_name,
+			sms_password,
+			account_id,
+			wx_agentid,
+			wx_corpid,
+			wx_corpsecret,
+			wx_access_token,
+			wx_expires_in,
+			wx_token_date,
+			wx_status,
+			checkin_secret,
+			approval_secret
+		) VALUES (
+			#{id},
+			#{mailSmtp},
+			#{mailPort},
+			#{mailName},
+			#{mailPassword},
+			#{smsName},
+			#{smsPassword},
+			#{accountId},
+			#{wxAgentid},
+			#{wxCorpid},
+			#{wxCorpsecret},
+			#{wxAccessToken},
+			#{wxExpiresIn},
+			#{wxTokenDate},
+			#{wxStatus},
+			#{checkinSecret},
+			#{approvalSecret}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_config SET
+						mail_smtp = #{mailSmtp},
+			mail_port = #{mailPort},
+			mail_name = #{mailName},
+			mail_password = #{mailPassword},
+			sms_name = #{smsName},
+			sms_password = #{smsPassword},
+			wx_agentid = #{wxAgentid},
+			wx_corpid = #{wxCorpid},
+			wx_corpsecret = #{wxCorpsecret},
+			wx_access_token = #{wxAccessToken},
+			wx_expires_in = #{wxExpiresIn},
+			wx_token_date = #{wxTokenDate},
+			wx_status = #{wxStatus},
+			checkin_secret = #{checkinSecret},
+			approval_secret = #{approvalSecret} 
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM sys_config
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SysConfig" statementType="STATEMENT">
+		select * FROM sys_config  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

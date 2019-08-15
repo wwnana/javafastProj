@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaCommonExpenseDao">
+    
+	<sql id="oaCommonExpenseColumns">
+		a.id AS "id",
+		a.amount AS "amount",
+		c.id AS "oaCommonAudit.id",
+		c.title AS "oaCommonAudit.title",
+		c.status AS "oaCommonAudit.status",
+		c.create_by AS "oaCommonAudit.createBy.id",
+		u8.name AS "oaCommonAudit.createBy.name"
+	</sql>
+	
+	<sql id="oaCommonExpenseJoins">
+		LEFT JOIN oa_common_audit c ON c.id = a.id
+		LEFT JOIN sys_user u8 ON u8.id = c.create_by
+	</sql>
+    
+	<select id="get" resultType="OaCommonExpense">
+		SELECT 
+			<include refid="oaCommonExpenseColumns"/>
+		FROM oa_common_expense a
+		<include refid="oaCommonExpenseJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCommonExpense">
+		SELECT 
+			<include refid="oaCommonExpenseColumns"/>
+		FROM oa_common_expense a
+		<include refid="oaCommonExpenseJoins"/>
+		<where>
+			1=1 
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaCommonExpense">
+		SELECT 
+			<include refid="oaCommonExpenseColumns"/>
+		FROM oa_common_expense a
+		<include refid="oaCommonExpenseJoins"/>
+		<where>
+			1=1
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_common_expense(
+			id,
+			amount
+		) VALUES (
+			#{id},
+			#{amount}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_common_expense SET
+						amount = #{amount}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_common_expense
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaCommonExpense" statementType="STATEMENT">
+		select * FROM oa_common_expense  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

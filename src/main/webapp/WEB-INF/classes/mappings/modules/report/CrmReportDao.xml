@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.report.dao.CrmReportDao">
+	<!-- 客户统计 -->
+	<select id="findCustomerReportList" resultType="CrmReport">
+		select u.id as "userId",
+		u.name as "userName",
+		(select count(c.id) from crm_customer c where c.account_id=#{accountId} and c.create_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createNum",
+		(select count(c.id) from crm_customer c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "ownNum",
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.create_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createChangeNum",
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "ownChangeNum",
+		(select count(c.id) from om_order c where c.account_id=#{accountId} and c.deal_by=u.id and c.del_flag='0' and status='1' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createOrderNum" 
+		 from sys_user u 
+		 where u.account_id=#{accountId} and u.del_flag=#{DEL_FLAG_NORMAL} and u.id!='1'  
+		 <if test="user != null and user.id != null and user.id != ''">
+				AND u.id = #{user.id}
+		</if>
+		<if test="office != null and office.id != null and office.id!= ''">
+			   AND u.office_id = #{office.id}
+		</if>		
+	</select>
+	<!-- 业绩统计 -->
+	<select id="findAchReportList" resultType="CrmReport">
+		select u.name as "userName",u.photo as "userPhoto",
+		(select sum(c.amount) from om_order c where c.account_id=#{accountId} and c.deal_by=u.id and c.del_flag='0' and status='1' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createOrderAmt",
+		(select sum(c.receive_amt) from om_order c where c.account_id=#{accountId} and c.deal_by=u.id and c.del_flag='0' and status='1' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "recOrderAmt"
+		 from sys_user u 
+		 where u.account_id=#{accountId} and u.del_flag=#{DEL_FLAG_NORMAL} and u.id!='1' 
+		 <if test="user != null and user.id != null and user.id != ''">
+				AND u.id = #{user.id}
+		</if>
+		<if test="office != null and office.id != null and office.id!= ''">
+			   AND u.office_id = #{office.id}
+		</if>
+		order by createOrderAmt desc
+	</select>
+	<!-- 财务统计 -->
+	<select id="findFiReportList" resultType="CrmReport">
+		select u.name as "userName",
+		(select sum(c.amount) from fi_receive_able c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "receiveAmt",
+		(select sum(c.amount) from fi_payment_able c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "rePayAmt",
+		(select sum(c.real_amt) from fi_receive_able c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "alReceiveAmt",
+		(select sum(c.amount) from fi_payment_able c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "alPayAmt"
+		 from sys_user u 
+		 where u.account_id=#{accountId} and u.del_flag=#{DEL_FLAG_NORMAL} and u.id!='1' 
+		 <if test="user != null and user.id != null and user.id != ''">
+				AND u.id = #{user.id}
+		</if>
+		<if test="office != null and office.id != null and office.id!= ''">
+			   AND u.office_id = #{office.id}
+		</if>		
+	</select>
+	<!-- 产品销售统计 -->
+	<select id="findProductReportList" resultType="CrmReport">
+		select p.name as "proName",
+		(select sum(d.num) from om_order_detail d LEFT JOIN om_order o ON d.order_id=o.id where d.account_id=#{accountId} and d.product_id=p.id AND o.status='1'
+		<if test="startDate != null and startDate != ''">
+			 AND o.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "productSaleNum",
+		(select sum(d.amount) from om_order_detail d LEFT JOIN om_order o ON d.order_id=o.id where d.account_id=#{accountId} and d.product_id=p.id AND o.status='1'
+		<if test="startDate != null and startDate != ''">
+			 AND o.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "productSaleAmt" 
+		from wms_product p where p.account_id=#{accountId} and p.del_flag=#{DEL_FLAG_NORMAL} 
+	</select>
+	
+	<!-- 销售业绩综合统计 -->
+	<select id="findReportList" resultType="CrmReport">
+		select u.id as "userId",
+		u.name as "userName",
+		(select count(c.id) from crm_customer c where c.account_id=#{accountId} and c.create_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createNum",
+		(select count(c.id) from crm_customer c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "ownNum",
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.create_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createChangeNum",
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "ownChangeNum",
+		(select count(c.id) from om_order c where c.account_id=#{accountId} and c.deal_by=u.id and c.del_flag='0' and status='1' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createOrderNum",
+		(select sum(c.amount) from om_order c where c.account_id=#{accountId} and c.deal_by=u.id and c.del_flag='0' and status='1' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createOrderAmt",
+		(select sum(c.receive_amt) from om_order c where c.account_id=#{accountId} and c.deal_by=u.id and c.del_flag='0' and status='1' 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "recOrderAmt",
+		(select count(id) from crm_customer c where c.account_id=#{accountId} and to_days(c.create_date) = to_days(now()) and c.own_by=u.id and c.del_flag='0') as dayCreateCustomerNum,
+		(select count(id) from crm_customer c where c.account_id=#{accountId} and to_days(c.nextcontact_date) = to_days(now()) and c.own_by=u.id and c.del_flag='0') as dayContactCustomerNum,
+		<!-- 商机，初步恰接 -->
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='1' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "purposeCustomerNum",
+		<!-- 商机，需求确定 -->
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='2' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "demandCustomerNum",
+		<!-- 商机，方案报价 -->
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='3' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "quoteCustomerNum",
+		<!-- 商机，签订合同 -->
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='4' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "dealOrderNum",
+		<!-- 商机，赢单 -->
+		(select count(c.id) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='5' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "completeOrderNum" 
+		 
+		 from sys_user u 
+		 where u.account_id=#{accountId} and u.del_flag=#{DEL_FLAG_NORMAL} and u.id!='1'
+		 <if test="user != null and user.id != null and user.id != ''">
+				AND u.id = #{user.id}
+		</if>
+		<if test="office != null and office.id != null and office.id!= ''">
+			   AND u.office_id = #{office.id}
+		</if>		
+	</select>
+	
+	<!-- 客户统计 -->
+	<select id="findCustomerReport" resultType="CrmReport">
+		select 
+		(select COALESCE(count(c.id),0) from crm_customer c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.create_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createNum",
+		(select COALESCE(count(c.id),0) from crm_customer c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "ownNum",
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.create_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createChangeNum",
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "ownChangeNum",
+		(select COALESCE(count(c.id),0) from om_order c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.deal_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createOrderNum",
+		(select COALESCE(sum(c.amount),0) from om_order c where c.account_id=#{accountId} and c.del_flag='0' 
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.deal_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "createOrderAmt",
+		(select COALESCE(sum(c.real_amt),0) from fi_receive_able c where c.account_id=#{accountId} and c.del_flag='0' 
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "recOrderAmt" 
+		 from sys_account s where s.id=#{accountId}	
+	</select>
+</mapper>

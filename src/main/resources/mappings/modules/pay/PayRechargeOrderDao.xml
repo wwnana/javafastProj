@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.pay.dao.PayRechargeOrderDao">
+    
+	<sql id="payRechargeOrderColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.amount AS "amount",
+		a.status AS "status",
+		a.pay_type AS "payType",
+		a.notes AS "notes",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u14.name AS "createBy.name"
+	</sql>
+	
+	<sql id="payRechargeOrderJoins">
+		LEFT JOIN sys_user u14 ON u14.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="PayRechargeOrder">
+		SELECT 
+			<include refid="payRechargeOrderColumns"/>
+		FROM pay_recharge_order a
+		<include refid="payRechargeOrderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PayRechargeOrder">
+		SELECT 
+			<include refid="payRechargeOrderColumns"/>
+		FROM pay_recharge_order a
+		<include refid="payRechargeOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no LIKE 
+					<if test="dbName == 'oracle'">'%'||#{no}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{no}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{no},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="payType != null and payType != ''">
+				AND a.pay_type = #{payType}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PayRechargeOrder">
+		SELECT 
+			<include refid="payRechargeOrderColumns"/>
+		FROM pay_recharge_order a
+		<include refid="payRechargeOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pay_recharge_order(
+			id,
+			no,
+			amount,
+			status,
+			pay_type,
+			notes,
+			create_date,
+			create_by,
+			update_date,
+			update_by,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{amount},
+			#{status},
+			#{payType},
+			#{notes},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pay_recharge_order SET
+						no = #{no},
+			amount = #{amount},
+			status = #{status},
+			pay_type = #{payType},
+			notes = #{notes},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE pay_recharge_order SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PayRechargeOrder" statementType="STATEMENT">
+		select * FROM pay_recharge_order  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

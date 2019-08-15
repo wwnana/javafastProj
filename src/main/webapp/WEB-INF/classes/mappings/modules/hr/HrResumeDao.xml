@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrResumeDao">
+    
+	<sql id="hrResumeColumns">
+		a.id AS "id",
+		a.hr_recruit_id AS "hrRecruit.id",
+		a.resume_source AS "resumeSource",
+		a.position AS "position",
+		a.resume_file AS "resumeFile",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.age AS "age",
+		a.mobile AS "mobile",
+		a.mail AS "mail",
+		a.experience AS "experience",
+		a.education AS "education",
+		a.last_company AS "lastCompany",
+		a.last_job AS "lastJob",
+		a.university AS "university",
+		a.specialty AS "specialty",
+		a.current_node AS "currentNode",
+		a.resume_status AS "resumeStatus",
+		a.interview_status AS "interviewStatus",
+		a.employ_status AS "employStatus",
+		a.interview_num AS "interviewNum",
+		a.reserve_status AS "reserveStatus",
+		a.reserve_cause AS "reserveCause",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.hr_employee_id AS "hrEmployeeId",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="hrResumeJoins">
+	</sql>
+    
+	<select id="get" resultType="HrResume">
+		SELECT 
+			<include refid="hrResumeColumns"/>
+		FROM hr_resume a
+		<include refid="hrResumeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrResume">
+		SELECT 
+			<include refid="hrResumeColumns"/>
+		FROM hr_resume a
+		<include refid="hrResumeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="hrRecruit != null and hrRecruit.id != null and hrRecruit.id != ''">
+				AND a.hr_recruit_id = #{hrRecruit.id}
+			</if>
+			<if test="resumeSource != null and resumeSource != ''">
+				AND a.resume_source = #{resumeSource}
+			</if>
+			<if test="position != null and position != ''">
+				AND a.position = #{position}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="experience != null and experience != ''">
+				AND a.experience = #{experience}
+			</if>
+			<if test="education != null and education != ''">
+				AND a.education = #{education}
+			</if>
+			<if test="currentNode != null and currentNode != ''">
+				AND a.current_node = #{currentNode}
+			</if>
+			<if test="resumeStatus != null and resumeStatus != ''">
+				AND a.resume_status = #{resumeStatus}
+			</if>
+			<if test="interviewStatus != null and interviewStatus != ''">
+				AND a.interview_status = #{interviewStatus}
+			</if>
+			<if test="employStatus != null and employStatus != ''">
+				AND a.employ_status = #{employStatus}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrResume">
+		SELECT 
+			<include refid="hrResumeColumns"/>
+		FROM hr_resume a
+		<include refid="hrResumeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_resume(
+			id,
+			hr_recruit_id,
+			resume_source,
+			position,
+			resume_file,
+			name,
+			sex,
+			age,
+			mobile,
+			mail,
+			experience,
+			education,
+			last_company,
+			last_job,
+			university,
+			specialty,
+			current_node,
+			resume_status,
+			interview_status,
+			employ_status,
+			interview_num,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			hr_employee_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{hrRecruit.id},
+			#{resumeSource},
+			#{position},
+			#{resumeFile},
+			#{name},
+			#{sex},
+			#{age},
+			#{mobile},
+			#{mail},
+			#{experience},
+			#{education},
+			#{lastCompany},
+			#{lastJob},
+			#{university},
+			#{specialty},
+			#{currentNode},
+			#{resumeStatus},
+			#{interviewStatus},
+			#{employStatus},
+			#{interviewNum},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{hrEmployeeId},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_resume SET
+						hr_recruit_id = #{hrRecruit.id},
+			resume_source = #{resumeSource},
+			position = #{position},
+			resume_file = #{resumeFile},
+			name = #{name},
+			sex = #{sex},
+			age = #{age},
+			mobile = #{mobile},
+			mail = #{mail},
+			experience = #{experience},
+			education = #{education},
+			last_company = #{lastCompany},
+			last_job = #{lastJob},
+			university = #{university},
+			specialty = #{specialty},
+			current_node = #{currentNode},
+			resume_status = #{resumeStatus},
+			interview_status = #{interviewStatus},
+			employ_status = #{employStatus},
+			interview_num = #{interviewNum},
+			reserve_status = #{reserveStatus},
+			reserve_cause = #{reserveCause},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			hr_employee_id = #{hrEmployeeId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_resume SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrResume" statementType="STATEMENT">
+		select * FROM hr_resume  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

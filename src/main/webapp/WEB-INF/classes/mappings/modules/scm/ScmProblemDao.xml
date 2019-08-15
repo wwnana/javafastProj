@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.scm.dao.ScmProblemDao">
+    
+	<sql id="scmProblemColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.content AS "content",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u12.name AS "createBy.name",
+		u12.name AS "createName",
+		a.problem_type_id AS "scmProblemType.id",
+		t.name AS "scmProblemType.name"
+	</sql>
+	
+	<sql id="scmProblemJoins">
+		LEFT JOIN scm_problem_type t ON t.id = a.problem_type_id
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="ScmProblem">
+		SELECT 
+			<include refid="scmProblemColumns"/>
+		FROM scm_problem a
+		<include refid="scmProblemJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ScmProblem">
+		SELECT 
+			<include refid="scmProblemColumns"/>
+		FROM scm_problem a
+		<include refid="scmProblemJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="scmProblemType != null and scmProblemType.id != null and scmProblemType.id != ''">
+				AND a.problem_type_id = #{scmProblemType.id}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ScmProblem">
+		SELECT 
+			<include refid="scmProblemColumns"/>
+		FROM scm_problem a
+		<include refid="scmProblemJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO scm_problem(
+			id,
+			name,
+			content,
+			status,
+			problem_type_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{content},
+			#{status},
+			#{scmProblemType.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE scm_problem SET
+						name = #{name},
+			content = #{content},
+			status = #{status},
+			problem_type_id = #{scmProblemType.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE scm_problem SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ScmProblem" statementType="STATEMENT">
+		select * FROM scm_problem  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

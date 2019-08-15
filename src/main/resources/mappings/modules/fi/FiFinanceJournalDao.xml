@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.fi.dao.FiFinanceJournalDao">
+    
+	<sql id="fiFinanceJournalColumns">
+		a.id AS "id",
+		a.fiaccount_id AS "fiaccount.id",
+		f.name AS "fiaccount.name",
+		a.deal_type AS "dealType",
+		a.deal_date AS "dealDate",
+		a.money_type AS "moneyType",
+		a.money AS "money",
+		a.notes AS "notes",
+		a.balance AS "balance",
+		a.unique_code AS "uniqueCode",
+		a.data_type AS "dataType",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.last_journal_id AS "lastJournalId",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u11.name AS "createBy.name"
+	</sql>
+	
+	<sql id="fiFinanceJournalJoins">
+		LEFT JOIN fi_finance_account f ON f.id = a.fiaccount_id
+		LEFT JOIN sys_user u11 ON u11.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="FiFinanceJournal">
+		SELECT 
+			<include refid="fiFinanceJournalColumns"/>
+		FROM fi_finance_journal a
+		<include refid="fiFinanceJournalJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FiFinanceJournal">
+		SELECT 
+			<include refid="fiFinanceJournalColumns"/>
+		FROM fi_finance_journal a
+		<include refid="fiFinanceJournalJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="fiaccount != null and fiaccount.id != null and fiaccount.id != ''">
+				AND a.fiaccount_id = #{fiaccount.id}
+			</if>
+			<if test="dealType != null and dealType != ''">
+				AND a.deal_type = #{dealType}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="moneyType != null and moneyType != ''">
+				AND a.money_type = #{moneyType}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FiFinanceJournal">
+		SELECT 
+			<include refid="fiFinanceJournalColumns"/>
+		FROM fi_finance_journal a
+		<include refid="fiFinanceJournalJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO fi_finance_journal(
+			id,
+			fiaccount_id,
+			deal_type,
+			deal_date,
+			money_type,
+			money,
+			notes,
+			balance,
+			unique_code,
+			data_type,
+			create_by,
+			create_date,
+			last_journal_id,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{fiaccount.id},
+			#{dealType},
+			#{dealDate},
+			#{moneyType},
+			#{money},
+			#{notes},
+			#{balance},
+			#{uniqueCode},
+			#{dataType},
+			#{createBy.id},
+			#{createDate},
+			#{lastJournalId},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE fi_finance_journal SET
+						fiaccount_id = #{fiaccount.id},
+			deal_type = #{dealType},
+			deal_date = #{dealDate},
+			money_type = #{moneyType},
+			money = #{money},
+			notes = #{notes},
+			balance = #{balance},
+			create_by = #{createBy.id},
+			create_date = #{createDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE fi_finance_journal SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FiFinanceJournal" statementType="STATEMENT">
+		select * FROM fi_finance_journal  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

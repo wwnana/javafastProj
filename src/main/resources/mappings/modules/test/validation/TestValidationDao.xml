@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.test.dao.validation.TestValidationDao">
+    
+	<sql id="testValidationColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.num AS "num",
+		a.num2 AS "num2",
+		a.new_date AS "newDate",
+		a.date2 AS "date2",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.url AS "url",
+		a.remarks AS "remarks"
+	</sql>
+	
+	<sql id="testValidationJoins">
+	</sql>
+    
+	<select id="get" resultType="TestValidation">
+		SELECT 
+			<include refid="testValidationColumns"/>
+		FROM test_validation a
+		<include refid="testValidationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TestValidation">
+		SELECT 
+			<include refid="testValidationColumns"/>
+		FROM test_validation a
+		<include refid="testValidationJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TestValidation">
+		SELECT 
+			<include refid="testValidationColumns"/>
+		FROM test_validation a
+		<include refid="testValidationJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO test_validation(
+			id,
+			name,
+			num,
+			num2,
+			new_date,
+			date2,
+			mobile,
+			email,
+			url,
+			remarks
+		) VALUES (
+			#{id},
+			#{name},
+			#{num},
+			#{num2},
+			#{newDate},
+			#{date2},
+			#{mobile},
+			#{email},
+			#{url},
+			#{remarks}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_validation SET
+						name = #{name},
+			num = #{num},
+			num2 = #{num2},
+			new_date = #{newDate},
+			date2 = #{date2},
+			mobile = #{mobile},
+			email = #{email},
+			url = #{url},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM test_validation
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="TestValidation" statementType="STATEMENT">
+		select * FROM test_validation  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

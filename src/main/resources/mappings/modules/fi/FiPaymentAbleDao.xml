@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.fi.dao.FiPaymentAbleDao">
+    
+	<sql id="fiPaymentAbleColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.purchase_id AS "purchase.id",
+		p.no  AS "purchase.no",
+		p.no  AS "purchase.name",
+		a.supplier_id AS "supplier.id",
+		s.name AS "supplier.name",
+		a.returnorder_id AS "returnorder.id",
+		r.no AS "returnorder.no",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.amount AS "amount",
+		a.real_amt AS "realAmt",
+		a.able_date AS "ableDate",
+		a.own_by AS "ownBy.id",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u8.name AS "ownBy.name",
+		u10.name AS "createBy.name",
+		u11.name AS "updateBy.name"
+	</sql>
+	
+	<sql id="fiPaymentAbleJoins">
+		LEFT JOIN wms_purchase p ON p.id = a.purchase_id
+		LEFT JOIN wms_supplier s ON s.id = a.supplier_id
+		LEFT JOIN om_returnorder r ON r.id = a.returnorder_id
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN sys_user u8 ON u8.id = a.own_by
+		LEFT JOIN sys_user u10 ON u10.id = a.create_by
+		LEFT JOIN sys_user u11 ON u11.id = a.update_by
+	</sql>
+    
+	<select id="get" resultType="FiPaymentAble">
+		SELECT 
+			<include refid="fiPaymentAbleColumns"/>
+		FROM fi_payment_able a
+		<include refid="fiPaymentAbleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FiPaymentAble">
+		SELECT 
+			<include refid="fiPaymentAbleColumns"/>
+		FROM fi_payment_able a
+		<include refid="fiPaymentAbleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no LIKE 
+					<if test="dbName == 'oracle'">'%'||#{no}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{no}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{no},'%')</if>
+			</if>
+			<if test="purchase != null and purchase.id != null and purchase.id != ''">
+				AND a.purchase_id = #{purchase.id}
+			</if>
+			<if test="supplier != null and supplier.id != null and supplier.id != ''">
+				AND a.supplier_id = #{supplier.id}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="beginAbleDate != null and endAbleDate != null and beginAbleDate != '' and endAbleDate != ''">
+				AND a.able_date BETWEEN #{beginAbleDate} AND #{endAbleDate}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="isUnComplete">
+				AND a.status != 2
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FiPaymentAble">
+		SELECT 
+			<include refid="fiPaymentAbleColumns"/>
+		FROM fi_payment_able a
+		<include refid="fiPaymentAbleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO fi_payment_able(
+			id,
+			no,
+			purchase_id,
+			supplier_id,
+			returnorder_id,
+			customer_id,
+			amount,
+			real_amt,
+			able_date,
+			own_by,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{purchase.id},
+			#{supplier.id},
+			#{returnorder.id},
+			#{customer.id},
+			#{amount},
+			#{realAmt},
+			#{ableDate},
+			#{ownBy.id},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE fi_payment_able SET
+						no = #{no},
+			purchase_id = #{purchase.id},
+			supplier_id = #{supplier.id},
+			returnorder_id = #{returnorder.id},
+			customer_id = #{customer.id},
+			amount = #{amount},
+			real_amt = #{realAmt},
+			able_date = #{ableDate},
+			own_by = #{ownBy.id},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE fi_payment_able SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FiPaymentAble" statementType="STATEMENT">
+		select * FROM fi_payment_able  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

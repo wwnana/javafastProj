@@ -1,0 +1,107 @@
+.box-timeline {
+	width: 575px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.box-timeline ul li {
+	float: left;
+	font-size: 16px;
+	color: #999;
+	width: 100px;
+	position: relative;
+	margin-right: 105px;
+}
+
+.ml45 {
+	margin-left: 45px;
+}
+
+li {
+	list-style: none;
+}
+
+.box-timeline ul .box-num1 {
+	background-color: #39f;
+}
+
+.box-timeline div[class*=box-num] {
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	margin: 14px auto;
+	border-radius: 50%;
+	background-color: #39f;
+	color: #fff;
+}
+
+.box-timeline .outside1ab .num2ab {
+	background-color: #999;
+}
+
+.box-timeline .outside2a .num3a {
+	background-color: #999;
+}
+
+.box-timeline .box-num1:after {
+	content: "";
+	position: absolute;
+	height: 1px;
+	width: 105px;
+	background-color: #39f;
+	top: 48px;
+	left: 71px;
+}
+
+.box-timeline .num1ab:before {
+	content: "";
+	position: absolute;
+	height: 1px;
+	width: 105px;
+	background-color: #39f;
+	top: 48px;
+	right: 71px;
+}
+
+.box-timeline .num2ab:before {
+	content: "";
+	position: absolute;
+	height: 1px;
+	width: 105px;
+	background-color: #d7d7d7;
+	top: 48px;
+	right: 71px;
+}
+
+.box-timeline .outside1ab:after {
+	content: "";
+	position: absolute;
+	height: 1px;
+	width: 105px;
+	background-color: #d7d7d7;
+	top: 48px;
+	left: 71px;
+	z-index: 2;
+}
+
+.box-timeline .outside2a:before {
+	content: "";
+	position: absolute;
+	height: 1px;
+	width: 105px;
+	background-color: #d7d7d7;
+	top: 48px;
+	right: 71px;
+	z-index: 2;
+}
+
+.box-timeline .outside2ab:after {
+	content: "";
+	position: absolute;
+	height: 1px;
+	width: 105px;
+	background-color: #39f;
+	top: 48px;
+	left: 71px;
+	z-index: 2;
+}

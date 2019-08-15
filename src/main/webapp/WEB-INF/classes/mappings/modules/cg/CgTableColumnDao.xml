@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.cg.dao.CgTableColumnDao">
+    
+	<sql id="cgTableColumnColumns">
+		a.id AS "id",
+		a.cg_table_id AS "cgTable.id",
+		a.name AS "name",
+		a.comments AS "comments",
+		a.jdbc_type AS "jdbcType",
+		a.java_type AS "javaType",
+		a.java_field AS "javaField",
+		a.is_pk AS "isPk",
+		a.is_insert AS "isInsert",
+		a.is_edit AS "isEdit",
+		a.is_list AS "isList",
+		a.is_sort AS "isSort",
+		a.is_query AS "isQuery",
+		a.query_type AS "queryType",
+		a.show_type AS "showType",
+		a.dict_type AS "dictType",
+		a.is_not_null AS "isNotNull",
+		a.validate_type AS "validateType",
+		a.settings AS "settings",
+		a.sort AS "sort",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks"
+	</sql>
+	
+	<sql id="cgTableColumnJoins">
+		LEFT JOIN cg_table b ON b.id = a.cg_table_id
+	</sql>
+    
+	<select id="get" resultType="CgTableColumn">
+		SELECT 
+			<include refid="cgTableColumnColumns"/>
+		FROM cg_table_column a
+		<include refid="cgTableColumnJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CgTableColumn">
+		SELECT 
+			<include refid="cgTableColumnColumns"/>
+		FROM cg_table_column a
+		<include refid="cgTableColumnJoins"/>
+		<where>
+			
+			<if test="cgTable.id != null and cgTable.id != ''">
+				AND a.cg_table_icgTable.idableId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CgTableColumn">
+		SELECT 
+			<include refid="cgTableColumnColumns"/>
+		FROM cg_table_column a
+		<include refid="cgTableColumnJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cg_table_column(
+			id,
+			cg_table_id,
+			name,
+			comments,
+			jdbc_type,
+			java_type,
+			java_field,
+			is_pk,
+			is_insert,
+			is_edit,
+			is_list,
+			is_sort,
+			is_query,
+			query_type,
+			show_type,
+			dict_type,
+			is_not_null,
+			validate_type,
+			settings,
+			sort,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks
+		) VALUES (
+			#{id},
+			#{cgTable.id},
+			#{name},
+			#{comments},
+			#{jdbcType},
+			#{javaType},
+			#{javaField},
+			#{isPk},
+			#{isInsert},
+			#{isEdit},
+			#{isList},
+			#{isSort},
+			#{isQuery},
+			#{queryType},
+			#{showType},
+			#{dictType},
+			#{isNotNull},
+			#{validateType},
+			#{settings},
+			#{sort},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cg_table_column SET
+						cg_table_id = #{cgTable.id},
+			name = #{name},
+			comments = #{comments},
+			jdbc_type = #{jdbcType},
+			java_type = #{javaType},
+			java_field = #{javaField},
+			is_pk = #{isPk},
+			is_insert = #{isInsert},
+			is_edit = #{isEdit},
+			is_list = #{isList},
+			is_sort = #{isSort},
+			is_query = #{isQuery},
+			query_type = #{queryType},
+			show_type = #{showType},
+			dict_type = #{dictType},
+			is_not_null = #{isNotNull},
+			validate_type = #{validateType},
+			settings = #{settings},
+			sort = #{sort},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cg_table_column
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE cg_table_id = #{cgTable.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CgTableColumn" statementType="STATEMENT">
+		select * FROM cg_table_column  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

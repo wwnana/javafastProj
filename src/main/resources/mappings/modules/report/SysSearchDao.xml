@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.report.dao.SysSearchDao">
+
+	<select id="findList" resultType="SysSearch">
+		SELECT 
+			id AS "id",
+			name AS "name",
+			type AS "type" 
+		 FROM(SELECT c1.id,c1.name,20 AS type FROM crm_customer c1 where c1.account_id=#{accountId} AND c1.name LIKE concat('%',#{keyWords},'%') 
+			union all SELECT c2.id,c2.name,21 AS type FROM crm_contacter c2 where c2.account_id=#{accountId} AND c2.name LIKE concat('%',#{keyWords},'%') 
+			union all SELECT c3.id,c3.name,22 AS type FROM crm_chance c3 where c3.account_id=#{accountId} AND c3.name LIKE concat('%',#{keyWords},'%') 
+			union all SELECT c4.id,c4.name,24 AS type FROM om_contract c4 where c4.account_id=#{accountId} AND c4.name LIKE concat('%',#{keyWords},'%') 
+			union all SELECT c5.id,c5.name,19 AS type FROM crm_clue c5 where c5.account_id=#{accountId} AND c5.name LIKE concat('%',#{keyWords},'%') 
+			) a
+	</select>
+</mapper>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrInterviewDao">
+    
+	<sql id="hrInterviewColumns">
+		a.id AS "id",
+		a.position AS "position",
+		a.interview_date AS "interviewDate",
+		a.interview_time AS "interviewTime",
+		a.invitate_status AS "inviteStatus",
+		a.link_man AS "linkMan",
+		a.link_phone AS "linkPhone",
+		a.company AS "company",
+		a.address AS "address",
+		a.sign_status AS "signStatus",
+		a.sign_time AS "signTime",
+		a.interview AS "interviewBy.id",
+		a.interview_note AS "interviewNote",
+		a.interview_status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.hr_resume_id AS "hrResume.id",
+		h.name AS "hrResume.name",
+		h.sex AS "hrResume.sex",
+		h.mobile AS "hrResume.mobile",
+		h.mail AS "hrResume.mail",
+		a.account_id AS "accountId",
+		u.name AS "createBy.name"
+	</sql>
+	
+	<sql id="hrInterviewJoins">
+		LEFT JOIN hr_resume h ON h.id = a.hr_resume_id
+		LEFT JOIN sys_user u ON u.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="HrInterview">
+		SELECT 
+			<include refid="hrInterviewColumns"/>
+		FROM hr_interview a
+		<include refid="hrInterviewJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrInterview">
+		SELECT 
+			<include refid="hrInterviewColumns"/>
+		FROM hr_interview a
+		<include refid="hrInterviewJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="beginInterviewDate != null and endInterviewDate != null and beginInterviewDate != '' and endInterviewDate != ''">
+				AND a.interview_date BETWEEN #{beginInterviewDate} AND #{endInterviewDate}
+			</if>
+			<if test="inviteStatus != null and inviteStatus != ''">
+				AND a.invitate_status = #{inviteStatus}
+			</if>
+			<if test="interviewBy != null and interviewBy.id != null and interviewBy.id != ''">
+				AND a.interview = #{interviewBy.id}
+			</if>
+			<if test="address != null and address != ''">
+				AND a.address = #{address}
+			</if>
+			<if test="signStatus != null and signStatus != ''">
+				AND a.sign_status = #{signStatus}
+			</if>
+			<if test="hrResume != null and hrResume.id != null and hrResume.id != ''">
+				AND a.hr_resume_id = #{hrResume.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrInterview">
+		SELECT 
+			<include refid="hrInterviewColumns"/>
+		FROM hr_interview a
+		<include refid="hrInterviewJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_interview(
+			id,
+			position,
+			interview_date,
+			interview_time,
+			invitate_status,
+			link_man,
+			link_phone,
+			company,
+			address,
+			sign_status,
+			sign_time,
+			interview,
+			interview_note,
+			interview_status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			hr_resume_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{position},
+			#{interviewDate},
+			#{interviewTime},
+			#{inviteStatus},
+			#{linkMan},
+			#{linkPhone},
+			#{company},
+			#{address},
+			#{signStatus},
+			#{signTime},
+			#{interviewBy.id},
+			#{interviewNote},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{hrResume.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_interview SET
+						position = #{position},
+			interview_date = #{interviewDate},
+			interview_time = #{interviewTime},
+			invitate_status = #{inviteStatus},
+			link_man = #{linkMan},
+			link_phone = #{linkPhone},
+			company = #{company},
+			address = #{address},
+			sign_status = #{signStatus},
+			sign_time = #{signTime},
+			interview = #{interviewBy.id},
+			interview_note = #{interviewNote},
+			interview_status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			hr_resume_id = #{hrResume.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_interview SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrInterview" statementType="STATEMENT">
+		select * FROM hr_interview  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

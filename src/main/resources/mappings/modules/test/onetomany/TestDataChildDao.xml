@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.test.dao.onetomany.TestDataChildDao">
+    
+	<sql id="testDataChildColumns">
+		a.id AS "id",
+		a.order_id AS "order.id",
+		a.product_id AS "product.id",
+		p.name AS "product.name",
+		p.spec AS "product.spec",
+		a.unit_type AS "unitType",
+		a.price AS "price",
+		a.num AS "num",
+		a.amount AS "amount",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="testDataChildJoins">
+		LEFT JOIN test_one p ON p.id = a.product_id
+	</sql>
+    
+	<select id="get" resultType="TestDataChild">
+		SELECT 
+			<include refid="testDataChildColumns"/>
+		FROM test_data_child a
+		<include refid="testDataChildJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TestDataChild">
+		SELECT 
+			<include refid="testDataChildColumns"/>
+		FROM test_data_child a
+		<include refid="testDataChildJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="order != null and order.id != null and order.id != ''">
+				AND a.order_id = #{order.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TestDataChild">
+		SELECT 
+			<include refid="testDataChildColumns"/>
+		FROM test_data_child a
+		<include refid="testDataChildJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO test_data_child(
+			id,
+			order_id,
+			product_id,
+			unit_type,
+			price,
+			num,
+			amount,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{order.id},
+			#{product.id},
+			#{unitType},
+			#{price},
+			#{num},
+			#{amount},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_data_child SET
+						order_id = #{order.id},
+			product_id = #{product.id},
+			unit_type = #{unitType},
+			price = #{price},
+			num = #{num},
+			amount = #{amount},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM test_data_child 
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE order_id = #{order.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="TestDataChild" statementType="STATEMENT">
+		select * FROM test_data_child  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

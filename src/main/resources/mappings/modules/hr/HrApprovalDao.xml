@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrApprovalDao">
+    
+	<sql id="hrApprovalColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.apply_name AS "applyName",
+		a.apply_org AS "applyOrg",
+		a.approval_name AS "approvalName",
+		a.notify_name AS "notifyName",
+		a.sp_status AS "spStatus",
+		a.sp_num AS "spNum",
+		a.apply_time AS "applyTime",
+		a.apply_user_id AS "applyUserId",
+		a.approval_type AS "approvalType",
+		a.expense_type AS "expenseType",
+		a.expense_reason AS "expenseReason",
+		a.leave_timeunit AS "leaveTimeunit",
+		a.leave_type AS "leaveType",
+		a.leave_start_time AS "leaveStartTime",
+		a.leave_end_time AS "leaveEndTime",
+		a.leave_duration AS "leaveDuration",
+		a.leave_reason AS "leaveReason",
+		a.apply_data AS "applyData",
+		
+		a.bk_checkin_time AS "bkCheckinTime",
+		a.begin_time AS "beginTime",
+		a.end_time AS "endTime",
+		a.duration AS "duration",
+		
+		a.user_id AS "user.id",
+		a.account_id AS "accountId",
+		u21.name AS "user.name",
+		u21.photo AS "user.photo",
+		o4.name AS "office.name"
+	</sql>
+	
+	<sql id="hrApprovalJoins">
+		LEFT JOIN sys_user u21 ON u21.id = a.user_id
+		LEFT JOIN sys_office o4 ON o4.id = u21.office_id
+	</sql>
+    
+	<select id="get" resultType="HrApproval">
+		SELECT 
+			<include refid="hrApprovalColumns"/>
+		FROM hr_approval a
+		<include refid="hrApprovalJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrApproval">
+		SELECT 
+			<include refid="hrApprovalColumns"/>
+		FROM hr_approval a
+		<include refid="hrApprovalJoins"/>
+		<where>
+			1=1 
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="approvalType != null and approvalType != ''">
+				AND a.approval_type = #{approvalType}
+			</if>
+			<if test="spStatus != null and spStatus != ''">
+				AND a.sp_status = #{spStatus}
+			</if>
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+                AND u21.office_id = #{office.id}
+            </if>
+            <if test="startDate !=null and startDate !='' ">
+				<![CDATA[
+                and	a.apply_time >= #{startDate}
+                ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[
+                and	a.apply_time <= #{endDate}
+                ]]>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrApproval">
+		SELECT 
+			<include refid="hrApprovalColumns"/>
+		FROM hr_approval a
+		<include refid="hrApprovalJoins"/>
+		<where>
+			1=1
+		</where>	
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_approval(
+			id,
+			name,
+			apply_name,
+			apply_org,
+			approval_name,
+			notify_name,
+			sp_status,
+			sp_num,
+			apply_time,
+			apply_user_id,
+			approval_type,
+			expense_type,
+			expense_reason,
+			leave_timeunit,
+			leave_type,
+			leave_start_time,
+			leave_end_time,
+			leave_duration,
+			leave_reason,
+			apply_data,
+			bk_checkin_time,
+			begin_time,
+			end_time,
+			duration,
+			user_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{applyName},
+			#{applyOrg},
+			#{approvalName},
+			#{notifyName},
+			#{spStatus},
+			#{spNum},
+			#{applyTime},
+			#{applyUserId},
+			#{approvalType},
+			#{expenseType},
+			#{expenseReason},
+			#{leaveTimeunit},
+			#{leaveType},
+			#{leaveStartTime},
+			#{leaveEndTime},
+			#{leaveDuration},
+			#{leaveReason},
+			#{applyData},
+			#{bkCheckinTime},
+			#{beginTime},
+			#{endTime},
+			#{duration},
+			#{user.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_approval SET
+						name = #{name},
+			apply_name = #{applyName},
+			apply_org = #{applyOrg},
+			approval_name = #{approvalName},
+			notify_name = #{notifyName},
+			sp_status = #{spStatus},
+			sp_num = #{spNum},
+			apply_time = #{applyTime},
+			apply_user_id = #{applyUserId},
+			approval_type = #{approvalType},
+			expense_type = #{expenseType},
+			expense_reason = #{expenseReason},
+			leave_timeunit = #{leaveTimeunit},
+			leave_type = #{leaveType},
+			leave_start_time = #{leaveStartTime},
+			leave_end_time = #{leaveEndTime},
+			leave_duration = #{leaveDuration},
+			leave_reason = #{leaveReason},
+			apply_data = #{applyData},
+			bk_checkin_time = #{bkCheckinTime},
+			begin_time = #{beginTime},
+			end_time = #{endTime},
+			duration = #{duration},
+			user_id = #{user.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM hr_approval
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrApproval" statementType="STATEMENT">
+		select * FROM hr_approval  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

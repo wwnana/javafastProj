@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaCommonBorrowDao">
+    
+	<sql id="oaCommonBorrowColumns">
+		a.id AS "id",
+		a.amount AS "amount",
+		a.borrow_date AS "borrowDate",
+		c.id AS "oaCommonAudit.id",
+		c.title AS "oaCommonAudit.title",
+		c.status AS "oaCommonAudit.status",
+		c.create_by AS "oaCommonAudit.createBy.id",
+		u8.name AS "oaCommonAudit.createBy.name"
+	</sql>
+	
+	<sql id="oaCommonBorrowJoins">
+		LEFT JOIN oa_common_audit c ON c.id = a.id
+		LEFT JOIN sys_user u8 ON u8.id = c.create_by
+	</sql>
+    
+	<select id="get" resultType="OaCommonBorrow">
+		SELECT 
+			<include refid="oaCommonBorrowColumns"/>
+		FROM oa_common_borrow a
+		<include refid="oaCommonBorrowJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCommonBorrow">
+		SELECT 
+			<include refid="oaCommonBorrowColumns"/>
+		FROM oa_common_borrow a
+		<include refid="oaCommonBorrowJoins"/>
+		<where>
+			1=1 
+			<if test="beginBorrowDate != null and endBorrowDate != null and beginBorrowDate != '' and endBorrowDate != ''">
+				AND a.borrow_date BETWEEN #{beginBorrowDate} AND #{endBorrowDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaCommonBorrow">
+		SELECT 
+			<include refid="oaCommonBorrowColumns"/>
+		FROM oa_common_borrow a
+		<include refid="oaCommonBorrowJoins"/>
+		<where>
+			1=1 
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_common_borrow(
+			id,
+			amount,
+			borrow_date
+		) VALUES (
+			#{id},
+			#{amount},
+			#{borrowDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_common_borrow SET
+						amount = #{amount},
+			borrow_date = #{borrowDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_common_borrow
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaCommonBorrow" statementType="STATEMENT">
+		select * FROM oa_common_borrow  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

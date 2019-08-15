@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.kms.dao.KmsArticleDao">
+    
+	<sql id="kmsArticleColumns">
+		a.id AS "id",
+		a.category_id AS "kmsCategory.id",
+		c.name AS "kmsCategory.name",
+		a.title AS "title",
+		a.link AS "link",
+		a.image AS "image",
+		a.keywords AS "keywords",
+		a.description AS "description",
+		a.sort AS "sort",
+		a.hits AS "hits",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		u12.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u13.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="kmsArticleJoins">
+		LEFT JOIN kms_category c ON c.id = a.category_id
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+		LEFT JOIN sys_user u13 ON u13.id = a.update_by
+	</sql>
+    
+	<select id="get" resultType="KmsArticle">
+		SELECT 
+			<include refid="kmsArticleColumns"/>
+		FROM kms_article a
+		<include refid="kmsArticleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="KmsArticle">
+		SELECT 
+			<include refid="kmsArticleColumns"/>
+		FROM kms_article a
+		<include refid="kmsArticleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<!-- 只能查看已经发布的，或者自己创建的 -->
+			AND (a.status = '1' OR a.create_by = #{currentUser.id})
+			<if test="kmsCategory != null and kmsCategory.id != null and kmsCategory.id != ''">
+				AND a.category_id = #{kmsCategory.id}
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginUpdateDate != null and endUpdateDate != null and beginUpdateDate != '' and endUpdateDate != ''">
+				AND a.update_date BETWEEN #{beginUpdateDate} AND #{endUpdateDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="KmsArticle">
+		SELECT 
+			<include refid="kmsArticleColumns"/>
+		FROM kms_article a
+		<include refid="kmsArticleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO kms_article(
+			id,
+			category_id,
+			title,
+			link,
+			image,
+			keywords,
+			description,
+			sort,
+			hits,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{kmsCategory.id},
+			#{title},
+			#{link},
+			#{image},
+			#{keywords},
+			#{description},
+			#{sort},
+			#{hits},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE kms_article SET
+						category_id = #{kmsCategory.id},
+			title = #{title},
+			link = #{link},
+			image = #{image},
+			keywords = #{keywords},
+			description = #{description},
+			sort = #{sort},
+			hits = #{hits},
+			status = #{status},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE kms_article SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="KmsArticle" statementType="STATEMENT">
+		select * FROM kms_article  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsInstockDetailDao">
+    
+	<sql id="wmsInstockDetailColumns">
+		a.id AS "id",
+		a.instock_id AS "instock.id",
+		a.product_id AS "product.id",
+		p.no AS "product.no",
+		p.name AS "product.name",
+		p.spec AS "product.spec",
+		a.unit_type AS "unitType",
+		a.instock_num AS "instockNum",
+		a.num AS "num",
+		a.diff_num AS "diffNum",
+		a.remarks AS "remarks",
+		a.sort AS "sort",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="wmsInstockDetailJoins">
+		LEFT JOIN wms_product p ON p.id = a.product_id
+	</sql>
+    
+	<select id="get" resultType="WmsInstockDetail">
+		SELECT 
+			<include refid="wmsInstockDetailColumns"/>
+		FROM wms_instock_detail a
+		<include refid="wmsInstockDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsInstockDetail">
+		SELECT 
+			<include refid="wmsInstockDetailColumns"/>
+		FROM wms_instock_detail a
+		<include refid="wmsInstockDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="instock != null and instock.id != null and instock.id != ''">
+				AND a.instock_id = #{instock.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsInstockDetail">
+		SELECT 
+			<include refid="wmsInstockDetailColumns"/>
+		FROM wms_instock_detail a
+		<include refid="wmsInstockDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_instock_detail(
+			id,
+			instock_id,
+			product_id,
+			unit_type,
+			instock_num,
+			num,
+			diff_num,
+			remarks,
+			sort,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{instock.id},
+			#{product.id},
+			#{unitType},
+			#{instockNum},
+			#{num},
+			#{diffNum},
+			#{remarks},
+			#{sort},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE wms_instock_detail SET
+			instock_id = #{instock.id},
+			product_id = #{product.id},
+			unit_type = #{unitType},
+			instock_num = #{instockNum},
+			num = #{num},
+			diff_num = #{diffNum},
+			remarks = #{remarks},
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE wms_instock_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE instock_id = #{instock.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsInstockDetail" statementType="STATEMENT">
+		select * FROM wms_instock_detail  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

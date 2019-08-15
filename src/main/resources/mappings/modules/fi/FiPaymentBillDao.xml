@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.fi.dao.FiPaymentBillDao">
+    
+	<sql id="fiPaymentBillColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.fi_payment_able_id AS "fiPaymentAble.id",
+		b.no AS "fiPaymentAble.no",
+		b.no AS "fiPaymentAble.name",
+		a.supplier_id AS "supplier.id",
+		s.name AS "supplier.name",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.amount AS "amount",
+		a.deal_date AS "dealDate",
+		a.fi_account_id AS "fiAccount.id",
+		f.name AS "fiAccount.name",
+		a.own_by AS "ownBy.id",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u8.name AS "ownBy.name",
+		u10.name AS "createBy.name"
+	</sql>
+	
+	<sql id="fiPaymentBillJoins">
+		LEFT JOIN fi_payment_able b ON b.id = a.fi_payment_able_id
+		LEFT JOIN wms_supplier s ON s.id = a.supplier_id
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN fi_finance_account f ON f.id = fi_account_id
+		LEFT JOIN sys_user u8 ON u8.id = a.own_by
+		LEFT JOIN sys_user u10 ON u10.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="FiPaymentBill">
+		SELECT 
+			<include refid="fiPaymentBillColumns"/>
+		FROM fi_payment_bill a
+		<include refid="fiPaymentBillJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FiPaymentBill">
+		SELECT 
+			<include refid="fiPaymentBillColumns"/>
+		FROM fi_payment_bill a
+		<include refid="fiPaymentBillJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no LIKE 
+					<if test="dbName == 'oracle'">'%'||#{no}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{no}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{no},'%')</if>
+			</if>
+			<if test="fiAccount != null and fiAccount.id != null and fiAccount.id != ''">
+				AND a.fi_account_id = #{fiAccount.id}
+			</if>
+			<if test="fiPaymentAble != null and fiPaymentAble.id != null and fiPaymentAble.id != ''">
+				AND a.fi_payment_able_id = #{fiPaymentAble.id}
+			</if>
+			<if test="supplier != null and supplier.id != null and supplier.id != ''">
+				AND a.supplier_id = #{supplier.id}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="fiAccount != null and fiAccount.id != null and fiAccount.id != ''">
+				AND a.fi_account_id = #{fiAccount.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FiPaymentBill">
+		SELECT 
+			<include refid="fiPaymentBillColumns"/>
+		FROM fi_payment_bill a
+		<include refid="fiPaymentBillJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO fi_payment_bill(
+			id,
+			fi_payment_able_id,
+			no,
+			supplier_id,
+			customer_id,
+			amount,
+			deal_date,
+			fi_account_id,
+			own_by,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{fiPaymentAble.id},
+			#{no},
+			#{supplier.id},
+			#{customer.id},
+			#{amount},
+			#{dealDate},
+			#{fiAccount.id},
+			#{ownBy.id},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE fi_payment_bill SET
+						fi_payment_able_id = #{fiPaymentAble.id},
+			no = #{no},
+			supplier_id = #{supplier.id},
+			customer_id = #{customer.id},
+			amount = #{amount},
+			deal_date = #{dealDate},
+			fi_account_id = #{fiAccount.id},
+			own_by = #{ownBy.id},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE fi_payment_bill SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE 
+		<if test="id != null and id != ''">
+			id = #{id}
+		</if>
+		<if test="fiPaymentAble != null and fiPaymentAble.id != null and fiPaymentAble.id != ''">
+			fi_payment_able_id = #{fiPaymentAble.id}
+		</if>
+			
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FiPaymentBill" statementType="STATEMENT">
+		select * FROM fi_payment_bill  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

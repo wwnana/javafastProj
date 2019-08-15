@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.scm.dao.ScmSuppotDao">
+    
+	<sql id="scmSuppotColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.order_id AS "omContract.id",
+		o.no AS "omContract.no",
+		o.name AS "omContract.name",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.own_by AS "ownBy.id",
+		a.level_type AS "levelType",
+		a.end_date AS "endDate",
+		a.expecte AS "expecte",
+		a.content AS "content",
+		a.status AS "status",
+		a.deal_date AS "dealDate",
+		a.satisfy_type AS "satisfyType",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u8.name AS "ownBy.name",
+		u12.name AS "createBy.name",
+		u13.name AS "auditBy.name"
+	</sql>
+	
+	<sql id="scmSuppotJoins">
+		LEFT JOIN sys_user u8 ON u8.id = a.own_by
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+		LEFT JOIN sys_user u13 ON u13.id = a.audit_by
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN om_contract o ON o.id = a.order_id
+	</sql>
+    
+	<select id="get" resultType="ScmSuppot">
+		SELECT 
+			<include refid="scmSuppotColumns"/>
+		FROM scm_suppot a
+		<include refid="scmSuppotJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ScmSuppot">
+		SELECT 
+			<include refid="scmSuppotColumns"/>
+		FROM scm_suppot a
+		<include refid="scmSuppotJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="omContract != null and omContract.id != null and omContract.id != ''">
+				AND a.order_id = #{omContract.id}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="levelType != null and levelType != ''">
+				AND a.level_type = #{levelType}
+			</if>
+			<if test="beginEndDate != null and endEndDate != null and beginEndDate != '' and endEndDate != ''">
+				AND a.end_date BETWEEN #{beginEndDate} AND #{endEndDate}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="satisfyType != null and satisfyType != ''">
+				AND a.satisfy_type = #{satisfyType}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ScmSuppot">
+		SELECT 
+			<include refid="scmSuppotColumns"/>
+		FROM scm_suppot a
+		<include refid="scmSuppotJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO scm_suppot(
+			id,
+			name,
+			order_id,
+			customer_id,
+			own_by,
+			level_type,
+			end_date,
+			expecte,
+			content,
+			status,
+			deal_date,
+			satisfy_type,
+			audit_by,
+			audit_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{omContract.id},
+			#{customer.id},
+			#{ownBy.id},
+			#{levelType},
+			#{endDate},
+			#{expecte},
+			#{content},
+			#{status},
+			#{dealDate},
+			#{satisfyType},
+			#{auditBy.id},
+			#{auditDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE scm_suppot SET
+						name = #{name},
+			order_id = #{omContract.id},
+			customer_id = #{customer.id},
+			own_by = #{ownBy.id},
+			level_type = #{levelType},
+			end_date = #{endDate},
+			expecte = #{expecte},
+			content = #{content},
+			status = #{status},
+			deal_date = #{dealDate},
+			satisfy_type = #{satisfyType},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE scm_suppot SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ScmSuppot" statementType="STATEMENT">
+		select * FROM scm_suppot  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

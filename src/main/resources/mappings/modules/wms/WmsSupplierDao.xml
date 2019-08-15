@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsSupplierDao">
+    
+	<sql id="wmsSupplierColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.name AS "name",
+		a.supplier_type_id AS "supplierType.id",
+		t.name  AS "supplierType.name",
+		a.contact_name AS "contactName",
+		a.phone AS "phone",
+		a.email AS "email",
+		a.qq AS "qq",
+		a.fax AS "fax",
+		a.zipcode AS "zipcode",
+		a.address AS "address",
+		a.arrear AS "arrear",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		u20.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="wmsSupplierJoins">
+		LEFT JOIN wms_supplier_type t on t.id = a.supplier_type_id
+		LEFT JOIN sys_user u20 ON u20.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="WmsSupplier">
+		SELECT 
+			<include refid="wmsSupplierColumns"/>
+		FROM wms_supplier a
+		<include refid="wmsSupplierJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsSupplier">
+		SELECT 
+			<include refid="wmsSupplierColumns"/>
+		FROM wms_supplier a
+		<include refid="wmsSupplierJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="supplierType != null and supplierType.id != null and supplierType.id != ''">
+				AND a.supplier_type_id = #{supplierType.id}
+			</if>
+			<if test="phone != null and phone != ''">
+				AND a.phone = #{phone}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsSupplier">
+		SELECT 
+			<include refid="wmsSupplierColumns"/>
+		FROM wms_supplier a
+		<include refid="wmsSupplierJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_supplier(
+			id,
+			no,
+			name,
+			supplier_type_id,
+			contact_name,
+			phone,
+			email,
+			qq,
+			fax,
+			zipcode,
+			address,
+			arrear,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{name},
+			#{supplierType.id},
+			#{contactName},
+			#{phone},
+			#{email},
+			#{qq},
+			#{fax},
+			#{zipcode},
+			#{address},
+			#{arrear},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+		<update id="update">
+		UPDATE wms_supplier SET
+						no = #{no},
+			name = #{name},
+			supplier_type_id = #{supplierType.id},
+			contact_name = #{contactName},
+			phone = #{phone},
+			email = #{email},
+			qq = #{qq},
+			fax = #{fax},
+			zipcode = #{zipcode},
+			address = #{address},
+			arrear = #{arrear},
+			status = #{status},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+
+	
+	<update id="delete">
+		UPDATE wms_supplier SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsSupplier" statementType="STATEMENT">
+		select * FROM wms_supplier  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

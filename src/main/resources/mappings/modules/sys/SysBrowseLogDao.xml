@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.sys.dao.SysBrowseLogDao">
+    
+	<sql id="sysBrowseLogColumns">
+		a.id AS "id",
+		a.target_type AS "targetType",
+		a.target_id AS "targetId",
+		a.target_name AS "targetName",
+		a.user_id AS "userId",
+		a.browse_date AS "browseDate"
+	</sql>
+	
+	<sql id="sysBrowseLogJoins">
+	</sql>
+    
+	<select id="get" resultType="SysBrowseLog">
+		SELECT 
+			<include refid="sysBrowseLogColumns"/>
+		FROM sys_browse_log a
+		<include refid="sysBrowseLogJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SysBrowseLog">
+		SELECT 
+			<include refid="sysBrowseLogColumns"/>
+		FROM sys_browse_log a
+		<include refid="sysBrowseLogJoins"/>
+		<where>
+			1=1 
+			<if test="targetType != null and targetType != ''">
+				AND a.target_type = #{targetType}
+			</if>
+			<if test="userId != null and userId != ''">
+				AND a.user_id = #{userId}
+			</if>
+			<if test="beginBrowseDate != null and endBrowseDate != null and beginBrowseDate != '' and endBrowseDate != ''">
+				AND a.browse_date BETWEEN #{beginBrowseDate} AND #{endBrowseDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY browse_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysBrowseLog">
+		SELECT 
+			<include refid="sysBrowseLogColumns"/>
+		FROM sys_browse_log a
+		<include refid="sysBrowseLogJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_browse_log(
+			id,
+			target_type,
+			target_id,
+			target_name,
+			user_id,
+			browse_date
+		) VALUES (
+			#{id},
+			#{targetType},
+			#{targetId},
+			#{targetName},
+			#{userId},
+			#{browseDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_browse_log SET
+						target_type = #{targetType},
+			target_id = #{targetId},
+			target_name = #{targetName},
+			user_id = #{userId},
+			browse_date = #{browseDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM sys_browse_log
+		WHERE id = #{id}
+	</update>
+	
+	<update id="deleteSysBrowseLog">
+		DELETE FROM sys_browse_log
+		WHERE target_id = #{targetId} AND user_id = #{userId}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SysBrowseLog" statementType="STATEMENT">
+		select * FROM sys_browse_log  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

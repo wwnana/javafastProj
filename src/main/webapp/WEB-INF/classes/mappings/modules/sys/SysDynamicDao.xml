@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.sys.dao.SysDynamicDao">
+    
+	<sql id="sysDynamicColumns">
+		a.id AS "id",
+		a.object_type AS "objectType",
+		a.action_type AS "actionType",
+		a.target_id AS "targetId",
+		a.target_name AS "targetName",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.customer_id AS "customerId",
+		c.name AS "customerName",
+		a.office_id AS "officeId",
+		a.account_id AS "accountId",
+		u6.name AS "createBy.name",
+		u6.photo AS "createBy.photo",
+		u6.name AS "userName",
+		u6.photo AS "userPhoto"
+	</sql>
+	
+	<sql id="sysDynamicJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN sys_user u6 ON u6.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="SysDynamic">
+		SELECT 
+			<include refid="sysDynamicColumns"/>
+		FROM sys_dynamic a
+		<include refid="sysDynamicJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SysDynamic">
+		SELECT 
+			<include refid="sysDynamicColumns"/>
+		FROM sys_dynamic a
+		<include refid="sysDynamicJoins"/>
+		<where>
+			1=1 
+			<if test="objectType != null and objectType != ''">
+				AND a.object_type = #{objectType}
+			</if>
+			<if test="actionType != null and actionType != ''">
+				AND a.action_type = #{actionType}
+			</if>
+			<if test="targetId != null and targetId != ''">
+				AND a.target_id = #{targetId}
+			</if>
+			<if test="targetName != null and targetName != ''">
+				AND a.target_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{targetName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{targetName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{targetName},'%')</if>
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="customerId != null and customerId != ''">
+				AND a.customer_id = #{customerId}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysDynamic">
+		SELECT 
+			<include refid="sysDynamicColumns"/>
+		FROM sys_dynamic a
+		<include refid="sysDynamicJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_dynamic(
+			id,
+			object_type,
+			action_type,
+			target_id,
+			target_name,
+			create_by,
+			create_date,
+			customer_id,
+			office_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{objectType},
+			#{actionType},
+			#{targetId},
+			#{targetName},
+			#{createBy.id},
+			#{createDate},
+			#{customerId},
+			#{officeId},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_dynamic SET
+						object_type = #{objectType},
+			action_type = #{actionType},
+			target_id = #{targetId},
+			target_name = #{targetName},
+			customer_id = #{customerId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM sys_dynamic
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SysDynamic" statementType="STATEMENT">
+		select * FROM sys_dynamic  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

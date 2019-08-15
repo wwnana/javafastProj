@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmChanceDao">
+    
+	<sql id="crmChanceColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.sale_amount AS "saleAmount",
+		a.period_type AS "periodType",
+		a.probability AS "probability",
+		a.change_type AS "changeType",
+		a.sour_type AS "sourType",
+		a.lose_reasons AS "loseReasons",
+		a.nextcontact_date AS "nextcontactDate",
+		a.nextcontact_note AS "nextcontactNote",
+		a.own_by AS "ownBy.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		a.office_id AS "officeId",
+		u11.name AS "ownBy.name",
+		u12.name AS "createBy.name",
+		u13.name AS "updateBy.name"
+	</sql>
+	
+	<sql id="crmChanceJoins">
+		LEFT JOIN sys_user u11 ON u11.id = a.own_by
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+		LEFT JOIN sys_user u13 ON u13.id = a.update_by
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+	</sql>
+    
+	<select id="get" resultType="CrmChance">
+		SELECT 
+			<include refid="crmChanceColumns"/>
+		FROM crm_chance a
+		<include refid="crmChanceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmChance">
+		SELECT 
+			<include refid="crmChanceColumns"/>
+		FROM crm_chance a
+		<include refid="crmChanceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="periodType != null and periodType != ''">
+				AND a.period_type = #{periodType}
+			</if>
+			<if test="changeType != null and changeType != ''">
+				AND a.change_type = #{changeType}
+			</if>
+			<if test="sourType != null and sourType != ''">
+				AND a.sour_type = #{sourType}
+			</if>
+			<if test="beginNextcontactDate != null and endNextcontactDate != null and beginNextcontactDate != '' and endNextcontactDate != ''">
+				AND a.nextcontact_date BETWEEN #{beginNextcontactDate} AND #{endNextcontactDate}
+			</if>
+			<if test="nextcontactDate != null and nextcontactDate != ''">
+				AND a.nextcontact_date = #{nextcontactDate}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+				OR c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>)
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmChance">
+		SELECT 
+			<include refid="crmChanceColumns"/>
+		FROM crm_chance a
+		<include refid="crmChanceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_chance(
+			id,
+			name,
+			customer_id,
+			sale_amount,
+			period_type,
+			probability,
+			change_type,
+			sour_type,
+			nextcontact_date,
+			nextcontact_note,
+			own_by,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id,
+			office_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{customer.id},
+			#{saleAmount},
+			#{periodType},
+			#{probability},
+			#{changeType},
+			#{sourType},
+			#{nextcontactDate},
+			#{nextcontactNote},
+			#{ownBy.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId},
+			#{officeId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_chance SET
+						name = #{name},
+			customer_id = #{customer.id},
+			sale_amount = #{saleAmount},
+			period_type = #{periodType},
+			probability = #{probability},
+			change_type = #{changeType},
+			sour_type = #{sourType},
+			lose_reasons = #{loseReasons},
+			nextcontact_date = #{nextcontactDate},
+			nextcontact_note = #{nextcontactNote},
+			own_by = #{ownBy.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_chance SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmChance" statementType="STATEMENT">
+		select * FROM crm_chance  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM crm_chance a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaNoteDao">
+    
+	<sql id="oaNoteColumns">
+		a.id AS "id",
+		a.notes AS "notes"
+	</sql>
+	
+	<sql id="oaNoteJoins">
+	</sql>
+    
+	<select id="get" resultType="OaNote">
+		SELECT 
+			<include refid="oaNoteColumns"/>
+		FROM oa_note a
+		<include refid="oaNoteJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaNote">
+		SELECT 
+			<include refid="oaNoteColumns"/>
+		FROM oa_note a
+		<include refid="oaNoteJoins"/>
+		<where>
+			
+			<if test="notes != null and notes != ''">
+				AND a.notes = #{notes}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaNote">
+		SELECT 
+			<include refid="oaNoteColumns"/>
+		FROM oa_note a
+		<include refid="oaNoteJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_note(
+			id,
+			notes
+		) VALUES (
+			#{id},
+			#{notes}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_note SET
+						notes = #{notes}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_note
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaNote" statementType="STATEMENT">
+		select * FROM oa_note  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

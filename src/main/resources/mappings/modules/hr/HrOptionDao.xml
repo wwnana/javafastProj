@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrOptionDao">
+    
+	<sql id="hrOptionColumns">
+		a.id AS "id",
+		a.grant_date AS "grantDate",
+		a.grant_num AS "grantNum",
+		a.proportion AS "proportion",
+		a.round_num AS "roundNum",
+		a.lock_period AS "lockPeriod",
+		a.mature_num AS "matureNum",
+		a.option_file AS "optionFile",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.hr_employee_id AS "hrEmployee.id",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="hrOptionJoins">
+	</sql>
+    
+	<select id="get" resultType="HrOption">
+		SELECT 
+			<include refid="hrOptionColumns"/>
+		FROM hr_option a
+		<include refid="hrOptionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrOption">
+		SELECT 
+			<include refid="hrOptionColumns"/>
+		FROM hr_option a
+		<include refid="hrOptionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="hrEmployee != null and hrEmployee.id != null and hrEmployee.id != ''">
+				AND a.hr_employee_id = #{hrEmployee.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrOption">
+		SELECT 
+			<include refid="hrOptionColumns"/>
+		FROM hr_option a
+		<include refid="hrOptionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>	
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_option(
+			id,
+			grant_date,
+			grant_num,
+			proportion,
+			round_num,
+			lock_period,
+			mature_num,
+			option_file,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			hr_employee_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{grantDate},
+			#{grantNum},
+			#{proportion},
+			#{roundNum},
+			#{lockPeriod},
+			#{matureNum},
+			#{optionFile},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{hrEmployee.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_option SET
+						grant_date = #{grantDate},
+			grant_num = #{grantNum},
+			proportion = #{proportion},
+			round_num = #{roundNum},
+			lock_period = #{lockPeriod},
+			mature_num = #{matureNum},
+			option_file = #{optionFile},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			hr_employee_id = #{hrEmployee.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_option SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrOption" statementType="STATEMENT">
+		select * FROM hr_option  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

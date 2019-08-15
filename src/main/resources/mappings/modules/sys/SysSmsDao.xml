@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.sys.dao.SysSmsDao">
+    
+	<sql id="sysSmsColumns">
+		a.id AS "id",
+		a.sms_type AS "smsType",
+		a.content AS "content",
+		a.mobile AS "mobile",
+		a.code AS "code",
+		a.ip AS "ip",
+		a.status AS "status",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="sysSmsJoins">
+	</sql>
+    
+	<select id="get" resultType="SysSms">
+		SELECT 
+			<include refid="sysSmsColumns"/>
+		FROM sys_sms a
+		<include refid="sysSmsJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SysSms">
+		SELECT 
+			<include refid="sysSmsColumns"/>
+		FROM sys_sms a
+		<include refid="sysSmsJoins"/>
+		<where>
+			
+			<if test="smsType != null and smsType != ''">
+				AND a.sms_type = #{smsType}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="code != null and code != ''">
+				AND a.code = #{code}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysSms">
+		SELECT 
+			<include refid="sysSmsColumns"/>
+		FROM sys_sms a
+		<include refid="sysSmsJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_sms(
+			id,
+			sms_type,
+			content,
+			mobile,
+			code,
+			ip,
+			status,
+			create_date,
+			account_id
+		) VALUES (
+			#{id},
+			#{smsType},
+			#{content},
+			#{mobile},
+			#{code},
+			#{ip},
+			#{status},
+			#{createDate},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_sms SET 
+			sms_type = #{smsType},
+			content = #{content},
+			mobile = #{mobile},
+			ip = #{ip},
+			status = #{status},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM sys_sms
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SysSms" statementType="STATEMENT">
+		select * FROM sys_sms  where ${propertyName} = '${value}'
+	</select>
+</mapper>

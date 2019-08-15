@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaCommonExpenseDetailDao">
+    
+	<sql id="oaCommonExpenseDetailColumns">
+		a.id AS "id",
+		a.expense_id AS "expense.id",
+		a.item_name AS "itemName",
+		a.date AS "date",
+		a.amount AS "amount"
+	</sql>
+	
+	<sql id="oaCommonExpenseDetailJoins">
+		LEFT JOIN oa_common_expense b ON b.id = a.expense_id
+	</sql>
+    
+	<select id="get" resultType="OaCommonExpenseDetail">
+		SELECT 
+			<include refid="oaCommonExpenseDetailColumns"/>
+		FROM oa_common_expense_detail a
+		<include refid="oaCommonExpenseDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCommonExpenseDetail">
+		SELECT 
+			<include refid="oaCommonExpenseDetailColumns"/>
+		FROM oa_common_expense_detail a
+		<include refid="oaCommonExpenseDetailJoins"/>
+		<where>
+			
+			<if test="expense != null and expense.id != null and expense.id != ''">
+				AND a.expense_id = #{expense.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaCommonExpenseDetail">
+		SELECT 
+			<include refid="oaCommonExpenseDetailColumns"/>
+		FROM oa_common_expense_detail a
+		<include refid="oaCommonExpenseDetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_common_expense_detail(
+			id,
+			expense_id,
+			item_name,
+			date,
+			amount
+		) VALUES (
+			#{id},
+			#{expense.id},
+			#{itemName},
+			#{date},
+			#{amount}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_common_expense_detail SET
+						expense_id = #{expense.id},
+			item_name = #{itemName},
+			date = #{date},
+			amount = #{amount}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_common_expense_detail
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE expense_id = #{expense.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaCommonExpenseDetail" statementType="STATEMENT">
+		select * FROM oa_common_expense_detail  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

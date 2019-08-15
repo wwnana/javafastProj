@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmInvoiceDao">
+    
+	<sql id="crmInvoiceColumns">
+		a.id AS "id",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.reg_name AS "regName",
+		a.reg_address AS "regAddress",
+		a.invoice_type AS "invoiceType",
+		a.reg_phone AS "regPhone",
+		a.bank_no AS "bankNo",
+		a.bank_name AS "bankName",
+		a.tax_no AS "taxNo",
+		a.province AS "province",
+		a.city AS "city",
+		a.dict AS "dict",
+		a.address AS "address",
+		a.zipcode AS "zipcode",
+		a.receiver AS "receiver",
+		a.phone AS "phone",
+		a.remarks AS "remarks",
+		a.account_id AS "accountId",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="crmInvoiceJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+	</sql>
+    
+	<select id="get" resultType="CrmInvoice">
+		SELECT 
+			<include refid="crmInvoiceColumns"/>
+		FROM crm_invoice a
+		<include refid="crmInvoiceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmInvoice">
+		SELECT 
+			<include refid="crmInvoiceColumns"/>
+		FROM crm_invoice a
+		<include refid="crmInvoiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="regName != null and regName != ''">
+				AND a.reg_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{regName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{regName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{regName},'%')</if>
+			</if>
+			<if test="taxNo != null and taxNo != ''">
+				AND a.tax_no = #{taxNo}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmInvoice">
+		SELECT 
+			<include refid="crmInvoiceColumns"/>
+		FROM crm_invoice a
+		<include refid="crmInvoiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_invoice(
+			id,
+			customer_id,
+			reg_name,
+			reg_address,
+			invoice_type,
+			reg_phone,
+			bank_no,
+			bank_name,
+			tax_no,
+			province,
+			city,
+			dict,
+			address,
+			zipcode,
+			receiver,
+			phone,
+			remarks,
+			account_id,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{customer.id},
+			#{regName},
+			#{regAddress},
+			#{invoiceType},
+			#{regPhone},
+			#{bankNo},
+			#{bankName},
+			#{taxNo},
+			#{province},
+			#{city},
+			#{dict},
+			#{address},
+			#{zipcode},
+			#{receiver},
+			#{phone},
+			#{remarks},
+			#{accountId},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_invoice SET
+						customer_id = #{customer.id},
+			reg_name = #{regName},
+			reg_address = #{regAddress},
+			invoice_type = #{invoiceType},
+			reg_phone = #{regPhone},
+			bank_no = #{bankNo},
+			bank_name = #{bankName},
+			tax_no = #{taxNo},
+			province = #{province},
+			city = #{city},
+			dict = #{dict},
+			address = #{address},
+			zipcode = #{zipcode},
+			receiver = #{receiver},
+			phone = #{phone},
+			remarks = #{remarks},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_invoice SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmInvoice" statementType="STATEMENT">
+		select * FROM crm_invoice  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

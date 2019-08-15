@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.test.dao.onetomany.TestDataMainDao">
+    
+	<sql id="testDataMainColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.sale_type AS "saleType",
+		a.amount AS "amount",
+		a.invoice_amt AS "invoiceAmt",
+		a.deal_by AS "dealBy.id",
+		a.deal_date AS "dealDate",
+		a.create_by AS "createBy.id",
+		u14.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.audit_by AS "auditBy.id",
+		u16.name AS "auditBy.name",
+		a.audit_date AS "auditDate",
+		a.status AS "status",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		u6.name AS "dealBy.name"
+	</sql>
+	
+	<sql id="testDataMainJoins">
+		LEFT JOIN sys_user u6 ON u6.id = a.deal_by
+		LEFT JOIN sys_user u14 ON u14.id = a.create_by
+		LEFT JOIN sys_user u16 ON u16.id = a.audit_by
+	</sql>
+    
+	<select id="get" resultType="TestDataMain">
+		SELECT 
+			<include refid="testDataMainColumns"/>
+		FROM test_data_main a
+		<include refid="testDataMainJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TestDataMain">
+		SELECT 
+			<include refid="testDataMainColumns"/>
+		FROM test_data_main a
+		<include refid="testDataMainJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no LIKE 
+					<if test="dbName == 'oracle'">'%'||#{no}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{no}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{no},'%')</if>
+			</if>
+			<if test="saleType != null and saleType != ''">
+				AND a.sale_type = #{saleType}
+			</if>
+			<if test="dealBy != null and dealBy.id != null and dealBy.id != ''">
+				AND a.deal_by = #{dealBy.id}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TestDataMain">
+		SELECT 
+			<include refid="testDataMainColumns"/>
+		FROM test_data_main a
+		<include refid="testDataMainJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO test_data_main(
+			id,
+			no,
+			sale_type,
+			amount,
+			invoice_amt,
+			deal_by,
+			deal_date,
+			create_by,
+			create_date,
+			audit_by,
+			audit_date,
+			status,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{no},
+			#{saleType},
+			#{amount},
+			#{invoiceAmt},
+			#{dealBy.id},
+			#{dealDate},
+			#{createBy.id},
+			#{createDate},
+			#{auditBy.id},
+			#{auditDate},
+			#{status},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_data_main SET
+						no = #{no},
+			sale_type = #{saleType},
+			amount = #{amount},
+			invoice_amt = #{invoiceAmt},
+			deal_by = #{dealBy.id},
+			deal_date = #{dealDate},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			status = #{status},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE test_data_main SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="TestDataMain" statementType="STATEMENT">
+		select * FROM test_data_main  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

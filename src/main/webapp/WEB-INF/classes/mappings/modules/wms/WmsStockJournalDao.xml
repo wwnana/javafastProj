@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsStockJournalDao">
+    
+	<sql id="wmsStockJournalColumns">
+		a.id AS "id",
+		a.product_id AS "product.id",
+		p.name AS "product.name",
+		p.no AS "product.no",
+		p.unit_type AS "product.unitType",
+		a.deal_type AS "dealType",
+		a.num AS "num",
+		a.notes AS "notes",
+		a.warehouse_id AS "warehouse.id",
+		w.name AS "warehouse.name",
+		a.unique_code AS "uniqueCode",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u8.name AS "createBy.name"
+	</sql>
+	
+	<sql id="wmsStockJournalJoins">
+		LEFT JOIN wms_product p ON p.id = a.product_id
+		LEFT JOIN wms_warehouse w ON w.id = a.warehouse_id
+		LEFT JOIN sys_user u8 ON u8.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="WmsStockJournal">
+		SELECT 
+			<include refid="wmsStockJournalColumns"/>
+		FROM wms_stock_journal a
+		<include refid="wmsStockJournalJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsStockJournal">
+		SELECT 
+			<include refid="wmsStockJournalColumns"/>
+		FROM wms_stock_journal a
+		<include refid="wmsStockJournalJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="product != null and product.id != null and product.id != ''">
+				AND a.product_id = #{product.id}
+			</if>
+			<if test="product != null and product.no != null and product.no != ''">
+				AND p.no = #{product.no}
+			</if>
+			<if test="product != null and product.name != null and product.name != ''">
+				AND p.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{product.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{product.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{product.name},'%')</if>
+			</if>
+			<if test="dealType != null and dealType != ''">
+				AND a.deal_type = #{dealType}
+			</if>
+			<if test="warehouse != null and warehouse.id != null and warehouse.id != ''">
+				AND a.warehouse_id = #{warehouse.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsStockJournal">
+		SELECT 
+			<include refid="wmsStockJournalColumns"/>
+		FROM wms_stock_journal a
+		<include refid="wmsStockJournalJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_stock_journal(
+			id,
+			product_id,
+			deal_type,
+			num,
+			notes,
+			warehouse_id,
+			unique_code,
+			create_by,
+			create_date,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{product.id},
+			#{dealType},
+			#{num},
+			#{notes},
+			#{warehouse.id},
+			#{uniqueCode},
+			#{createBy.id},
+			#{createDate},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+		<update id="update">
+		UPDATE wms_stock_journal SET
+						product_id = #{product.id},
+			deal_type = #{dealType},
+			num = #{num},
+			notes = #{notes},
+			warehouse_id = #{warehouse.id},
+			unique_code = #{uniqueCode}
+		WHERE id = #{id}
+	</update>
+
+
+
+	
+	<update id="delete">
+		UPDATE wms_stock_journal SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsStockJournal" statementType="STATEMENT">
+		select * FROM wms_stock_journal  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

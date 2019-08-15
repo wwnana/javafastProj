@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.pay.dao.PayBankbookJournalDao">
+    
+	<sql id="payBankbookJournalColumns">
+		a.id AS "id",
+		a.account_id AS "accountId",
+		a.deal_date AS "dealDate",
+		a.deal_type AS "dealType",
+		a.money AS "money",
+		a.money_type AS "moneyType",
+		a.balance AS "balance",
+		a.remarks AS "remarks",
+		a.unique_code AS "uniqueCode",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="payBankbookJournalJoins">
+	</sql>
+    
+	<select id="get" resultType="PayBankbookJournal">
+		SELECT 
+			<include refid="payBankbookJournalColumns"/>
+		FROM pay_bankbook_journal a
+		<include refid="payBankbookJournalJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PayBankbookJournal">
+		SELECT 
+			<include refid="payBankbookJournalColumns"/>
+		FROM pay_bankbook_journal a
+		<include refid="payBankbookJournalJoins"/>
+		<where>
+			
+			<if test="accountId != null and accountId != ''">
+				AND a.account_id = #{accountId}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="dealType != null and dealType != ''">
+				AND a.deal_type = #{dealType}
+			</if>
+			<if test="moneyType != null and moneyType != ''">
+				AND a.money_type = #{moneyType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.deal_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PayBankbookJournal">
+		SELECT 
+			<include refid="payBankbookJournalColumns"/>
+		FROM pay_bankbook_journal a
+		<include refid="payBankbookJournalJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pay_bankbook_journal(
+			id,
+			account_id,
+			deal_date,
+			deal_type,
+			money,
+			money_type,
+			balance,
+			remarks,
+			unique_code,
+			create_by,
+			create_date
+		) VALUES (
+			#{id},
+			#{accountId},
+			#{dealDate},
+			#{dealType},
+			#{money},
+			#{moneyType},
+			#{balance},
+			#{remarks},
+			#{uniqueCode},
+			#{createBy.id},
+			#{createDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pay_bankbook_journal SET
+						deal_date = #{dealDate},
+			deal_type = #{dealType},
+			money = #{money},
+			money_type = #{moneyType},
+			balance = #{balance},
+			remarks = #{remarks},
+			unique_code = #{uniqueCode}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM pay_bankbook_journal
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PayBankbookJournal" statementType="STATEMENT">
+		select * FROM pay_bankbook_journal  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

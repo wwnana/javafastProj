@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaCommonFlowDetailDao">
+    
+	<sql id="oaCommonFlowDetailColumns">
+		a.id AS "id",
+		a.common_flow_id AS "commonFlow.id",
+		a.sort AS "sort",
+		a.deal_type AS "dealType",
+		a.user_id AS "user.id",
+		u5.name AS "user.name"
+	</sql>
+	
+	<sql id="oaCommonFlowDetailJoins">
+		LEFT JOIN oa_common_flow b ON b.id = a.common_flow_id
+		LEFT JOIN sys_user u5 ON u5.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="OaCommonFlowDetail">
+		SELECT 
+			<include refid="oaCommonFlowDetailColumns"/>
+		FROM oa_common_flow_detail a
+		<include refid="oaCommonFlowDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCommonFlowDetail">
+		SELECT 
+			<include refid="oaCommonFlowDetailColumns"/>
+		FROM oa_common_flow_detail a
+		<include refid="oaCommonFlowDetailJoins"/>
+		<where>
+			
+			<if test="commonFlow != null and commonFlow.id != null and commonFlow.id != ''">
+				AND a.common_flow_id = #{commonFlow.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaCommonFlowDetail">
+		SELECT 
+			<include refid="oaCommonFlowDetailColumns"/>
+		FROM oa_common_flow_detail a
+		<include refid="oaCommonFlowDetailJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_common_flow_detail(
+			id,
+			common_flow_id,
+			sort,
+			deal_type,
+			user_id
+		) VALUES (
+			#{id},
+			#{commonFlow.id},
+			#{sort},
+			#{dealType},
+			#{user.id}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_common_flow_detail SET
+						common_flow_id = #{commonFlow.id},
+			sort = #{sort},
+			deal_type = #{dealType},
+			user_id = #{user.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_common_flow_detail
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE common_flow_id = #{commonFlow.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaCommonFlowDetail" statementType="STATEMENT">
+		select * FROM oa_common_flow_detail  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

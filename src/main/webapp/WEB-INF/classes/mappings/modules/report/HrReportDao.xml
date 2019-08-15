@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.report.dao.HrReportDao">
+
+	<!-- HR综合统计 -->
+	<select id="findReport" resultType="HrReport">
+		select 
+		(select count(c.id) from hr_employee c where c.account_id=#{accountId} and c.status='0' and c.del_flag='0'
+		) as "jobNum",
+		(select count(c.id) from hr_employee c where c.account_id=#{accountId} and c.status='0' and c.del_flag='0'
+		<if test="startDate != null and endDate != null">
+				 AND c.entry_date between #{startDate} and #{endDate} 
+		</if>
+		) as "entryNum",
+		(select count(c.id) from hr_employee c where c.account_id=#{accountId} and c.status='0' and c.del_flag='0'
+		<if test="startDate != null and endDate != null">
+				 AND c.contract_end_date between #{startDate} and #{endDate} 
+		</if>
+		) as "expireNum",
+		(select count(c.id) from hr_employee c where c.account_id=#{accountId} and c.status='0' and c.del_flag='0'
+		<if test="startDate != null and endDate != null">
+				 AND c.regular_date between #{startDate} and #{endDate} AND regular_status='1'
+		</if>
+		) as "regularNum",
+		(select count(c.id) from hr_quit c where c.account_id=#{accountId} and c.status='1' and c.del_flag='0'
+		<if test="startDate != null and endDate != null">
+				 AND c.quit_date between #{startDate} and #{endDate} 
+		</if>
+		) as "quitNum",
+		(select count(c.id) from hr_position_change c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="startDate != null and endDate != null">
+				 AND c.change_date between #{startDate} and #{endDate} 
+		</if>
+		) as "changeNum" 
+		 
+		 from sys_account a 
+		 where a.id=#{accountId}	
+	</select>
+</mapper>

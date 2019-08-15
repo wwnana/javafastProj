@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsAllotDetailDao">
+    
+	<sql id="wmsAllotDetailColumns">
+		a.id AS "id",
+		a.allot_id AS "wmsAllot.id",
+		a.product_id AS "product.id",
+		p.no AS "product.no",
+		p.name AS "product.name",
+		p.spec AS "product.spec",
+		a.unit_type AS "unitType",
+		a.num AS "num",
+		a.remarks AS "remarks",
+		a.sort AS "sort",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="wmsAllotDetailJoins">
+		LEFT JOIN wms_product p ON p.id = a.product_id
+	</sql>
+    
+	<select id="get" resultType="WmsAllotDetail">
+		SELECT 
+			<include refid="wmsAllotDetailColumns"/>
+		FROM wms_allot_detail a
+		<include refid="wmsAllotDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsAllotDetail">
+		SELECT 
+			<include refid="wmsAllotDetailColumns"/>
+		FROM wms_allot_detail a
+		<include refid="wmsAllotDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="wmsAllot != null and wmsAllot.id != null and wmsAllot.id != ''">
+				AND a.allot_id = #{wmsAllot.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsAllotDetail">
+		SELECT 
+			<include refid="wmsAllotDetailColumns"/>
+		FROM wms_allot_detail a
+		<include refid="wmsAllotDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_allot_detail(
+			id,
+			allot_id,
+			product_id,
+			unit_type,
+			num,
+			remarks,
+			sort,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{wmsAllot.id},
+			#{product.id},
+			#{unitType},
+			#{num},
+			#{remarks},
+			#{sort},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE wms_allot_detail SET
+						allot_id = #{wmsAllot.id},
+			product_id = #{product.id},
+			unit_type = #{unitType},
+			num = #{num},
+			remarks = #{remarks},
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE wms_allot_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE allot_id = #{wmsAllot.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsAllotDetail" statementType="STATEMENT">
+		select * FROM wms_allot_detail  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.scm.dao.ScmCareDao">
+    
+	<sql id="scmCareColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.contacter_name AS "contacterName",
+		a.care_type AS "careType",
+		a.care_date AS "careDate",
+		a.care_note AS "careNote",
+		a.own_by AS "ownBy.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u8.name AS "ownBy.name",
+		u12.name AS "createBy.name"
+	</sql>
+	
+	<sql id="scmCareJoins">
+		LEFT JOIN sys_user u8 ON u8.id = a.own_by
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+	</sql>
+    
+	<select id="get" resultType="ScmCare">
+		SELECT 
+			<include refid="scmCareColumns"/>
+		FROM scm_care a
+		<include refid="scmCareJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ScmCare">
+		SELECT 
+			<include refid="scmCareColumns"/>
+		FROM scm_care a
+		<include refid="scmCareJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="careType != null and careType != ''">
+				AND a.care_type = #{careType}
+			</if>
+			<if test="beginCareDate != null and endCareDate != null and beginCareDate != '' and endCareDate != ''">
+				AND a.care_date BETWEEN #{beginCareDate} AND #{endCareDate}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+					 OR 
+					 c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+					)
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ScmCare">
+		SELECT 
+			<include refid="scmCareColumns"/>
+		FROM scm_care a
+		<include refid="scmCareJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>	
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO scm_care(
+			id,
+			name,
+			customer_id,
+			contacter_name,
+			care_type,
+			care_date,
+			care_note,
+			own_by,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{customer.id},
+			#{contacterName},
+			#{careType},
+			#{careDate},
+			#{careNote},
+			#{ownBy.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE scm_care SET
+						name = #{name},
+			customer_id = #{customer.id},
+			contacter_name = #{contacterName},
+			care_type = #{careType},
+			care_date = #{careDate},
+			care_note = #{careNote},
+			own_by = #{ownBy.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE scm_care SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ScmCare" statementType="STATEMENT">
+		select * FROM scm_care  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

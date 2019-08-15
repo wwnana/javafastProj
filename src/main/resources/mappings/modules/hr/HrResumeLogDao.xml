@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrResumeLogDao">
+    
+	<sql id="hrResumeLogColumns">
+		a.id AS "id",
+		a.hr_resume_id AS "hrResumeId",
+		a.note AS "note",
+		a.type AS "type",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.remarks AS "remarks",
+		a.account_id AS "accountId",
+		u12.name AS "createBy.name"
+	</sql>
+	
+	<sql id="hrResumeLogJoins">
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="HrResumeLog">
+		SELECT 
+			<include refid="hrResumeLogColumns"/>
+		FROM hr_resume_log a
+		<include refid="hrResumeLogJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrResumeLog">
+		SELECT 
+			<include refid="hrResumeLogColumns"/>
+		FROM hr_resume_log a
+		<include refid="hrResumeLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="hrResumeId != null and hrResumeId != ''">
+				AND a.hr_resume_id = #{hrResumeId}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrResumeLog">
+		SELECT 
+			<include refid="hrResumeLogColumns"/>
+		FROM hr_resume_log a
+		<include refid="hrResumeLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_resume_log(
+			id,
+			hr_resume_id,
+			note,
+			type,
+			create_by,
+			create_date,
+			remarks,
+			account_id
+		) VALUES (
+			#{id},
+			#{hrResumeId},
+			#{note},
+			#{type},
+			#{createBy.id},
+			#{createDate},
+			#{remarks},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_resume_log SET
+						hr_resume_id = #{hrResumeId},
+			note = #{note},
+			type = #{type},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM hr_resume_log
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrResumeLog" statementType="STATEMENT">
+		select * FROM hr_resume_log  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

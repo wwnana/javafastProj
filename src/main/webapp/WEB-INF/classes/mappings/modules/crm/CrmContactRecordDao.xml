@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmContactRecordDao">
+    
+	<sql id="crmContactRecordColumns">
+		a.id AS "id",
+		a.target_type AS "targetType",
+		a.target_id AS "targetId",
+		a.target_name AS "targetName",
+		a.contact_type AS "contactType",
+		a.contact_date AS "contactDate",
+		a.content AS "content",
+		a.create_by AS "createBy.id",
+		u6.name AS "createBy.name",
+		u6.photo AS "createBy.photo",
+		a.create_by AS "ownBy.id",
+		u6.name AS "ownBy.name",
+		u6.photo AS "ownBy.photo",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="crmContactRecordJoins">
+		LEFT JOIN sys_user u6 ON u6.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="CrmContactRecord">
+		SELECT 
+			<include refid="crmContactRecordColumns"/>
+		FROM crm_contact_record a
+		<include refid="crmContactRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmContactRecord">
+		SELECT 
+			<include refid="crmContactRecordColumns"/>
+		FROM crm_contact_record a
+		<include refid="crmContactRecordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="targetId != null and targetId != ''">
+				AND a.target_id = #{targetId}
+			</if>
+			<if test="contactType != null and contactType != ''">
+				AND a.contact_type = #{contactType}
+			</if>
+			<if test="contactDate != null and contactDate != ''">
+				AND a.contact_date = #{contactDate}
+			</if>
+			<if test="beginContactDate != null and endContactDate != null and beginContactDate != '' and endContactDate != ''">
+				AND a.contact_date BETWEEN #{beginContactDate} AND #{endContactDate}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="createDate != null and createDate != ''">
+				AND a.create_date = #{createDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND a.target_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmContactRecord">
+		SELECT 
+			<include refid="crmContactRecordColumns"/>
+		FROM crm_contact_record a
+		<include refid="crmContactRecordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_contact_record(
+			id,
+			target_type,
+			target_id,
+			target_name,
+			contact_type,
+			contact_date,
+			content,
+			create_by,
+			create_date,
+			del_flag,
+			account_id,
+			office_id,
+			own_by
+		) VALUES (
+			#{id},
+			#{targetType},
+			#{targetId},
+			#{targetName},
+			#{contactType},
+			#{contactDate},
+			#{content},
+			#{createBy.id},
+			#{createDate},
+			#{delFlag},
+			#{accountId},
+			#{officeId},
+			#{ownBy.id}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_contact_record SET 
+			target_type = #{targetType},
+			target_id = #{targetId},
+			target_name = #{targetName},
+			contact_type = #{contactType},
+			contact_date = #{contactDate},
+			content = #{content} 
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_contact_record SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmContactRecord" statementType="STATEMENT">
+		select * FROM crm_contact_record  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM crm_contact_record a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="and targetId != null and targetId != ''">
+				AND a.target_id = #{targetId}
+			</if>
+		</where>
+			
+	</select>
+</mapper>

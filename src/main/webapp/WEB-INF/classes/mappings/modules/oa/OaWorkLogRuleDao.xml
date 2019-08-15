@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaWorkLogRuleDao">
+    
+	<sql id="oaWorkLogRuleColumns">
+		a.id AS "id",
+		a.user_id AS "user.id",
+		a.sort AS "sort",
+		a.account_id AS "accountId",
+		u2.name AS "user.name",
+		u2.photo AS "user.photo"
+	</sql>
+	
+	<sql id="oaWorkLogRuleJoins">
+		LEFT JOIN sys_user u2 ON u2.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="OaWorkLogRule">
+		SELECT 
+			<include refid="oaWorkLogRuleColumns"/>
+		FROM oa_work_log_rule a
+		<include refid="oaWorkLogRuleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaWorkLogRule">
+		SELECT 
+			<include refid="oaWorkLogRuleColumns"/>
+		FROM oa_work_log_rule a
+		<include refid="oaWorkLogRuleJoins"/>
+		<where>
+			1=1
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaWorkLogRule">
+		SELECT 
+			<include refid="oaWorkLogRuleColumns"/>
+		FROM oa_work_log_rule a
+		<include refid="oaWorkLogRuleJoins"/>
+		<where>
+			1=1
+		</where>	
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_work_log_rule(
+			id,
+			user_id,
+			sort,
+			account_id
+		) VALUES (
+			#{id},
+			#{user.id},
+			#{sort},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_work_log_rule SET
+						user_id = #{user.id},
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_work_log_rule
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaWorkLogRule" statementType="STATEMENT">
+		select * FROM oa_work_log_rule  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

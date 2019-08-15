@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaTaskRecordDao">
+    
+	<sql id="oaTaskRecordColumns">
+		a.id AS "id",
+		a.oa_task_id AS "oaTask.id",
+		a.user_id AS "user.id",
+		a.read_flag AS "readFlag",
+		a.read_date AS "readDate",
+		b.name AS "oaTask.name",
+		u3.name AS "user.name"
+	</sql>
+	
+	<sql id="oaTaskRecordJoins">
+		LEFT JOIN oa_task b ON b.id = a.oa_task_id
+		LEFT JOIN sys_user u3 ON u3.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="OaTaskRecord">
+		SELECT 
+			<include refid="oaTaskRecordColumns"/>
+		FROM oa_task_record a
+		<include refid="oaTaskRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaTaskRecord">
+		SELECT 
+			<include refid="oaTaskRecordColumns"/>
+		FROM oa_task_record a
+		<include refid="oaTaskRecordJoins"/>
+		<where>
+			
+			<if test="oaTask != null and oaTask.id != null and oaTask.id != ''">
+				AND a.oa_task_id = #{oaTask.id}
+			</if>
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaTaskRecord">
+		SELECT 
+			<include refid="oaTaskRecordColumns"/>
+		FROM oa_task_record a
+		<include refid="oaTaskRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_task_record(
+			id,
+			oa_task_id,
+			user_id,
+			read_flag,
+			read_date
+		) VALUES (
+			#{id},
+			#{oaTask.id},
+			#{user.id},
+			#{readFlag},
+			#{readDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_task_record SET 	
+			read_flag = #{readFlag},
+			read_date = #{readDate}
+		WHERE oa_task_id = #{oaTask.id}
+			AND user_id = #{user.id}
+			AND read_flag != '1'
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_task_record
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE oa_task_id = #{oaTask.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaTaskRecord" statementType="STATEMENT">
+		select * FROM oa_task_record  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

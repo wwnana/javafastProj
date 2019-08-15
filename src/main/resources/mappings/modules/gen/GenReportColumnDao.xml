@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.gen.dao.GenReportColumnDao">
+    
+	<sql id="genReportColumnColumns">
+		a.id AS "id",
+		a.gen_report_id AS "genReport.id",
+		a.java_field AS "javaField",
+		a.name AS "name",
+		a.java_type AS "javaType",
+		a.is_list AS "isList",
+		a.is_query AS "isQuery",
+		a.query_type AS "queryType",
+		a.show_type AS "showType",
+		a.dict_type AS "dictType",
+		a.sort AS "sort",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="genReportColumnJoins">
+		LEFT JOIN gen_report b ON b.id = a.gen_report_id
+	</sql>
+    
+	<select id="get" resultType="GenReportColumn">
+		SELECT 
+			<include refid="genReportColumnColumns"/>
+		FROM gen_report_column a
+		<include refid="genReportColumnJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="GenReportColumn">
+		SELECT 
+			<include refid="genReportColumnColumns"/>
+		FROM gen_report_column a
+		<include refid="genReportColumnJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="genReport != null and genReport.id != null and genReport.id != ''">
+				AND a.gen_report_id = #{genReport.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="GenReportColumn">
+		SELECT 
+			<include refid="genReportColumnColumns"/>
+		FROM gen_report_column a
+		<include refid="genReportColumnJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO gen_report_column(
+			id,
+			gen_report_id,
+			java_field,
+			name,
+			java_type,
+			is_list,
+			is_query,
+			query_type,
+			show_type,
+			dict_type,
+			sort,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{genReport.id},
+			#{javaField},
+			#{name},
+			#{javaType},
+			#{isList},
+			#{isQuery},
+			#{queryType},
+			#{showType},
+			#{dictType},
+			#{sort},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE gen_report_column SET
+						gen_report_id = #{genReport.id},
+			java_field = #{javaField},
+			name = #{name},
+			java_type = #{javaType},
+			is_list = #{isList},
+			is_query = #{isQuery},
+			query_type = #{queryType},
+			show_type = #{showType},
+			dict_type = #{dictType},
+			sort = #{sort},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE gen_report_column SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE gen_report_id = #{genReport.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="GenReportColumn" statementType="STATEMENT">
+		select * FROM gen_report_column  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

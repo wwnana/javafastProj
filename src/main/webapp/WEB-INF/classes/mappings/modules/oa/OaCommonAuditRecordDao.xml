@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaCommonAuditRecordDao">
+    
+	<sql id="oaCommonAuditRecordColumns">
+		a.id AS "id",
+		a.audit_order AS "auditOrder",
+		a.common_audit_id AS "commonAudit.id",
+		a.deal_type AS "dealType",
+		a.user_id AS "user.id",
+		a.read_flag AS "readFlag",
+		a.read_date AS "readDate",
+		a.audit_status AS "auditStatus",
+		a.audit_date AS "auditDate",
+		a.audit_notes AS "auditNotes",
+		u5.name AS "user.name",
+		u5.photo AS "user.photo"
+	</sql>
+	
+	<sql id="oaCommonAuditRecordJoins">
+		LEFT JOIN oa_common_audit b ON b.id = a.common_audit_id
+		LEFT JOIN sys_user u5 ON u5.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="OaCommonAuditRecord">
+		SELECT 
+			<include refid="oaCommonAuditRecordColumns"/>
+		FROM oa_common_audit_record a
+		<include refid="oaCommonAuditRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCommonAuditRecord">
+		SELECT 
+			<include refid="oaCommonAuditRecordColumns"/>
+		FROM oa_common_audit_record a
+		<include refid="oaCommonAuditRecordJoins"/>
+		<where>
+			
+			<if test="commonAudit != null and commonAudit.id != null and commonAudit.id != ''">
+				AND a.common_audit_id = #{commonAudit.id}
+			</if>
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+			<if test="dealType != null and dealType != ''">
+				AND a.deal_type = #{dealType}
+			</if>
+			<if test="dealType == null or dealType != ''">
+				AND a.deal_type != '2'
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.audit_order ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findNoAuditList" resultType="OaCommonAuditRecord">
+		SELECT 
+			<include refid="oaCommonAuditRecordColumns"/>
+		FROM oa_common_audit_record a
+		<include refid="oaCommonAuditRecordJoins"/>
+		<where>
+			audit_status is null  
+			<if test="commonAudit != null and commonAudit.id != null and commonAudit.id != ''">
+				AND a.common_audit_id = #{commonAudit.id}
+			</if>
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+			<if test="dealType != null and dealType != ''">
+				AND a.deal_type = #{dealType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.audit_order ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaCommonAuditRecord">
+		SELECT 
+			<include refid="oaCommonAuditRecordColumns"/>
+		FROM oa_common_audit_record a
+		<include refid="oaCommonAuditRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_common_audit_record(
+			id,
+			audit_order,
+			common_audit_id,
+			deal_type,
+			user_id,
+			read_flag,
+			read_date,
+			audit_status,
+			audit_date,
+			audit_notes
+		) VALUES (
+			#{id},
+			#{auditOrder},
+			#{commonAudit.id},
+			#{dealType},
+			#{user.id},
+			#{readFlag},
+			#{readDate},
+			#{auditStatus},
+			#{auditDate},
+			#{auditNotes}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_common_audit_record SET
+						audit_order = #{auditOrder},
+			common_audit_id = #{commonAudit.id},
+			deal_type = #{dealType},
+			user_id = #{user.id},
+			read_flag = #{readFlag},
+			read_date = #{readDate},
+			audit_status = #{auditStatus},
+			audit_date = #{auditDate},
+			audit_notes = #{auditNotes}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_common_audit_record
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE common_audit_id = #{commonAudit.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaCommonAuditRecord" statementType="STATEMENT">
+		select * FROM oa_common_audit_record  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

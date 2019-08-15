@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaTaskDao">
+    
+	<sql id="oaTaskColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.name AS "name",
+		a.relation_type AS "relationType",
+		a.relation_id AS "relationId",
+		a.relation_name AS "relationName",
+		a.start_date AS "startDate",
+		a.end_date AS "endDate",
+		a.level_type AS "levelType",
+		a.schedule AS "schedule",
+		a.content AS "content",
+		a.files AS "files",
+		a.own_by AS "ownBy.id",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u12.name AS "ownBy.name",
+		u14.name AS "createBy.name",
+		u16.name AS "updateBy.name"
+	</sql>
+	
+	<sql id="oaTaskJoins">
+		LEFT JOIN sys_user u12 ON u12.id = a.own_by
+		LEFT JOIN sys_user u14 ON u14.id = a.create_by
+		LEFT JOIN sys_user u16 ON u16.id = a.update_by
+	</sql>
+    
+	<select id="get" resultType="OaTask">
+		SELECT 
+			<include refid="oaTaskColumns"/>
+		FROM oa_task a
+		<include refid="oaTaskJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaTask">
+		SELECT 
+			<include refid="oaTaskColumns"/>
+		FROM oa_task a
+		<include refid="oaTaskJoins"/>
+		<!-- 我的任务 -->
+		<if test="isSelf">
+			JOIN oa_task_record r ON r.oa_task_id = a.id AND r.user_id = #{currentUser.id}
+			<if test="readFlag != null and readFlag != ''">
+				AND r.read_flag = #{readFlag}
+			</if>
+		</if>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="relationType != null and relationType != ''">
+				AND a.relation_type = #{relationType}
+			</if>
+			<if test="relationId != null and relationId != ''">
+				AND a.relation_id = #{relationId}
+			</if>
+			<if test="beginEndDate != null and endEndDate != null and beginEndDate != '' and endEndDate != ''">
+				AND a.end_date BETWEEN #{beginEndDate} AND #{endEndDate}
+			</if>
+			<if test="levelType != null and levelType != ''">
+				AND a.level_type = #{levelType}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="isUnComplete">
+				AND a.status != 2 AND a.status != 3
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaTask">
+		SELECT 
+			<include refid="oaTaskColumns"/>
+		FROM oa_task a
+		<include refid="oaTaskJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_task(
+			id,
+			no,
+			name,
+			relation_type,
+			relation_id,
+			relation_name,
+			start_date,
+			end_date,
+			level_type,
+			schedule,
+			content,
+			files,
+			own_by,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			account_id,
+			office_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{name},
+			#{relationType},
+			#{relationId},
+			#{relationName},
+			#{startDate},
+			#{endDate},
+			#{levelType},
+			#{schedule},
+			#{content},
+			#{files},
+			#{ownBy.id},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{accountId},
+			#{officeId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_task SET
+						no = #{no},
+			name = #{name},
+			relation_type = #{relationType},
+			relation_id = #{relationId},
+			relation_name = #{relationName},
+			start_date = #{startDate},
+			end_date = #{endDate},
+			level_type = #{levelType},
+			schedule = #{schedule},
+			content = #{content},
+			files = #{files},
+			own_by = #{ownBy.id},
+			status = #{status},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE oa_task SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaTask" statementType="STATEMENT">
+		select * FROM oa_task  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) AS count FROM oa_task a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="relationId != null and relationId != ''">
+				AND a.relation_id = #{relationId}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+		</where>			
+	</select>
+	
+	<!-- 查询项目的任务数 -->
+	<select id="findProCount" resultType="Integer">
+		SELECT COUNT(0) AS count FROM oa_task a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="relationId != null and relationId != ''">
+				AND a.relation_id = #{relationId}
+			</if>
+		</where>			
+	</select>
+	
+	<!-- 查询项目已完成的项目数 -->
+	<select id="findProFinCount" resultType="Integer">
+		SELECT COUNT(0) AS count FROM oa_task a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="relationId != null and relationId != ''">
+				AND a.relation_id = #{relationId}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = 2
+			</if>
+		</where>			
+	</select>
+	
+</mapper>

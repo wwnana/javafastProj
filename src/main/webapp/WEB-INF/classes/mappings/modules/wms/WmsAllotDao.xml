@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsAllotDao">
+    
+	<sql id="wmsAllotColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.num AS "num",
+		a.real_num AS "realNum",
+		a.out_warehouse_id AS "outWarehouse.id",
+		a.in_warehouse_id AS "inWarehouse.id",
+		a.logistics_company AS "logisticsCompany",
+		a.logistics_no AS "logisticsNo",
+		a.logistics_amount AS "logisticsAmount",
+		a.fi_account_id AS "fiAccount.id",
+		a.status AS "status",
+		a.deal_by AS "dealBy.id",
+		a.deal_date AS "dealDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		ow.name AS "outWarehouse.name",
+		iw.name AS "inWarehouse.name",
+		f.name AS "fiAccount.name",
+		u16.name AS "auditBy.name",
+		u12.name AS "dealBy.name",
+		u14.name AS "createBy.name"
+	</sql>
+	
+	<sql id="wmsAllotJoins">
+		LEFT JOIN wms_warehouse ow ON ow.id = a.out_warehouse_id
+		LEFT JOIN wms_warehouse iw ON iw.id = a.in_warehouse_id
+		LEFT JOIN fi_finance_account f ON f.id = a.fi_account_id
+		LEFT JOIN sys_user u12 ON u12.id = a.deal_by
+		LEFT JOIN sys_user u14 ON u14.id = a.create_by
+		LEFT JOIN sys_user u16 ON u16.id = a.audit_by
+	</sql>
+    
+	<select id="get" resultType="WmsAllot">
+		SELECT 
+			<include refid="wmsAllotColumns"/>
+		FROM wms_allot a
+		<include refid="wmsAllotJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsAllot">
+		SELECT 
+			<include refid="wmsAllotColumns"/>
+		FROM wms_allot a
+		<include refid="wmsAllotJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsAllot">
+		SELECT 
+			<include refid="wmsAllotColumns"/>
+		FROM wms_allot a
+		<include refid="wmsAllotJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_allot(
+			id,
+			no,
+			num,
+			real_num,
+			out_warehouse_id,
+			in_warehouse_id,
+			logistics_company,
+			logistics_no,
+			logistics_amount,
+			fi_account_id,
+			status,
+			deal_by,
+			deal_date,
+			create_by,
+			create_date,
+			audit_by,
+			audit_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{num},
+			#{realNum},
+			#{outWarehouse.id},
+			#{inWarehouse.id},
+			#{logisticsCompany},
+			#{logisticsNo},
+			#{logisticsAmount},
+			#{fiAccount.id},
+			#{status},
+			#{dealBy.id},
+			#{dealDate},
+			#{createBy.id},
+			#{createDate},
+			#{auditBy.id},
+			#{auditDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE wms_allot SET
+						no = #{no},
+			num = #{num},
+			real_num = #{realNum},
+			out_warehouse_id = #{outWarehouse.id},
+			in_warehouse_id = #{inWarehouse.id},
+			logistics_company = #{logisticsCompany},
+			logistics_no = #{logisticsNo},
+			logistics_amount = #{logisticsAmount},
+			fi_account_id = #{fiAccount.id},
+			status = #{status},
+			deal_by = #{dealBy.id},
+			deal_date = #{dealDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE wms_allot SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsAllot" statementType="STATEMENT">
+		select * FROM wms_allot  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaWorkLogRecordDao">
+    
+	<sql id="oaWorkLogRecordColumns">
+		a.id AS "id",
+		a.oa_work_log_id AS "oaWorkLog.id",
+		a.user_id AS "user.id",
+		a.read_flag AS "readFlag",
+		a.read_date AS "readDate",
+		a.audit_notes AS "auditNotes",
+		u3.name AS "user.name",
+		u3.photo AS "user.photo"
+	</sql>
+	
+	<sql id="oaWorkLogRecordJoins">
+		LEFT JOIN oa_work_log b ON b.id = a.oa_work_log_id
+		LEFT JOIN sys_user u3 ON u3.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="OaWorkLogRecord">
+		SELECT 
+			<include refid="oaWorkLogRecordColumns"/>
+		FROM oa_work_log_record a
+		<include refid="oaWorkLogRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaWorkLogRecord">
+		SELECT 
+			<include refid="oaWorkLogRecordColumns"/>
+		FROM oa_work_log_record a
+		<include refid="oaWorkLogRecordJoins"/>
+		<where>
+			
+			<if test="oaWorkLog != null and oaWorkLog.id != null and oaWorkLog.id != ''">
+				AND a.oa_work_log_id = #{oaWorkLog.id}
+			</if>
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.read_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaWorkLogRecord">
+		SELECT 
+			<include refid="oaWorkLogRecordColumns"/>
+		FROM oa_work_log_record a
+		<include refid="oaWorkLogRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_work_log_record(
+			id,
+			oa_work_log_id,
+			user_id,
+			read_flag,
+			read_date,
+			audit_notes
+		) VALUES (
+			#{id},
+			#{oaWorkLog.id},
+			#{user.id},
+			#{readFlag},
+			#{readDate},
+			#{auditNotes}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_work_log_record SET
+						oa_work_log_id = #{oaWorkLog.id},
+			user_id = #{user.id},
+			read_flag = #{readFlag},
+			read_date = #{readDate},
+			audit_notes = #{auditNotes}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_work_log_record
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE oa_work_log_id = #{oaWorkLog.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaWorkLogRecord" statementType="STATEMENT">
+		select * FROM oa_work_log_record  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

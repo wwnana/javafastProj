@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrCheckRuleDao">
+
+    <sql id="hrCheckRuleColumns">
+		a.id AS "id",
+		a.group_type AS "groupType",
+		a.group_id AS "groupId",
+		a.groupname AS "groupname",
+		a.workdays AS "workdays",
+		a.flex_time AS "flexTime",
+		a.noneed_offwork AS "noneedOffwork",
+		a.limit_aheadtime AS "limitAheadtime",
+		a.checkintime AS "checkintime",
+		a.spe_offdays AS "speOffdays",
+		a.sync_holidays AS "syncHolidays",
+		a.need_photo AS "needPhoto",
+		a.wifimac_infos AS "wifimacInfos",
+		a.note_can_use_local_pic AS "noteCanUseLocalPic",
+		a.allow_checkin_offworkday AS "allowCheckinOffworkday",
+		a.allow_apply_offworkday AS "allowApplyOffworkday",
+		a.loc_infos AS "locInfos",
+		a.spe_workdays as "speWorkdays",
+		a.account_id AS "accountId"
+	</sql>
+
+    <sql id="hrCheckRuleJoins">
+    </sql>
+
+    <select id="get" resultType="HrCheckRule">
+        SELECT
+        <include refid="hrCheckRuleColumns"/>
+        FROM hr_check_rule a
+        <include refid="hrCheckRuleJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="HrCheckRule">
+        SELECT
+        <include refid="hrCheckRuleColumns"/>
+        FROM hr_check_rule a
+        <include refid="hrCheckRuleJoins"/>
+        <where>
+            1=1
+            <if test="groupType != null and groupType != ''">
+                AND a.group_type = #{groupType}
+            </if>
+            <if test="groupname != null and groupname != ''">
+                AND a.groupname LIKE
+                <if test="dbName == 'oracle'">'%'||#{groupname}||'%'</if>
+                <if test="dbName == 'mssql'">'%'+#{groupname}+'%'</if>
+                <if test="dbName == 'mysql'">concat('%',#{groupname},'%')</if>
+            </if>
+        </where>
+        <!-- 数据范围过滤 -->
+        ${sqlMap.dsf}
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="HrCheckRule">
+        SELECT
+        <include refid="hrCheckRuleColumns"/>
+        FROM hr_check_rule a
+        <include refid="hrCheckRuleJoins"/>
+        <where>
+            1=1
+        </where>
+        <!-- 数据范围过滤 -->
+        ${sqlMap.dsf}
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+		INSERT INTO hr_check_rule(
+			id,
+			group_type,
+			group_id,
+			groupname,
+			workdays,
+			flex_time,
+			noneed_offwork,
+			limit_aheadtime,
+			checkintime,
+			spe_offdays,
+			sync_holidays,
+			need_photo,
+			wifimac_infos,
+			note_can_use_local_pic,
+			spe_workdays,
+			allow_checkin_offworkday,
+			allow_apply_offworkday,
+			loc_infos,
+			account_id
+		) VALUES (
+			#{id},
+			#{groupType},
+			#{groupId},
+			#{groupname},
+			#{workdays},
+			#{flexTime},
+			#{noneedOffwork},
+			#{limitAheadtime},
+			#{checkintime},
+			#{speOffdays},
+			#{syncHolidays},
+			#{needPhoto},
+			#{wifimacInfos},
+			#{noteCanUseLocalPic},
+			#{speWorkdays},
+			#{allowCheckinOffworkday},
+			#{allowApplyOffworkday},
+			#{locInfos},
+			#{accountId}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE hr_check_rule SET
+						group_type = #{groupType},
+			group_id = #{groupId},
+			groupname = #{groupname},
+			workdays = #{workdays},
+			flex_time = #{flexTime},
+			noneed_offwork = #{noneedOffwork},
+			limit_aheadtime = #{limitAheadtime},
+			checkintime = #{checkintime},
+			spe_offdays = #{speOffdays},
+			sync_holidays = #{syncHolidays},
+			need_photo = #{needPhoto},
+			wifimac_infos = #{wifimacInfos},
+			note_can_use_local_pic = #{noteCanUseLocalPic},
+			allow_checkin_offworkday = #{allowCheckinOffworkday},
+			allow_apply_offworkday = #{allowApplyOffworkday},
+			loc_infos = #{locInfos}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		DELETE FROM hr_check_rule
+		WHERE id = #{id}
+	</update>
+
+    <!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+    <select id="findUniqueByProperty" resultType="HrCheckRule" statementType="STATEMENT">
+		select * FROM hr_check_rule  where ${propertyName} = '${value}'
+	</select>
+
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM hr_check_rule a
+		<where>
+			<if test="id != null and id != ''">
+				and id = #{id}
+			</if>
+		</where>
+
+	</select>
+
+    <select id="getCheckRuleDetailByName" resultType="HrCheckRule">
+        SELECT
+        <include refid="hrCheckRuleColumns"/>
+        FROM hr_check_rule a
+        <include refid="hrCheckRuleJoins"/>
+        <where>
+            1=1
+            <if test="accountId != null and accountId != ''">
+                AND a.account_id = #{accountId}
+            </if>
+            <if test="groupname != null and groupname != ''">
+                AND a.groupname = #{groupname}
+            </if>
+        </where>
+		limit 1
+    </select>
+
+
+</mapper>

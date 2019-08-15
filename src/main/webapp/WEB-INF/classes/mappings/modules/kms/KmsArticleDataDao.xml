@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.kms.dao.KmsArticleDataDao">
+    
+	<sql id="kmsArticleDataColumns">
+		a.id AS "id",
+		a.content AS "content",
+		a.files AS "files",
+		a.copyfrom AS "copyfrom"
+	</sql>
+	
+	<sql id="kmsArticleDataJoins">
+	</sql>
+    
+	<select id="get" resultType="KmsArticleData">
+		SELECT 
+			<include refid="kmsArticleDataColumns"/>
+		FROM kms_article_data a
+		<include refid="kmsArticleDataJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="KmsArticleData">
+		SELECT 
+			<include refid="kmsArticleDataColumns"/>
+		FROM kms_article_data a
+		<include refid="kmsArticleDataJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="KmsArticleData">
+		SELECT 
+			<include refid="kmsArticleDataColumns"/>
+		FROM kms_article_data a
+		<include refid="kmsArticleDataJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO kms_article_data(
+			id,
+			content,
+			files,
+			copyfrom
+		) VALUES (
+			#{id},
+			#{content},
+			#{files},
+			#{copyfrom}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE kms_article_data SET
+						content = #{content},
+						files = #{files},
+			copyfrom = #{copyfrom}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM kms_article_data
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="KmsArticleData" statementType="STATEMENT">
+		select * FROM kms_article_data  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

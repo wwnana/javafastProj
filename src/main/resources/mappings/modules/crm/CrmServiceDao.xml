@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmServiceDao">
+    
+	<sql id="crmServiceColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.name AS "name",
+		a.service_type AS "serviceType",
+		a.order_id AS "omContract.id",
+		o.no AS "omContract.no",
+		o.name AS "omContract.name",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.own_by AS "ownBy.id",
+		a.level_type AS "levelType",
+		a.end_date AS "endDate",
+		a.expecte AS "expecte",
+		a.content AS "content",
+		a.status AS "status",
+		a.deal_date AS "dealDate",
+		a.satisfy_type AS "satisfyType",
+		a.audit_status AS "auditStatus",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u7.name AS "ownBy.name",
+		u15.name AS "auditBy.name",
+		u12.name AS "createBy.name",
+		u13.name AS "updateBy.name"
+	</sql>
+	
+	<sql id="crmServiceJoins">
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+		LEFT JOIN sys_user u13 ON u13.id = a.update_by
+		LEFT JOIN sys_user u7 ON u7.id = a.own_by
+		LEFT JOIN sys_user u15 ON u15.id = a.audit_by
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN om_contract o ON o.id = a.order_id
+	</sql>
+    
+	<select id="get" resultType="CrmService">
+		SELECT 
+			<include refid="crmServiceColumns"/>
+		FROM crm_service a
+		<include refid="crmServiceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmService">
+		SELECT 
+			<include refid="crmServiceColumns"/>
+		FROM crm_service a
+		<include refid="crmServiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="serviceType != null and serviceType != ''">
+				AND a.service_type = #{serviceType}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="levelType != null and levelType != ''">
+				AND a.level_type = #{levelType}
+			</if>
+			<if test="beginEndDate != null and endEndDate != null and beginEndDate != '' and endEndDate != ''">
+				AND a.end_date BETWEEN #{beginEndDate} AND #{endEndDate}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="satisfyType != null and satisfyType != ''">
+				AND a.satisfy_type = #{satisfyType}
+			</if>
+			<if test="auditStatus != null and auditStatus != ''">
+				AND a.audit_status = #{auditStatus}
+			</if>
+			<if test="beginAuditDate != null and endAuditDate != null and beginAuditDate != '' and endAuditDate != ''">
+				AND a.audit_date BETWEEN #{beginAuditDate} AND #{endAuditDate}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+				OR c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>)
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmService">
+		SELECT 
+			<include refid="crmServiceColumns"/>
+		FROM crm_service a
+		<include refid="crmServiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>	
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_service(
+			id,
+			no,
+			name,
+			service_type,
+			order_id,
+			customer_id,
+			own_by,
+			level_type,
+			end_date,
+			expecte,
+			content,
+			status,
+			deal_date,
+			satisfy_type,
+			audit_status,
+			audit_by,
+			audit_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{name},
+			#{serviceType},
+			#{omContract.id},
+			#{customer.id},
+			#{ownBy.id},
+			#{levelType},
+			#{endDate},
+			#{expecte},
+			#{content},
+			#{status},
+			#{dealDate},
+			#{satisfyType},
+			#{auditStatus},
+			#{auditBy.id},
+			#{auditDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_service SET
+						no = #{no},
+			name = #{name},
+			service_type = #{serviceType},
+			order_id = #{omContract.id},
+			customer_id = #{customer.id},
+			own_by = #{ownBy.id},
+			level_type = #{levelType},
+			end_date = #{endDate},
+			expecte = #{expecte},
+			content = #{content},
+			status = #{status},
+			deal_date = #{dealDate},
+			satisfy_type = #{satisfyType},
+			audit_status = #{auditStatus},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_service SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmService" statementType="STATEMENT">
+		select * FROM crm_service  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsProductDataDao">
+    
+	<sql id="wmsProductDataColumns">
+		a.id AS "id",
+		a.content AS "content"
+	</sql>
+	
+	<sql id="wmsProductDataJoins">
+	</sql>
+    
+	<select id="get" resultType="WmsProductData">
+		SELECT 
+			<include refid="wmsProductDataColumns"/>
+		FROM wms_product_data a
+		<include refid="wmsProductDataJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsProductData">
+		SELECT 
+			<include refid="wmsProductDataColumns"/>
+		FROM wms_product_data a
+		<include refid="wmsProductDataJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsProductData">
+		SELECT 
+			<include refid="wmsProductDataColumns"/>
+		FROM wms_product_data a
+		<include refid="wmsProductDataJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_product_data(
+			id,
+			content
+		) VALUES (
+			#{id},
+			#{content}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE wms_product_data SET
+						content = #{content}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM wms_product_data
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsProductData" statementType="STATEMENT">
+		select * FROM wms_product_data  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

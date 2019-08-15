@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrCheckReportDayDao">
+
+    <sql id="hrCheckReportDayColumns">
+		a.id AS "id",
+		a.checkin_date AS "checkinDate",
+		a.sys_user_id AS "user.id",
+		a.office_id AS "office.id",
+		a.groupname AS "groupname",
+		a.first_checkin_time AS "firstCheckinTime",
+		a.last_checkin_time AS "lastCheckinTime",
+		a.checkin_num AS "checkinNum",
+		a.work_hours AS "workHours",
+		a.oa_audit_id AS "hrApproval.id",
+		h.name AS "hrApproval.name",
+		h.approval_type AS "hrApproval.approvalType",
+		h.leave_duration AS "hrApproval.leaveDuration",
+		a.checkin_status AS "checkinStatus",
+		a.audit_status AS "auditStatus",
+		a.account_id AS "accountId",
+		a.leave_day as "leaveDay",
+		u3.name AS "user.name",
+		u3.photo AS "user.photo",
+		o4.name AS "office.name"
+
+	</sql>
+
+    <sql id="hrCheckReportDayJoins">
+		LEFT JOIN sys_user u3 ON u3.id = a.sys_user_id
+		LEFT JOIN sys_office o4 ON o4.id = a.office_id
+		LEFT JOIN hr_approval h ON h.id = a.oa_audit_id
+	</sql>
+
+    <select id="get" resultType="HrCheckReportDay">
+        SELECT
+        <include refid="hrCheckReportDayColumns"/>
+        FROM hr_check_report_day a
+        <include refid="hrCheckReportDayJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="HrCheckReportDay">
+        SELECT
+        <include refid="hrCheckReportDayColumns"/>
+        FROM hr_check_report_day a
+        <include refid="hrCheckReportDayJoins"/>
+        <where>
+			1=1 
+			<if test="startDate !=null and startDate !='' ">
+				<![CDATA[
+                and	a.checkin_date >= #{startDate}
+                ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[
+                and	a.checkin_date <= #{endDate}
+                ]]>
+			</if>
+            <if test="user != null and user.id != null and user.id != ''">
+                AND a.sys_user_id = #{user.id}
+            </if>
+            <if test="office != null and office.id != null and office.id != ''">
+                AND a.office_id = #{office.id}
+            </if>
+            <if test="checkinStatus != null and checkinStatus != ''">
+                AND a.checkin_status = #{checkinStatus}
+            </if>
+
+        </where>
+        <!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.checkin_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="HrCheckReportDay">
+        SELECT
+        <include refid="hrCheckReportDayColumns"/>
+        FROM hr_check_report_day a
+        <include refid="hrCheckReportDayJoins"/>
+        <where>
+			1=1 
+        </where>
+        <!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+		INSERT INTO hr_check_report_day(
+			id,
+			checkin_date,
+			sys_user_id,
+			office_id,
+			groupname,
+			first_checkin_time,
+			last_checkin_time,
+			checkin_num,
+			work_hours,
+			oa_audit_id,
+			checkin_status,
+			audit_status,
+			leave_day ,
+			account_id
+		) VALUES (
+			#{id},
+			#{checkinDate},
+			#{user.id},
+			#{office.id},
+			#{groupname},
+			#{firstCheckinTime},
+			#{lastCheckinTime},
+			#{checkinNum},
+			#{workHours},
+			#{hrApproval.id},
+			#{checkinStatus},
+			#{auditStatus},
+			#{leaveDay},
+			#{accountId},
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE hr_check_report_day SET
+						checkin_date = #{checkinDate},
+			sys_user_id = #{user.id},
+			office_id = #{office.id},
+			groupname = #{groupname},
+			first_checkin_time = #{firstCheckinTime},
+			last_checkin_time = #{lastCheckinTime},
+			checkin_num = #{checkinNum},
+			work_hours = #{workHours},
+			oa_audit_id = #{hrApproval.id},
+			checkin_status = #{checkinStatus},
+			leave_day =  #{leaveDay},
+			audit_status = #{auditStatus}
+		WHERE id = #{id}
+	</update>
+    <!--HR修改了考勤结果的标识 update_falg=1 -->
+	<update id="updateAuditStatusByOa">
+		UPDATE hr_check_report_day SET
+			oa_audit_id = #{hrApproval.id},
+			leave_day=#{leaveDay},
+			audit_status = #{auditStatus},
+			update_flag=1
+		WHERE
+			1=1
+			and sys_user_id = #{user.id},
+			and checkin_date= #{checkinDate},
+			and account_id=#{accountId}
+	</update>
+
+    <update id="delete">
+		DELETE FROM hr_check_report_day
+		WHERE id = #{id}
+	</update>
+
+
+	<!--删除没有审核过的记录-->
+    <update id="deleteByDateButNotAudit">
+        DELETE FROM hr_check_report_day
+		 <where>
+			 <if test="startDate !=null and startDate !='' ">
+				<![CDATA[
+                and	checkin_date >= #{startDate}
+                ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[
+                and	checkin_date <= #{endDate}
+                ]]>
+			</if>
+			 <if test="accountId != null and accountId != '' ">
+				 and account_id=#{accountId}
+			 </if>
+			 <if test="user!= null and user.id!= null and user.id != ''">
+				 AND sys_user_id = #{user.id}
+			 </if>
+			 and update_flag = 0
+		 </where>
+    </update>
+	<!--重新生成日记录，排除已经审核过的记录-->
+    <update id="generateDayReportButNotAudit">
+		INSERT INTO hr_check_report_day(
+			id,
+			sys_user_id,
+			office_id,
+		    checkin_date,
+			groupname,
+			first_checkin_time,
+			last_checkin_time,
+			checkin_num,
+			work_hours,
+			checkin_Status,
+		    audit_status,
+			account_id,
+		    leave_day,
+			update_flag
+		)
+		select CONCAT(sys_user_id,r.sdate,account_id),r.sys_user_id,office_id ,r.sdate,max(r.groupname),min(r.checkin_date) fdate,max(r.checkin_date) ldate
+		,count(checkin_time) num ,max(r.checkin_time)-min(r.checkin_time) sec ,MAX(checkin_Status),MAX(checkin_Status),r.account_id,0,0
+		from  hr_check_report_detail r
+		 <where>
+			 <if test="startDate !=null and startDate !='' ">
+				<![CDATA[
+                and	r.sdate >= #{startDate}
+                ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[
+                and	r.sdate <= #{endDate}
+                ]]>
+			</if>
+			 <if test="accountId != null and accountId != '' ">
+				<![CDATA[
+				 and r.account_id=#{accountId}
+				 ]]>
+			 </if>
+			 <if test="user!= null and user.id!= null and user.id != ''">
+				 AND r.sys_user_id = #{user.id}
+			 </if>
+			 <!--排除已经审核过的记录 update_flag is 1  的记录-->
+			 and  NOT exists (select 1 from hr_check_report_day d
+			 where d.update_flag = 1
+			 and d.sys_user_id=r.sys_user_id
+			 and d.account_id=r.account_id
+			 and d.checkin_date=r.sdate)
+		 </where>
+		group by r.account_id,r.office_id,sys_user_id,r.sdate,r.userid
+	</update>
+
+    <!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+    <select id="findUniqueByProperty" resultType="HrCheckReportDay" statementType="STATEMENT">
+		select * FROM hr_check_report_day  where ${propertyName} = '${value}'
+	</select>
+</mapper>

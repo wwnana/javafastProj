@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.om.dao.OmContractDao">
+    
+	<sql id="omContractColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.name AS "name",
+		a.order_id AS "order.id",
+		a.quote_id AS "quote.id",
+		q.no AS "quote.name",
+		q.no AS "quote.no",
+		a.chance_id AS "chance.id",
+		chance.name AS "chance.name",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		c.contacter_name AS "customer.contacterName",
+		c.mobile AS "customer.mobile",
+		a.amount AS "amount",
+		a.deal_date AS "dealDate",
+		a.deliver_date AS "deliverDate",
+		a.start_date AS "startDate",
+		a.end_date AS "endDate",
+		a.own_by AS "ownBy.id",
+		a.audit_by AS "auditBy.id",
+		u15.name AS "auditBy.name",
+		a.audit_date AS "auditDate",
+		a.notes AS "notes",
+		a.files AS "files",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		a.office_id AS "officeId",
+		u13.name AS "ownBy.name",
+		u17.name AS "createBy.name",
+		u13.mobile AS "ownBy.mobile"
+	</sql>
+	
+	<sql id="omContractJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN crm_chance chance ON chance.id = a.chance_id
+		LEFT JOIN crm_quote q  ON q.id = a.quote_id
+		LEFT JOIN sys_user u13 ON u13.id = a.own_by
+		LEFT JOIN sys_user u15 ON u15.id = a.audit_by
+		LEFT JOIN sys_user u17 ON u17.id = a.create_by
+		LEFT JOIN sys_office o24 ON o24.id = a.office_id
+	</sql>
+    
+	<select id="get" resultType="OmContract">
+		SELECT 
+			<include refid="omContractColumns"/>
+		FROM om_contract a
+		<include refid="omContractJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OmContract">
+		SELECT 
+			<include refid="omContractColumns"/>
+		FROM om_contract a
+		<include refid="omContractJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no LIKE 
+					<if test="dbName == 'oracle'">'%'||#{no}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{no}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{no},'%')</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="order != null and order.id != null and order.id != ''">
+				AND a.order_id = #{order.id}
+			</if>
+			<if test="quote != null and quote.id != null and quote.id != ''">
+				AND a.quote_id = #{quote.id}
+			</if>
+			<if test="chance != null and chance.id != null and chance.id != ''">
+				AND a.chance_id = #{chance.id}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="dealDate != null and dealDate != ''">
+				AND a.deal_date = #{dealDate}
+			</if>
+			<if test="deliverDate != null and deliverDate != ''">
+				AND a.deliver_date = #{deliverDate}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="beginDeliverDate != null and endDeliverDate != null and beginDeliverDate != '' and endDeliverDate != ''">
+				AND a.deliver_date BETWEEN #{beginDeliverDate} AND #{endDeliverDate}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OmContract">
+		SELECT 
+			<include refid="omContractColumns"/>
+		FROM om_contract a
+		<include refid="omContractJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO om_contract(
+			id,
+			no,
+			name,
+			order_id,
+			quote_id,
+			chance_id,
+			customer_id,
+			amount,
+			deal_date,
+			deliver_date,
+			start_date,
+			end_date,
+			own_by,
+			notes,
+			files,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id,
+			office_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{name},
+			#{order.id},
+			#{quote.id},
+			#{chance.id},
+			#{customer.id},
+			#{amount},
+			#{dealDate},
+			#{deliverDate},
+			#{startDate},
+			#{endDate},
+			#{ownBy.id},
+			#{notes},
+			#{files},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId},
+			#{officeId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE om_contract SET
+						no = #{no},
+			name = #{name},
+			order_id = #{order.id},
+			quote_id = #{quote.id},
+			chance_id = #{chance.id},
+			customer_id = #{customer.id},
+			amount = #{amount},
+			deal_date = #{dealDate},
+			deliver_date = #{deliverDate},
+			start_date = #{startDate},
+			end_date = #{endDate},
+			own_by = #{ownBy.id},
+			notes = #{notes},
+			files = #{files},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE om_contract SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OmContract" statementType="STATEMENT">
+		select 
+		<include refid="omContractColumns"/> 
+		FROM om_contract a 
+		<include refid="omContractJoins"/> 
+		where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM om_contract a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+		</where>			
+	</select>
+</mapper>

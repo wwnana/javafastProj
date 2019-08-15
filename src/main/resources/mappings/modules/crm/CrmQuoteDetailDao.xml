@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmQuoteDetailDao">
+    
+	<sql id="crmQuoteDetailColumns">
+		a.id AS "id",
+		a.quote_id AS "quote.id",
+		a.product_id AS "product.id",
+		p.no AS "product.no",
+		p.name AS "product.name",
+		p.spec AS "product.spec",
+		a.unit_type AS "unitType",
+		a.price AS "price",
+		a.num AS "num",
+		a.amt AS "amt",
+		a.remarks AS "remarks",
+		a.sort AS "sort",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="crmQuoteDetailJoins">
+		LEFT JOIN crm_quote b ON b.id = a.quote_id
+		LEFT JOIN wms_product p ON p.id = a.product_id
+	</sql>
+    
+	<select id="get" resultType="CrmQuoteDetail">
+		SELECT 
+			<include refid="crmQuoteDetailColumns"/>
+		FROM crm_quote_detail a
+		<include refid="crmQuoteDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmQuoteDetail">
+		SELECT 
+			<include refid="crmQuoteDetailColumns"/>
+		FROM crm_quote_detail a
+		<include refid="crmQuoteDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="quote != null and quote.id != null and quote.id != ''">
+				AND a.quote_id = #{quote.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmQuoteDetail">
+		SELECT 
+			<include refid="crmQuoteDetailColumns"/>
+		FROM crm_quote_detail a
+		<include refid="crmQuoteDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_quote_detail(
+			id,
+			quote_id,
+			product_id,
+			unit_type,
+			price,
+			num,
+			amt,
+			remarks,
+			sort,
+			del_flag
+		) VALUES (
+			#{id},
+			#{quote.id},
+			#{product.id},
+			#{unitType},
+			#{price},
+			#{num},
+			#{amt},
+			#{remarks},
+			#{sort},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_quote_detail SET
+						quote_id = #{quote.id},
+			product_id = #{product.id},
+			unit_type = #{unitType},
+			price = #{price},
+			num = #{num},
+			amt = #{amt},
+			remarks = #{remarks},
+			sort = #{sort}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_quote_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE quote_id = #{quote.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmQuoteDetail" statementType="STATEMENT">
+		select * FROM crm_quote_detail  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

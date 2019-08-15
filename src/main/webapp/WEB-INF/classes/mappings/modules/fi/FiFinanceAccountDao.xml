@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.fi.dao.FiFinanceAccountDao">
+    
+	<sql id="fiFinanceAccountColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.bank_name AS "bankName",
+		a.bankcard_no AS "bankcardNo",
+		a.balance AS "balance",
+		a.is_default AS "isDefault",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u7.name AS "createBy.name"
+	</sql>
+	
+	<sql id="fiFinanceAccountJoins">
+		LEFT JOIN sys_user u7 ON u7.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="FiFinanceAccount">
+		SELECT 
+			<include refid="fiFinanceAccountColumns"/>
+		FROM fi_finance_account a
+		<include refid="fiFinanceAccountJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FiFinanceAccount">
+		SELECT 
+			<include refid="fiFinanceAccountColumns"/>
+		FROM fi_finance_account a
+		<include refid="fiFinanceAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date,a.is_default DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FiFinanceAccount">
+		SELECT 
+			<include refid="fiFinanceAccountColumns"/>
+		FROM fi_finance_account a
+		<include refid="fiFinanceAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO fi_finance_account(
+			id,
+			name,
+			bank_name,
+			bankcard_no,
+			balance,
+			is_default,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{bankName},
+			#{bankcardNo},
+			#{balance},
+			#{isDefault},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE fi_finance_account SET
+			name = #{name},
+			bank_name = #{bankName},
+			bankcard_no = #{bankcardNo},
+			is_default = #{isDefault},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE fi_finance_account SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FiFinanceAccount" statementType="STATEMENT">
+		select * FROM fi_finance_account  where ${propertyName} = '${value}'
+	</select>
+
+	<select id="getFiFinanceAccountForUpdate" resultType="FiFinanceAccount">
+		SELECT 
+			a.id AS "id",
+			a.name AS "name",
+			a.bank_name AS "bankName",
+			a.bankcard_no AS "bankcardNo",
+			a.balance AS "balance",
+			a.is_default AS "isDefault",
+			a.status AS "status",
+			a.create_by AS "createBy.id",
+			a.create_date AS "createDate",
+			a.update_by AS "updateBy.id",
+			a.update_date AS "updateDate",
+			a.remarks AS "remarks",
+			a.del_flag AS "delFlag",
+			a.account_id AS "accountId" 
+		FROM fi_finance_account a 
+		WHERE a.id = #{id} FOR UPDATE
+	</select>
+	
+	<update id="updateBalance">
+		UPDATE fi_finance_account SET balance = #{balance} WHERE id = #{id}
+	</update>
+	
+	<update id="updateDefaultData">
+		UPDATE fi_finance_account SET is_default = '0' WHERE account_id = #{accountId} AND id != #{id}
+	</update>
+</mapper>

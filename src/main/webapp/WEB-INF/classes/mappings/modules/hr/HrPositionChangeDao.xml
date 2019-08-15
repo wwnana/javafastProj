@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrPositionChangeDao">
+    
+	<sql id="hrPositionChangeColumns">
+		a.id AS "id",
+		a.old_office_id AS "oldOffice.id",
+		a.old_position AS "oldPosition",
+		a.old_position_level AS "oldPositionLevel",
+		a.office_id AS "office.id",
+		a.position AS "position",
+		a.position_level AS "positionLevel",
+		a.change_date AS "changeDate",
+		a.change_cause AS "changeCause",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.hr_employee_id AS "hrEmployee.id",
+		a.account_id AS "accountId",
+		o2.name AS "oldOffice.name",
+		o5.name AS "office.name",
+		h.name AS "hrEmployee.name"
+	</sql>
+	
+	<sql id="hrPositionChangeJoins">
+		LEFT JOIN sys_office o2 ON o2.id = a.old_office_id
+		LEFT JOIN sys_office o5 ON o5.id = a.office_id
+		LEFT JOIN hr_employee h ON h.id = a.hr_employee_id
+	</sql>
+    
+	<select id="get" resultType="HrPositionChange">
+		SELECT 
+			<include refid="hrPositionChangeColumns"/>
+		FROM hr_position_change a
+		<include refid="hrPositionChangeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrPositionChange">
+		SELECT 
+			<include refid="hrPositionChangeColumns"/>
+		FROM hr_position_change a
+		<include refid="hrPositionChangeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="beginChangeDate != null and endChangeDate != null and beginChangeDate != '' and endChangeDate != ''">
+				AND a.change_date BETWEEN #{beginChangeDate} AND #{endChangeDate}
+			</if>
+			<if test="hrEmployee != null and hrEmployee.id != null and hrEmployee.id != ''">
+				AND a.hr_employee_id = #{hrEmployee.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrPositionChange">
+		SELECT 
+			<include refid="hrPositionChangeColumns"/>
+		FROM hr_position_change a
+		<include refid="hrPositionChangeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_position_change(
+			id,
+			old_office_id,
+			old_position,
+			old_position_level,
+			office_id,
+			position,
+			position_level,
+			change_date,
+			change_cause,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			hr_employee_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{oldOffice.id},
+			#{oldPosition},
+			#{oldPositionLevel},
+			#{office.id},
+			#{position},
+			#{positionLevel},
+			#{changeDate},
+			#{changeCause},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{hrEmployee.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_position_change SET
+						old_office_id = #{oldOffice.id},
+			old_position = #{oldPosition},
+			old_position_level = #{oldPositionLevel},
+			office_id = #{office.id},
+			position = #{position},
+			position_level = #{positionLevel},
+			change_date = #{changeDate},
+			change_cause = #{changeCause},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			hr_employee_id = #{hrEmployee.id}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_position_change SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrPositionChange" statementType="STATEMENT">
+		select * FROM hr_position_change  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

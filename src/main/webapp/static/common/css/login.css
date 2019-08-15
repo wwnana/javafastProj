@@ -1,0 +1,109 @@
+html{height: 100%;}
+body.signin {
+    background: #188ae2 !important;
+    height: auto;
+    
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.signinpanel {
+    width: 340px;
+    margin: 10% auto 0 auto;
+}
+
+.login-logo{
+	color: #fff;
+	text-align: center;
+	margin-bottom: 25px;
+	font-weight: 300;
+	font-size: 22px;
+}
+.logo-name{
+	font-size: 80px !important;
+}
+
+.login-box-msg{
+	margin: 0;
+	text-align: center;
+	padding: 0 20px 10px 20px;
+}
+
+.signinpanel .logopanel {
+    float: none;
+    width: auto;
+    padding: 0;
+    background: none;
+}
+
+.signinpanel .signin-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.signinpanel .form-control {
+    display: block;
+    margin-top: 15px;
+}
+
+.signinpanel .uname {
+    background: #fff url(../img/user.png) no-repeat 95% center;color:#333;
+}
+
+.signinpanel .pword {
+    background: #fff url(../img/locked.png) no-repeat 95% center;color:#333;
+}
+
+.signinpanel .btn {
+    margin-top: 15px;
+}
+
+.signinpanel form {
+    background: #fff;
+    border: 1px solid rgba(255,255,255,.3);
+    -moz-box-shadow: 0 3px 0 rgba(12, 12, 12, 0.03);
+    -webkit-box-shadow: 0 3px 0 rgba(12, 12, 12, 0.03);
+    box-shadow: 0 3px 0 rgba(12, 12, 12, 0.03);
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    padding: 25px;
+}
+
+.signup-footer{margin:20px 0;color: #fff;text-align: center;}
+
+@media screen and (max-width: 768px) {
+    .signinpanel,
+    .signuppanel {
+        margin: 0 0;
+        width: 100% !important;
+        padding: 20px 20px 20px 20px;
+    }
+    .signinpanel form {
+        margin-top: 20px;
+    }
+    .signup-footer {
+        margin-bottom: 10px;
+    }
+    .signuppanel .form-control {
+        margin-bottom: 10px;
+    }
+    .signup-footer .pull-left,
+    .signup-footer .pull-right {
+        float: none !important;
+        text-align: center;
+    }
+    .signinpanel .signin-info ul {
+        display: none;
+    }
+}
+@media screen and (max-width: 320px) {
+    .signinpanel,
+    .signuppanel {
+        margin:0px 0px;
+        width:auto;
+    }
+}

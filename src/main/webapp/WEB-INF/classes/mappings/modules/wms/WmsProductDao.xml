@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsProductDao">
+    
+	<sql id="wmsProductColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.name AS "name",
+		a.code AS "code",
+		a.product_type_id AS "productType.id",
+		a.unit_type AS "unitType",
+		a.spec AS "spec",
+		a.color AS "color",
+		a.size AS "size",
+		a.custom_field1 AS "customField1",
+		a.custom_field2 AS "customField2",
+		a.product_img AS "productImg",
+		a.sale_price AS "salePrice",
+		a.batch_price AS "batchPrice",
+		a.min_price AS "minPrice",
+		a.cost_price AS "costPrice",
+		a.min_stock AS "minStock",
+		a.max_stock AS "maxStock",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u20.name AS "createBy.name",
+		t.name AS "productType.name"
+	</sql>
+	
+	<sql id="wmsProductJoins">
+		LEFT JOIN wms_product_type t ON t.id=a.product_type_id
+		LEFT JOIN sys_user u20 ON u20.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="WmsProduct">
+		SELECT 
+			<include refid="wmsProductColumns"/>
+		FROM wms_product a
+		<include refid="wmsProductJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsProduct">
+		SELECT 
+			<include refid="wmsProductColumns"/>
+		FROM wms_product a
+		<include refid="wmsProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no LIKE 
+					<if test="dbName == 'oracle'">'%'||#{no}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{no}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{no},'%')</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="code != null and code != ''">
+				AND a.code = #{code}
+			</if>
+			<if test="productType != null and productType.id != null and productType.id != ''">
+				AND a.product_type_id = #{productType.id}
+			</if>
+			<if test="spec != null and spec != ''">
+				AND a.spec LIKE 
+					<if test="dbName == 'oracle'">'%'||#{spec}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{spec}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{spec},'%')</if>
+			</if>
+			<if test="unitType != null and unitType != ''">
+				AND a.unit_type = #{unitType}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsProduct">
+		SELECT 
+			<include refid="wmsProductColumns"/>
+		FROM wms_product a
+		<include refid="wmsProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_product(
+			id,
+			no,
+			name,
+			code,
+			product_type_id,
+			unit_type,
+			spec,
+			color,
+			size,
+			custom_field1,
+			custom_field2,
+			product_img,
+			sale_price,
+			batch_price,
+			min_price,
+			cost_price,
+			min_stock,
+			max_stock,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{name},
+			#{code},
+			#{productType.id},
+			#{unitType},
+			#{spec},
+			#{color},
+			#{size},
+			#{customField1},
+			#{customField2},
+			#{productImg},
+			#{salePrice},
+			#{batchPrice},
+			#{minPrice},
+			#{costPrice},
+			#{minStock},
+			#{maxStock},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+		<update id="update">
+		UPDATE wms_product SET
+						no = #{no},
+			name = #{name},
+			code = #{code},
+			product_type_id = #{productType.id},
+			unit_type = #{unitType},
+			spec = #{spec},
+			color = #{color},
+			size = #{size},
+			custom_field1 = #{customField1},
+			custom_field2 = #{customField2},
+			product_img = #{productImg},
+			sale_price = #{salePrice},
+			batch_price = #{batchPrice},
+			min_price = #{minPrice},
+			cost_price = #{costPrice},
+			min_stock = #{minStock},
+			max_stock = #{maxStock},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+
+	
+	<update id="delete">
+		UPDATE wms_product SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsProduct" statementType="STATEMENT">
+		select * FROM wms_product  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

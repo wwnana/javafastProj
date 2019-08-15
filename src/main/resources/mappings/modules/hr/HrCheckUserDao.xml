@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrCheckUserDao">
+    
+	<sql id="hrCheckUserColumns">
+		a.id AS "id",
+		a.userid AS "userid",
+		a.check_rule_id AS "checkRuleId",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="hrCheckUserJoins">
+	</sql>
+    
+	<select id="get" resultType="HrCheckUser">
+		SELECT 
+			<include refid="hrCheckUserColumns"/>
+		FROM hr_check_user a
+		<include refid="hrCheckUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrCheckUser">
+		SELECT 
+			<include refid="hrCheckUserColumns"/>
+		FROM hr_check_user a
+		<include refid="hrCheckUserJoins"/>
+		<where>
+			1=1 
+			<if test="userid != null and userid != ''">
+				AND a.userid = #{userid}
+			</if>
+			<if test="checkRuleId != null and checkRuleId != ''">
+				AND a.check_rule_id = #{checkRuleId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrCheckUser">
+		SELECT 
+			<include refid="hrCheckUserColumns"/>
+		FROM hr_check_user a
+		<include refid="hrCheckUserJoins"/>
+		<where>
+			1=1 
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_check_user(
+			id,
+			userid,
+			check_rule_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{userid},
+			#{checkRuleId},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_check_user SET
+						userid = #{userid},
+			check_rule_id = #{checkRuleId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM hr_check_user
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrCheckUser" statementType="STATEMENT">
+		select * FROM hr_check_user  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

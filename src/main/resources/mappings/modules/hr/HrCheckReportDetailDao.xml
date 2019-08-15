@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrCheckReportDetailDao">
+
+	<sql id="hrCheckReportDetailColumns">
+		a.id AS "id",
+		a.groupname AS "groupname",
+		a.userid AS "userid",
+		a.checkin_type AS "checkinType",
+		a.exception_type AS "exceptionType",
+		a.checkin_time AS "checkinTime",
+		a.checkin_date AS "checkinDate",
+		a.location_title AS "locationTitle",
+		a.location_detail AS "locationDetail",
+		a.wifiname AS "wifiname",
+		a.notes AS "notes",
+		a.wifimac AS "wifimac",
+		a.mediaids AS "mediaids",
+		a.account_id AS "accountId",
+		a.checkin_status AS "checkinStatus",
+		a.sys_user_id AS "user.id",
+		a.sdate as "sdate",
+		u.name AS "user.name",
+		u.photo AS "user.photo",
+		a.office_id AS "office.id",
+		o4.name AS "office.name"
+	</sql>
+
+	<sql id="hrCheckReportDetailJoins">
+		LEFT JOIN sys_user u ON u.id = a.sys_user_id
+		LEFT JOIN sys_office o4 ON o4.id = a.office_id
+	</sql>
+
+	<select id="get" resultType="HrCheckReportDetail">
+		SELECT
+		<include refid="hrCheckReportDetailColumns"/>
+		FROM hr_check_report_detail a
+		<include refid="hrCheckReportDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="HrCheckReportDetail">
+		SELECT
+		<include refid="hrCheckReportDetailColumns"/>
+		FROM hr_check_report_detail a
+		<include refid="hrCheckReportDetailJoins"/>
+		<where>
+			1=1 
+			<if test="userid != null and userid != ''">
+				AND a.userid = #{userid}
+			</if>
+			<if test="office!= null and office.id!= null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+			<if test="user!= null and user.id!= null and user.id != ''">
+				AND a.sys_user_id = #{user.id}
+			</if>
+			<if test="sdate != null and sdate != ''">
+				AND a.sdate = #{sdate}
+			</if>
+			<if test="checkinStatus != null and checkinStatus != ''">
+				AND a.checkin_status = #{checkinStatus}
+			</if>
+			<if test="startDate !=null and startDate !='' ">
+				<![CDATA[
+                and	a.sdate >= #{startDate}
+                ]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[
+                and	a.sdate <= #{endDate}
+                ]]>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sdate desc ,a.userid
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="HrCheckReportDetail">
+		SELECT
+		<include refid="hrCheckReportDetailColumns"/>
+		FROM hr_check_report_detail a
+		<include refid="hrCheckReportDetailJoins"/>
+		<where>
+			1=1 
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO hr_check_report_detail(
+			id,
+			groupname,
+			userid,
+			checkin_type,
+			exception_type,
+			checkin_time,
+			checkin_date,
+			location_title,
+			location_detail,
+			wifiname,
+			notes,
+			wifimac,
+			mediaids,
+			checkin_status,
+			office_id,
+			sys_user_id,
+			sdate,
+			account_id			
+		) VALUES (
+			#{id},
+			#{groupname},
+			#{userid},
+			#{checkinType},
+			#{exceptionType},
+			#{checkinTime},
+			#{checkinDate},
+			#{locationTitle},
+			#{locationDetail},
+			#{wifiname},
+			#{notes},
+			#{wifimac},
+			#{mediaids},
+			#{checkinStatus},
+			#{office.id},
+			#{user.id},
+			#{sdate},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_check_report_detail SET
+						groupname = #{groupname},
+			userid = #{userid},
+			checkin_type = #{checkinType},
+			exception_type = #{exceptionType},
+			checkin_time = #{checkinTime},
+			checkin_date = #{checkinDate},
+			location_title = #{locationTitle},
+			location_detail = #{locationDetail},
+			wifiname = #{wifiname},
+			notes = #{notes},
+			wifimac = #{wifimac},
+			mediaids = #{mediaids},
+			checkin_status = #{checkinStatus},
+			office_id = #{office.id},
+			sys_user_id = #{user.id} 
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM hr_check_report_detail
+		WHERE id = #{id}
+	</update>
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrCheckReportDetail" statementType="STATEMENT">
+		select * FROM hr_check_report_detail  where ${propertyName} = '${value}'
+	</select>
+
+	<select id="findCheckUserList" resultType="HrCheckReportDetail">
+		select a.sys_user_id AS "user.id" from hr_check_report_detail a where a.account_id=#{accountId} GROUP BY a.sys_user_id
+	</select>
+
+
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM hr_check_report_detail a
+		<where>
+			<if test="id != null and id != ''">
+				and id = #{id}
+			</if>
+		</where>
+
+	</select>
+</mapper>

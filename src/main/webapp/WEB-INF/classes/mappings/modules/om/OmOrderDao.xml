@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.om.dao.OmOrderDao">
+    
+	<sql id="omOrderColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.sale_type AS "saleType",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.content AS "content",
+		a.num AS "num",
+		a.total_amt AS "totalAmt",
+		a.tax_amt AS "taxAmt",
+		a.other_amt AS "otherAmt",
+		a.amount AS "amount",
+		a.fi_account_id AS "fiAccount.id",
+		f.name AS "fiAccount.name",
+		a.book_amt AS "bookAmt",
+		a.receive_amt AS "receiveAmt",
+		a.is_invoice AS "isInvoice",
+		a.invoice_amt AS "invoiceAmt",
+		a.profit_amt AS "profitAmt",
+		a.status AS "status",
+		a.deal_by AS "dealBy.id",
+		a.deal_date AS "dealDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u18.name AS "dealBy.name",
+		u20.name AS "createBy.name",
+		u22.name AS "auditBy.name",
+		u18.name AS "ownBy.name"
+	</sql>
+	
+	<sql id="omOrderJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN fi_finance_account f ON f.id = fi_account_id
+		LEFT JOIN sys_user u18 ON u18.id = a.deal_by
+		LEFT JOIN sys_user u20 ON u20.id = a.create_by
+		LEFT JOIN sys_user u22 ON u22.id = a.audit_by
+	</sql>
+    
+	<select id="get" resultType="OmOrder">
+		SELECT 
+			<include refid="omOrderColumns"/>
+		FROM om_order a
+		<include refid="omOrderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OmOrder">
+		SELECT 
+			<include refid="omOrderColumns"/>
+		FROM om_order a
+		<include refid="omOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="saleType != null and saleType != ''">
+				AND a.sale_type = #{saleType}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="fiAccount != null and fiAccount.id != null and fiAccount.id != ''">
+				AND a.fi_account_id = #{fiAccount.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="dealBy != null and dealBy.id != null and dealBy.id != ''">
+				AND a.deal_by = #{dealBy.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.deal_by = #{ownBy.id}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="auditBy != null and auditBy.id != null and auditBy.id != ''">
+				AND a.audit_by = #{auditBy.id}
+			</if>
+			<if test="beginAuditDate != null and endAuditDate != null and beginAuditDate != '' and endAuditDate != ''">
+				AND a.audit_date BETWEEN #{beginAuditDate} AND #{endAuditDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND (c.no LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+				OR a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+					)
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OmOrder">
+		SELECT 
+			<include refid="omOrderColumns"/>
+		FROM om_order a
+		<include refid="omOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO om_order(
+			id,
+			no,
+			sale_type,
+			customer_id,
+			content,
+			num,
+			total_amt,
+			tax_amt,
+			other_amt,
+			amount,
+			fi_account_id,
+			book_amt,
+			receive_amt,
+			is_invoice,
+			invoice_amt,
+			profit_amt,
+			status,
+			deal_by,
+			deal_date,
+			create_by,
+			create_date,
+			audit_by,
+			audit_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{saleType},
+			#{customer.id},
+			#{content},
+			#{num},
+			#{totalAmt},
+			#{taxAmt},
+			#{otherAmt},
+			#{amount},
+			#{fiAccount.id},
+			#{bookAmt},
+			#{receiveAmt},
+			#{isInvoice},
+			#{invoiceAmt},
+			#{profitAmt},
+			#{status},
+			#{dealBy.id},
+			#{dealDate},
+			#{createBy.id},
+			#{createDate},
+			#{auditBy.id},
+			#{auditDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE om_order SET
+						no = #{no},
+			sale_type = #{saleType},
+			customer_id = #{customer.id},
+			content = #{content},
+			num = #{num},
+			total_amt = #{totalAmt},
+			tax_amt = #{taxAmt},
+			other_amt = #{otherAmt},
+			amount = #{amount},
+			fi_account_id = #{fiAccount.id},
+			book_amt = #{bookAmt},
+			receive_amt = #{receiveAmt},
+			is_invoice = #{isInvoice},
+			invoice_amt = #{invoiceAmt},
+			profit_amt = #{profitAmt},
+			status = #{status},
+			deal_by = #{dealBy.id},
+			deal_date = #{dealDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE om_order SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OmOrder" statementType="STATEMENT">
+		select * FROM om_order  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

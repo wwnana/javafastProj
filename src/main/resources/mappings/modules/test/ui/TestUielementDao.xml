@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.test.dao.ui.TestUielementDao">
+    
+	<sql id="testUielementColumns">
+		a.id AS "id",
+		a.product_id AS "product.id",
+		p.name AS "product.name",
+		a.product_type AS "productType.id",
+		r.name AS "productType.name",
+		a.sex AS "sex",
+		a.sex2 AS "sex2",
+		a.tags AS "tags",
+		a.tags2 AS "tags2",
+		a.user_id AS "user.id",
+		a.office_id AS "office.id",
+		a.image AS "image",
+		a.image2 AS "image2",
+		a.file AS "file",
+		a.file2 AS "file2",
+		a.content AS "content",
+		u8.name AS "user.name",
+		o9.name AS "office.name"
+	</sql>
+	
+	<sql id="testUielementJoins">
+		LEFT JOIN sys_user u8 ON u8.id = a.user_id
+		LEFT JOIN sys_office o9 ON o9.id = a.office_id
+		LEFT JOIN test_one p ON p.id = a.product_id
+		LEFT JOIN test_tree r ON r.id = a.product_type
+	</sql>
+    
+	<select id="get" resultType="TestUielement">
+		SELECT 
+			<include refid="testUielementColumns"/>
+		FROM test_uielement a
+		<include refid="testUielementJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TestUielement">
+		SELECT 
+			<include refid="testUielementColumns"/>
+		FROM test_uielement a
+		<include refid="testUielementJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TestUielement">
+		SELECT 
+			<include refid="testUielementColumns"/>
+		FROM test_uielement a
+		<include refid="testUielementJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO test_uielement(
+			id,
+			product_id,
+			product_type,
+			sex,
+			sex2,
+			tags,
+			tags2,
+			user_id,
+			office_id,
+			image,
+			image2,
+			file,
+			file2,
+			content
+		) VALUES (
+			#{id},
+			#{product.id},
+			#{productType.id},
+			#{sex},
+			#{sex2},
+			#{tags},
+			#{tags2},
+			#{user.id},
+			#{office.id},
+			#{image},
+			#{image2},
+			#{file},
+			#{file2},
+			#{content}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_uielement SET
+						product_id = #{product.id},
+			product_type = #{productType.id},
+			sex = #{sex},
+			sex2 = #{sex2},
+			tags = #{tags},
+			tags2 = #{tags2},
+			user_id = #{user.id},
+			office_id = #{office.id},
+			image = #{image},
+			image2 = #{image2},
+			file = #{file},
+			file2 = #{file2},
+			content = #{content}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM test_uielement
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="TestUielement" statementType="STATEMENT">
+		select * FROM test_uielement  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

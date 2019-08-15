@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaCommonTravelDao">
+    
+	<sql id="oaCommonTravelColumns">
+		a.id AS "id",
+		a.start_address AS "startAddress",
+		a.dest_address AS "destAddress",
+		a.start_time AS "startTime",
+		a.end_time AS "endTime",
+		a.budget_amt AS "budgetAmt",
+		a.advance_amt AS "advanceAmt",
+		c.id AS "oaCommonAudit.id",
+		c.title AS "oaCommonAudit.title",
+		c.status AS "oaCommonAudit.status",
+		c.create_by AS "oaCommonAudit.createBy.id",
+		u8.name AS "oaCommonAudit.createBy.name"
+	</sql>
+	
+	<sql id="oaCommonTravelJoins">
+		LEFT JOIN oa_common_audit c ON c.id = a.id
+		LEFT JOIN sys_user u8 ON u8.id = c.create_by
+	</sql>
+    
+	<select id="get" resultType="OaCommonTravel">
+		SELECT 
+			<include refid="oaCommonTravelColumns"/>
+		FROM oa_common_travel a
+		<include refid="oaCommonTravelJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCommonTravel">
+		SELECT 
+			<include refid="oaCommonTravelColumns"/>
+		FROM oa_common_travel a
+		<include refid="oaCommonTravelJoins"/>
+		<where>
+			1=1 
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaCommonTravel">
+		SELECT 
+			<include refid="oaCommonTravelColumns"/>
+		FROM oa_common_travel a
+		<include refid="oaCommonTravelJoins"/>
+		<where>
+			1=1 
+		</where>	
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 	
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_common_travel(
+			id,
+			start_address,
+			dest_address,
+			start_time,
+			end_time,
+			budget_amt,
+			advance_amt
+		) VALUES (
+			#{id},
+			#{startAddress},
+			#{destAddress},
+			#{startTime},
+			#{endTime},
+			#{budgetAmt},
+			#{advanceAmt}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_common_travel SET
+						start_address = #{startAddress},
+			dest_address = #{destAddress},
+			start_time = #{startTime},
+			end_time = #{endTime},
+			budget_amt = #{budgetAmt},
+			advance_amt = #{advanceAmt}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_common_travel
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaCommonTravel" statementType="STATEMENT">
+		select * FROM oa_common_travel  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

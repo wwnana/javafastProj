@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaCommonAuditDao">
+    
+	<sql id="oaCommonAuditColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.title AS "title",
+		a.content AS "content",
+		a.files AS "files",
+		a.current_by AS "currentBy.id",
+		a.status AS "status",
+		a.office_id AS "office.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u5.name AS "currentBy.name",
+		o7.name AS "office.name",
+		u8.name AS "createBy.name",
+		u8.photo AS "createBy.photo",
+		u8.name AS "createName"
+	</sql>
+	
+	<sql id="oaCommonAuditListColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.title AS "title",
+		a.content AS "content",
+		a.files AS "files",
+		a.current_by AS "currentBy.id",
+		a.status AS "status",
+		a.office_id AS "office.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		<if test="type != null and type == 1">
+	    	c1.start_time AS "oaCommonLeave.startTime",
+			c1.end_time AS "oaCommonLeave.endTime",
+			c1.leave_type AS "oaCommonLeave.leaveType",
+			c1.days_num AS "oaCommonLeave.daysNum",
+	    </if>
+	    <if test="type != null and type == 2">
+	    	c2.amount AS "oaCommonExpense.amount",
+	    </if>
+	    <if test="type != null and type == 3">
+			c3.start_address AS "oaCommonTravel.startAddress",
+			c3.dest_address AS "oaCommonTravel.destAddress",
+			c3.start_time AS "oaCommonTravel.startTime",
+			c3.end_time AS "oaCommonTravel.endTime",
+			c3.budget_amt AS "oaCommonTravel.budgetAmt",
+			c3.advance_amt AS "oaCommonTravel.advanceAmt",
+		</if>
+		<if test="type != null and type == 4">
+			c4.amount AS "oaCommonTravel.amount",
+			c4.borrow_date AS "oaCommonTravel.borrowDate",
+		</if>
+		<if test="type != null and type == 5">
+			c5.start_time AS "oaCommonExtra.startTime",
+			c5.end_time AS "oaCommonExtra.endTime",
+			c5.extra_type AS "oaCommonExtra.extraType",
+			c5.days_num AS "oaCommonExtra.daysNum",
+		</if>
+		u5.name AS "currentBy.name",
+		o7.name AS "office.name",
+		u8.name AS "createBy.name",
+		u8.name AS "createName"
+	</sql>
+	
+	<sql id="oaCommonAuditJoins">
+		LEFT JOIN sys_user u5 ON u5.id = a.current_by
+		LEFT JOIN sys_office o7 ON o7.id = a.office_id
+		LEFT JOIN sys_user u8 ON u8.id = a.create_by
+	</sql>
+	
+	<sql id="oaCommonAuditListJoins">
+		<if test="type != null and type == 1">
+			LEFT JOIN oa_common_leave c1 ON c1.id = a.id
+		</if>
+		<if test="type != null and type == 2">
+			LEFT JOIN oa_common_expense c2 ON c2.id = a.id
+		</if>
+		<if test="type != null and type == 3">
+			LEFT JOIN oa_common_travel c3 ON c3.id = a.id
+		</if>
+		<if test="type != null and type == 4">
+			LEFT JOIN oa_common_borrow c4 ON c4.id = a.id
+		</if>
+		<if test="type != null and type == 5">
+			LEFT JOIN oa_common_extra c5 ON c5.id = a.id
+		</if>
+		LEFT JOIN sys_user u5 ON u5.id = a.current_by
+		LEFT JOIN sys_office o7 ON o7.id = a.office_id
+		LEFT JOIN sys_user u8 ON u8.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="OaCommonAudit">
+		SELECT 
+			<include refid="oaCommonAuditColumns"/>
+		FROM oa_common_audit a
+		<include refid="oaCommonAuditJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCommonAudit">
+		SELECT distinct 
+			<include refid="oaCommonAuditListColumns"/>
+			<if test="isSelf">
+				,r.read_flag AS "readFlag"
+			</if>
+		FROM oa_common_audit a
+		<include refid="oaCommonAuditListJoins"/>
+			<!-- 只查抄送给我的 -->
+			<if test="isSelf">
+				LEFT JOIN oa_common_audit_record r ON r.common_audit_id = a.id
+			</if>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="currentBy != null and currentBy.id != null and currentBy.id != ''">
+				AND a.current_by = #{currentBy.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="createId != null and createId != ''">
+				AND a.create_by = #{createId}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<!-- 只查抄送给我的 -->
+			<if test="isSelf">
+				AND r.user_id = #{currentUser.id}
+			</if>
+			<if test="isSelfRead != null and isSelfRead != ''">
+				AND r.deal_type='1' 
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND (a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+					 OR 
+					 u8.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+					)
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaCommonAudit">
+		SELECT 
+			<include refid="oaCommonAuditColumns"/>
+		FROM oa_common_audit a
+		<include refid="oaCommonAuditJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_common_audit(
+			id,
+			type,
+			title,
+			content,
+			files,
+			current_by,
+			status,
+			office_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{type},
+			#{title},
+			#{content},
+			#{files},
+			#{currentBy.id},
+			#{status},
+			#{office.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_common_audit SET
+						type = #{type},
+			title = #{title},
+			content = #{content},
+			files = #{files},
+			current_by = #{currentBy.id},
+			status = #{status},
+			office_id = #{office.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE oa_common_audit SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaCommonAudit" statementType="STATEMENT">
+		select * FROM oa_common_audit  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmCustomerStarDao">
+    
+	<sql id="crmCustomerStarColumns">
+		a.id AS "id",
+		a.own_by AS "ownBy",
+		a.create_date AS "createDate",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		c.customer_status AS "customer.customerStatus",
+		c.customer_level AS "customer.customerLevel",
+		c.contacter_name AS "customer.contacterName",
+		c.mobile AS "customer.mobile",
+		c.nextcontact_date AS "customer.nextcontactDate",
+		c.nextcontact_note AS "customer.nextcontactNote",
+		c.own_by AS "customer.ownBy.id"
+	</sql>
+	
+	<sql id="crmCustomerStarJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+	</sql>
+    
+	<select id="get" resultType="CrmCustomerStar">
+		SELECT 
+			<include refid="crmCustomerStarColumns"/>
+		FROM crm_customer_star a
+		<include refid="crmCustomerStarJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmCustomerStar">
+		SELECT 
+			<include refid="crmCustomerStarColumns"/>
+		FROM crm_customer_star a
+		<include refid="crmCustomerStarJoins"/>
+		<where>
+			
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="ownBy != null and ownBy != ''">
+				AND a.own_by = #{ownBy}
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmCustomerStar">
+		SELECT 
+			<include refid="crmCustomerStarColumns"/>
+		FROM crm_customer_star a
+		<include refid="crmCustomerStarJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_customer_star(
+			id,
+			customer_id,
+			own_by,
+			create_date
+		) VALUES (
+			#{id},
+			#{customer.id},
+			#{ownBy},
+			#{createDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_customer_star SET
+						customer_id = #{customer.id},
+			own_by = #{ownBy}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM crm_customer_star
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmCustomerStar" statementType="STATEMENT">
+		select * FROM crm_customer_star  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

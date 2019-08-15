@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsPurchaseDao">
+    
+	<sql id="wmsPurchaseColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.supplier_id AS "supplier.id",
+		s.name AS "supplier.name",
+		a.content AS "content",
+		a.num AS "num",
+		a.total_amt AS "totalAmt",
+		a.tax_amt AS "taxAmt",
+		a.other_amt AS "otherAmt",
+		a.amount AS "amount",
+		a.status AS "status",
+		a.deal_by AS "dealBy.id",
+		a.deal_date AS "dealDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.audit_by AS "auditBy.id",
+		u16.name AS "auditBy.name",
+		a.audit_date AS "auditDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u12.name AS "dealBy.name",
+		u14.name AS "createBy.name"
+	</sql>
+	
+	<sql id="wmsPurchaseJoins">
+		LEFT JOIN sys_user u12 ON u12.id = a.deal_by
+		LEFT JOIN sys_user u14 ON u14.id = a.create_by
+		LEFT JOIN sys_user u16 ON u16.id = a.audit_by
+		LEFT JOIN wms_supplier s ON s.id = a.supplier_id
+	</sql>
+    
+	<select id="get" resultType="WmsPurchase">
+		SELECT 
+			<include refid="wmsPurchaseColumns"/>
+		FROM wms_purchase a
+		<include refid="wmsPurchaseJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WmsPurchase">
+		SELECT 
+			<include refid="wmsPurchaseColumns"/>
+		FROM wms_purchase a
+		<include refid="wmsPurchaseJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="supplier != null and supplier.id != null and supplier.id != ''">
+				AND a.supplier_id = #{supplier.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="dealBy != null and dealBy.id != null and dealBy.id != ''">
+				AND a.deal_by = #{dealBy.id}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsPurchase">
+		SELECT 
+			<include refid="wmsPurchaseColumns"/>
+		FROM wms_purchase a
+		<include refid="wmsPurchaseJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_purchase(
+			id,
+			no,
+			supplier_id,
+			content,
+			num,
+			total_amt,
+			tax_amt,
+			other_amt,
+			amount,
+			status,
+			deal_by,
+			deal_date,
+			create_by,
+			create_date,
+			audit_by,
+			audit_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{supplier.id},
+			#{content},
+			#{num},
+			#{totalAmt},
+			#{taxAmt},
+			#{otherAmt},
+			#{amount},
+			#{status},
+			#{dealBy.id},
+			#{dealDate},
+			#{createBy.id},
+			#{createDate},
+			#{auditBy.id},
+			#{auditDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE wms_purchase SET
+						no = #{no},
+			supplier_id = #{supplier.id},
+			content = #{content},
+			num = #{num},
+			total_amt = #{totalAmt},
+			tax_amt = #{taxAmt},
+			other_amt = #{otherAmt},
+			amount = #{amount},
+			status = #{status},
+			deal_by = #{dealBy.id},
+			deal_date = #{dealDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE wms_purchase SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsPurchase" statementType="STATEMENT">
+		select * FROM wms_purchase  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

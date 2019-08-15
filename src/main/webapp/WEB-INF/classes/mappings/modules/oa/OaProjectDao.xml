@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaProjectDao">
+    
+	<sql id="oaProjectColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.name AS "name",
+		a.start_date AS "startDate",
+		a.end_date AS "endDate",
+		a.schedule AS "schedule",
+		a.content AS "content",
+		a.files AS "files",
+		a.own_by AS "ownBy.id",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		a.office_id AS "officeId",
+		u9.name AS "ownBy.name",
+		u14.name AS "createBy.name"
+	</sql>
+	
+	<sql id="oaProjectJoins">
+		LEFT JOIN sys_user u9 ON u9.id = a.own_by
+		LEFT JOIN sys_user u14 ON u14.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="OaProject">
+		SELECT 
+			<include refid="oaProjectColumns"/>
+		FROM oa_project a
+		<include refid="oaProjectJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaProject">
+		SELECT 
+			<include refid="oaProjectColumns"/>
+		FROM oa_project a
+		<include refid="oaProjectJoins"/>
+		<!-- 我的任务 -->
+		<if test="isSelf">
+			JOIN oa_project_record r ON r.oa_project_id = a.id AND r.user_id = #{currentUser.id}
+			<if test="readFlag != null and readFlag != ''">
+				AND r.read_flag = #{readFlag}
+			</if>
+		</if>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="beginEndDate != null and endEndDate != null and beginEndDate != '' and endEndDate != ''">
+				AND a.end_date BETWEEN #{beginEndDate} AND #{endEndDate}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="isUnComplete">
+				AND a.status != 2 AND a.status != 3
+			</if>
+			
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaProject">
+		SELECT 
+			<include refid="oaProjectColumns"/>
+		FROM oa_project a
+		<include refid="oaProjectJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_project(
+			id,
+			no,
+			name,
+			start_date,
+			end_date,
+			schedule,
+			content,
+			files,
+			own_by,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			account_id,
+			office_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{name},
+			#{startDate},
+			#{endDate},
+			#{schedule},
+			#{content},
+			#{files},
+			#{ownBy.id},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{accountId},
+			#{officeId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_project SET
+						no = #{no},
+			name = #{name},
+			start_date = #{startDate},
+			end_date = #{endDate},
+			schedule = #{schedule},
+			content = #{content},
+			files = #{files},
+			own_by = #{ownBy.id},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			office_id = #{officeId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE oa_project SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaProject" statementType="STATEMENT">
+		select * FROM oa_project  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) AS count FROM oa_project a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+		</where>			
+	</select>
+</mapper>

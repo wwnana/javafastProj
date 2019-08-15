@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.report.dao.CrmChanceReportDao">
+	
+	<!--  企业各销售阶段数 -->
+	<select id="findChanceReportList" resultType="CrmChanceReport">
+		select u.id as "userId",
+		u.name as "userName",
+		<!-- 商机总数 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "totalChanceNum",
+		<!-- 商机，初步恰接 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='1' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "purposeCustomerNum",
+		<!-- 商机，需求确定 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='2' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "demandCustomerNum",
+		<!-- 商机，方案报价 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='3' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "quoteCustomerNum",
+		<!-- 商机，签订合同 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='4' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "dealOrderNum",
+		<!-- 商机，赢单 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.own_by=u.id and period_type='5' and c.del_flag='0'
+		<if test="startDate != null and startDate != ''">
+				 AND c.update_date between #{startDate} and #{endDate} 
+		</if>
+		) as "completeOrderNum" 
+		 
+		 from sys_user u 
+		 where u.account_id=#{accountId}
+		 <if test="user != null and user.id != null and user.id != ''">
+				AND u.id = #{user.id}
+		</if>
+		<if test="office != null and office.id != null and office.id!= ''">
+			   AND u.office_id = #{office.id}
+		</if>
+	</select>
+	
+	<!--  单个企业各销售阶段数 -->
+	<select id="findChanceReport" resultType="CrmChanceReport">
+		select 
+		<!-- 商机总数 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "totalChanceNum",
+		<!-- 商机，初步恰接 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and period_type='1' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "purposeCustomerNum",
+		<!-- 商机，需求确定 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and period_type='2' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>		
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "demandCustomerNum",
+		<!-- 商机，方案报价 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and period_type='3' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if> 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "quoteCustomerNum",
+		<!-- 商机，签订合同 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and period_type='4' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "dealOrderNum",
+		<!-- 商机，赢单 -->
+		(select COALESCE(count(c.id),0) from crm_chance c where c.account_id=#{accountId} and period_type='5' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "completeOrderNum" 
+		 from sys_account s where s.id=#{accountId}
+	</select>
+	
+	<!--  单个企业各销售阶段总额 -->
+	<select id="findChanceAmountReport" resultType="CrmChanceReport">
+		select 
+		<!-- 商机总数 -->
+		(select COALESCE(sum(c.sale_amount),0) from crm_chance c where c.account_id=#{accountId} and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "totalChanceNum",
+		<!-- 商机，初步恰接 -->
+		(select COALESCE(sum(c.sale_amount),0) from crm_chance c where c.account_id=#{accountId} and period_type='1' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "purposeCustomerNum",
+		<!-- 商机，需求确定 -->
+		(select COALESCE(sum(c.sale_amount),0) from crm_chance c where c.account_id=#{accountId} and period_type='2' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>		
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "demandCustomerNum",
+		<!-- 商机，方案报价 -->
+		(select COALESCE(sum(c.sale_amount),0) from crm_chance c where c.account_id=#{accountId} and period_type='3' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if> 
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "quoteCustomerNum",
+		<!-- 商机，签订合同 -->
+		(select COALESCE(sum(c.sale_amount),0) from crm_chance c where c.account_id=#{accountId} and period_type='4' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "dealOrderNum",
+		<!-- 商机，赢单 -->
+		(select COALESCE(sum(c.sale_amount),0) from crm_chance c where c.account_id=#{accountId} and period_type='5' and c.del_flag='0'
+		<if test="user != null and user.id != null and user.id != ''">
+				AND c.own_by = #{user.id}
+		</if>
+		<if test="startDate != null and startDate != ''">
+				 AND c.create_date between #{startDate} and #{endDate} 
+		</if>
+		) as "completeOrderNum" 
+		 from sys_account s where s.id=#{accountId}
+	</select>
+</mapper>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.om.dao.OmReturnorderDao">
+    
+	<sql id="omReturnorderColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.sale_type AS "saleType",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.order_id AS "order.id",
+		o.no AS "order.no",
+		a.warehouse_id AS "warehouse.id",
+		w.name AS "warehouse.name",
+		a.content AS "content",
+		a.num AS "num",
+		a.total_amt AS "totalAmt",
+		a.tax_amt AS "taxAmt",
+		a.other_amt AS "otherAmt",
+		a.amount AS "amount",
+		a.actual_amt AS "actualAmt",
+		a.fi_account_id AS "fiAccount.id",
+		f.name AS "fiAccount.name",
+		a.status AS "status",
+		a.deal_by AS "dealBy.id",
+		a.deal_date AS "dealDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u16.name AS "dealBy.name",
+		u18.name AS "createBy.name",
+		u20.name AS "auditBy.name"
+	</sql>
+	
+	<sql id="omReturnorderJoins">
+		LEFT JOIN sys_user u16 ON u16.id = a.deal_by
+		LEFT JOIN sys_user u18 ON u18.id = a.create_by
+		LEFT JOIN sys_user u20 ON u20.id = a.audit_by
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN fi_finance_account f ON f.id = a.fi_account_id
+		LEFT JOIN om_order o ON o.id = a.order_id
+		LEFT JOIN wms_warehouse w ON w.id = a.warehouse_id
+	</sql>
+    
+	<select id="get" resultType="OmReturnorder">
+		SELECT 
+			<include refid="omReturnorderColumns"/>
+		FROM om_returnorder a
+		<include refid="omReturnorderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OmReturnorder">
+		SELECT 
+			<include refid="omReturnorderColumns"/>
+		FROM om_returnorder a
+		<include refid="omReturnorderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="saleType != null and saleType != ''">
+				AND a.sale_type = #{saleType}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="order != null and order.id != null and order.id != ''">
+				AND a.order_id = #{order.id}
+			</if>
+			<if test="warehouse != null and warehouse.id != null and warehouse.id != ''">
+				AND a.warehouse_id = #{warehouse.id}
+			</if>
+			<if test="fiAccount != null and fiAccount.id != null and fiAccount.id != ''">
+				AND a.fi_account_id = #{fiAccount.id}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="dealBy != null and dealBy.id != null and dealBy.id != ''">
+				AND a.deal_by = #{dealBy.id}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OmReturnorder">
+		SELECT 
+			<include refid="omReturnorderColumns"/>
+		FROM om_returnorder a
+		<include refid="omReturnorderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO om_returnorder(
+			id,
+			no,
+			sale_type,
+			customer_id,
+			order_id,
+			warehouse_id,
+			content,
+			num,
+			total_amt,
+			tax_amt,
+			other_amt,
+			amount,
+			actual_amt,
+			fi_account_id,
+			status,
+			deal_by,
+			deal_date,
+			create_by,
+			create_date,
+			audit_by,
+			audit_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{saleType},
+			#{customer.id},
+			#{order.id},
+			#{warehouse.id},
+			#{content},
+			#{num},
+			#{totalAmt},
+			#{taxAmt},
+			#{otherAmt},
+			#{amount},
+			#{actualAmt},
+			#{fiAccount.id},
+			#{status},
+			#{dealBy.id},
+			#{dealDate},
+			#{createBy.id},
+			#{createDate},
+			#{auditBy.id},
+			#{auditDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE om_returnorder SET
+						no = #{no},
+			sale_type = #{saleType},
+			customer_id = #{customer.id},
+			order_id = #{order.id},
+			warehouse_id = #{warehouse.id},
+			content = #{content},
+			num = #{num},
+			total_amt = #{totalAmt},
+			tax_amt = #{taxAmt},
+			other_amt = #{otherAmt},
+			amount = #{amount},
+			actual_amt = #{actualAmt},
+			fi_account_id = #{fiAccount.id},
+			status = #{status},
+			deal_by = #{dealBy.id},
+			deal_date = #{dealDate},
+			create_by = #{createBy.id},
+			create_date = #{createDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE om_returnorder SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OmReturnorder" statementType="STATEMENT">
+		select * FROM om_returnorder  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM om_returnorder a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+		</where>			
+	</select>
+</mapper>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.sys.dao.OfficeDao">
+
+	<sql id="officeColumns">
+		a.id,
+		a.parent_id AS "parent.id",
+		a.parent_ids,
+		a.code,
+		a.name,
+		a.sort,
+		a.type,
+		a.grade,
+		a.remarks,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.update_by AS "updateBy.id",
+		a.update_date,
+		a.del_flag,
+		a.primary_person AS "primaryPerson.id",
+		p.name AS "parent.name",
+		pp.name AS "primaryPerson.name"
+	</sql>
+	
+	<sql id="officeJoins">
+		LEFT JOIN sys_office p ON p.id = a.parent_id
+		LEFT JOIN sys_user pp ON pp.id = a.primary_person
+    </sql>
+	
+	<select id="get" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getByCode" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		
+		WHERE a.code = #{code}
+	</select>
+	<select id="findList" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="name != null and name != ''">
+			AND a.name = #{name} 
+		</if>
+		<if test="code != null and code != ''">
+			AND a.code = #{code} 
+		</if>
+		
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		ORDER BY a.sort ASC
+	</select>
+			
+	<select id="findAllList" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		ORDER BY a.sort ASC
+	</select>
+	
+	<select id="findByParentIdsLike" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} AND a.parent_ids LIKE #{parentIds}
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		ORDER BY a.sort ASC
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_office(
+			id, 
+			parent_id, 
+			parent_ids, 
+			code, 
+			name, 
+			sort, 
+			type, 
+			grade, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks, 
+			del_flag,
+			account_id,
+			primary_person
+		) VALUES (
+			#{id}, 
+			#{parent.id}, 
+			#{parentIds}, 
+			#{code}, 
+			#{name}, 
+			#{sort}, 
+			#{type}, 
+			#{grade}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag},
+			#{accountId},
+			#{primaryPerson.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_office SET 
+			parent_id = #{parent.id}, 
+			parent_ids = #{parentIds}, 
+			code = #{code}, 
+			name = #{name}, 
+			sort = #{sort},
+			type = #{type}, 
+			grade = #{grade}, 
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks},
+			primary_person=#{primaryPerson.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateParentIds">
+		UPDATE sys_office SET 
+			parent_id = #{parent.id}, 
+			parent_ids = #{parentIds}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM sys_office 
+		WHERE id = #{id} OR parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{id}||',%'</if>
+					<if test="dbName == 'mssql'">'%'+#{id}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+	
+	<update id="deleteByLogic">
+		UPDATE sys_office SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id} OR parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{id}||',%'</if>
+					<if test="dbName == 'mssql'">'%'+#{id}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+
+	<select id="findOfficeList" resultType="Office">
+		SELECT
+			<include refid="officeColumns"/>
+		FROM sys_office a
+		<include refid="officeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="name != null and name != ''">
+			AND a.name = #{name} 
+		</if>
+		<if test="code != null and code != ''">
+			AND a.code = #{code} 
+		</if>
+		<if test="parent != null and parent.id != null and parent.id != ''">
+			AND a.parent_id = #{parent.id} 
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		ORDER BY a.type ASC
+	</select>
+</mapper>

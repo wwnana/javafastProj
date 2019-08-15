@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.wms.dao.WmsStockDao">
+    
+	<sql id="wmsStockColumns">
+		a.id AS "id",
+		a.product_id AS "product.id",
+		p.name AS "product.name",
+		p.no AS "product.no",
+		p.unit_type AS "product.unitType",
+		a.warehouse_id AS "warehouse.id",
+		w.name AS "warehouse.name",
+		a.stock_num AS "stockNum",
+		a.warn_num AS "warnNum",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="wmsStockJoins">
+		LEFT JOIN wms_product p ON p.id = a.product_id
+		LEFT JOIN wms_warehouse w ON w.id = a.warehouse_id
+	</sql>
+    
+	<select id="get" resultType="WmsStock">
+		SELECT 
+			<include refid="wmsStockColumns"/>
+		FROM wms_stock a
+		<include refid="wmsStockJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getProductStock" resultType="WmsStock">
+		SELECT 
+			<include refid="wmsStockColumns"/>
+		FROM wms_stock a
+		<include refid="wmsStockJoins"/>
+		WHERE a.product_id = #{productId} AND a.warehouse_id = #{warehouseId}
+	</select>
+	
+	<select id="findList" resultType="WmsStock">
+		SELECT 
+			<include refid="wmsStockColumns"/>
+		FROM wms_stock a
+		<include refid="wmsStockJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="product != null and product.id != null and product.id != ''">
+				AND a.product_id = #{product.id}
+			</if>
+			<if test="product != null and product.no != null and product.no != ''">
+				AND p.no = #{product.no}
+			</if>
+			<if test="product != null and product.name != null and product.name != ''">
+				AND p.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{product.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{product.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{product.name},'%')</if>
+			</if>
+			<if test="warehouse != null and warehouse.id != null and warehouse.id != ''">
+				AND a.warehouse_id = #{warehouse.id}
+			</if>
+			<if test="stockNum != null and stockNum != ''">
+				AND a.stock_num = #{stockNum}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WmsStock">
+		SELECT 
+			<include refid="wmsStockColumns"/>
+		FROM wms_stock a
+		<include refid="wmsStockJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wms_stock(
+			id,
+			product_id,
+			warehouse_id,
+			stock_num,
+			warn_num,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{product.id},
+			#{warehouse.id},
+			#{stockNum},
+			#{warnNum},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+		<update id="update">
+		UPDATE wms_stock SET
+						product_id = #{product.id},
+			warehouse_id = #{warehouse.id},
+			stock_num = #{stockNum},
+			warn_num = #{warnNum}
+		WHERE id = #{id}
+	</update>
+
+
+
+	
+	<update id="delete">
+		UPDATE wms_stock SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WmsStock" statementType="STATEMENT">
+		select * FROM wms_stock  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findWarnList" resultType="WmsStock">
+		SELECT 
+			<include refid="wmsStockColumns"/>
+		FROM wms_stock a
+		<include refid="wmsStockJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} AND a.stock_num &lt;= a.warn_num
+			<if test="product != null and product.id != null and product.id != ''">
+				AND a.product_id = #{product.id}
+			</if>
+			<if test="product != null and product.no != null and product.no != ''">
+				AND p.no = #{product.no}
+			</if>
+			<if test="product != null and product.name != null and product.name != ''">
+				AND p.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{product.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{product.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{product.name},'%')</if>
+			</if>
+			<if test="warehouse != null and warehouse.id != null and warehouse.id != ''">
+				AND a.warehouse_id = #{warehouse.id}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

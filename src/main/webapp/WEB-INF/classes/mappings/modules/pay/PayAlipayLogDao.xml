@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.pay.dao.PayAlipayLogDao">
+    
+	<sql id="payAlipayLogColumns">
+		a.id AS "id",
+		a.appid AS "appid",
+		a.seller_id AS "sellerId",
+		a.trade_no AS "tradeNo",
+		a.out_trade_no AS "outTradeNo",
+		a.trade_status AS "tradeStatus",
+		a.sign AS "sign",
+		a.sign_type AS "signType",
+		a.trade_type AS "tradeType",
+		a.bank_type AS "bankType",
+		a.total_amount AS "totalAmount",
+		a.buyer_pay_amount AS "buyerPayAmount",
+		a.receipt_amount AS "receiptAmount",
+		a.gmt_payment AS "gmtPayment",
+		a.buyer_id AS "buyerId",
+		a.out_biz_no AS "outBizNo",
+		a.refund_fee AS "refundFee",
+		a.gmt_refund AS "gmtRefund",
+		a.status AS "status",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="payAlipayLogJoins">
+	</sql>
+    
+	<select id="get" resultType="PayAlipayLog">
+		SELECT 
+			<include refid="payAlipayLogColumns"/>
+		FROM pay_alipay_log a
+		<include refid="payAlipayLogJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PayAlipayLog">
+		SELECT 
+			<include refid="payAlipayLogColumns"/>
+		FROM pay_alipay_log a
+		<include refid="payAlipayLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="tradeNo != null and tradeNo != ''">
+				AND a.trade_no = #{tradeNo}
+			</if>
+			<if test="outTradeNo != null and outTradeNo != ''">
+				AND a.out_trade_no = #{outTradeNo}
+			</if>
+			<if test="tradeStatus != null and tradeStatus != ''">
+				AND a.trade_status = #{tradeStatus}
+			</if>
+			<if test="buyerId != null and buyerId != ''">
+				AND a.buyer_id = #{buyerId}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PayAlipayLog">
+		SELECT 
+			<include refid="payAlipayLogColumns"/>
+		FROM pay_alipay_log a
+		<include refid="payAlipayLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pay_alipay_log(
+			id,
+			appid,
+			seller_id,
+			trade_no,
+			out_trade_no,
+			trade_status,
+			sign,
+			sign_type,
+			trade_type,
+			bank_type,
+			total_amount,
+			buyer_pay_amount,
+			receipt_amount,
+			gmt_payment,
+			buyer_id,
+			out_biz_no,
+			refund_fee,
+			gmt_refund,
+			status,
+			create_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{appid},
+			#{sellerId},
+			#{tradeNo},
+			#{outTradeNo},
+			#{tradeStatus},
+			#{sign},
+			#{signType},
+			#{tradeType},
+			#{bankType},
+			#{totalAmount},
+			#{buyerPayAmount},
+			#{receiptAmount},
+			#{gmtPayment},
+			#{buyerId},
+			#{outBizNo},
+			#{refundFee},
+			#{gmtRefund},
+			#{status},
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE pay_alipay_log SET
+						appid = #{appid},
+			seller_id = #{sellerId},
+			trade_no = #{tradeNo},
+			out_trade_no = #{outTradeNo},
+			trade_status = #{tradeStatus},
+			sign = #{sign},
+			sign_type = #{signType},
+			trade_type = #{tradeType},
+			bank_type = #{bankType},
+			total_amount = #{totalAmount},
+			buyer_pay_amount = #{buyerPayAmount},
+			receipt_amount = #{receiptAmount},
+			gmt_payment = #{gmtPayment},
+			buyer_id = #{buyerId},
+			out_biz_no = #{outBizNo},
+			refund_fee = #{refundFee},
+			gmt_refund = #{gmtRefund},
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE pay_alipay_log SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="PayAlipayLog" statementType="STATEMENT">
+		select * FROM pay_alipay_log  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

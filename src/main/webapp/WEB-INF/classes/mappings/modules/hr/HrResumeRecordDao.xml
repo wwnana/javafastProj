@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrResumeRecordDao">
+    
+	<sql id="hrResumeRecordColumns">
+		a.id AS "id",
+		a.hr_resume_id AS "hrResume.id",
+		a.user_id AS "user.id",
+		a.read_flag AS "readFlag",
+		a.read_date AS "readDate",
+		u3.name AS "user.name"
+	</sql>
+	
+	<sql id="hrResumeRecordJoins">
+		LEFT JOIN sys_user u3 ON u3.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="HrResumeRecord">
+		SELECT 
+			<include refid="hrResumeRecordColumns"/>
+		FROM hr_resume_record a
+		<include refid="hrResumeRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrResumeRecord">
+		SELECT 
+			<include refid="hrResumeRecordColumns"/>
+		FROM hr_resume_record a
+		<include refid="hrResumeRecordJoins"/>
+		<where>
+			
+			<if test="hrResume != null and hrResume.id != null and hrResume.id != ''">
+				AND a.hr_resume_id = #{hrResume.id}
+			</if>
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+			<if test="readFlag != null and readFlag != ''">
+				AND a.read_flag = #{readFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrResumeRecord">
+		SELECT 
+			<include refid="hrResumeRecordColumns"/>
+		FROM hr_resume_record a
+		<include refid="hrResumeRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_resume_record(
+			id,
+			hr_resume_id,
+			user_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{hrResume.id},
+			#{user.id},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_resume_record SET
+						hr_resume_id = #{hrResume.id},
+			user_id = #{user.id},
+			read_flag = #{readFlag},
+			read_date = #{readDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM hr_resume_record
+		WHERE hr_resume_id = #{hrResume.id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrResumeRecord" statementType="STATEMENT">
+		select * FROM hr_resume_record  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

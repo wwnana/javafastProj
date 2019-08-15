@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrSalaryDetailDao">
+    
+	<sql id="hrSalaryDetailColumns">
+		a.id AS "id",
+		a.hr_salary_id AS "hrSalary.id",
+		a.hr_employee_id AS "hrEmployee.id",
+		a.name AS "name",
+		a.must_work_days AS "mustWorkDays",
+		a.real_work_days AS "realWorkDays",
+		a.extra_work_days AS "extraWorkDays",
+		a.leave_days AS "leaveDays",
+		a.absent_days AS "absentDays",
+		a.base_salary AS "baseSalary",
+		a.post_salary AS "postSalary",
+		a.bonus_salary AS "bonusSalary",
+		a.overtime_salary AS "overtimeSalary",
+		a.should_amt AS "shouldAmt",
+		a.social_amt AS "socialAmt",
+		a.fund_amt AS "fundAmt",
+		a.tax_amt AS "taxAmt",
+		a.seduct_salary AS "seductSalary",
+		a.real_amt AS "realAmt",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId"
+	</sql>
+	
+	<sql id="hrSalaryDetailJoins">
+		LEFT JOIN hr_salary b ON b.id = a.hr_salary_id
+	</sql>
+    
+	<select id="get" resultType="HrSalaryDetail">
+		SELECT 
+			<include refid="hrSalaryDetailColumns"/>
+		FROM hr_salary_detail a
+		<include refid="hrSalaryDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrSalaryDetail">
+		SELECT 
+			<include refid="hrSalaryDetailColumns"/>
+		FROM hr_salary_detail a
+		<include refid="hrSalaryDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="hrSalaryId != null and hrSalaryId != ''">
+				AND a.hr_salary_id = #{hrSalaryId}
+			</if>
+			<if test="hrEmployee != null and hrEmployee.id != null and hrEmployee.id != null and hrEmployee.id != ''">
+				AND a.hr_employee_id = #{hrEmployee.id}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrSalaryDetail">
+		SELECT 
+			<include refid="hrSalaryDetailColumns"/>
+		FROM hr_salary_detail a
+		<include refid="hrSalaryDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_salary_detail(
+			id,
+			hr_salary_id,
+			hr_employee_id,
+			name,
+			must_work_days,
+			real_work_days,
+			extra_work_days,
+			leave_days,
+			absent_days,
+			base_salary,
+			post_salary,
+			bonus_salary,
+			overtime_salary,
+			should_amt,
+			social_amt,
+			fund_amt,
+			tax_amt,
+			seduct_salary,
+			real_amt,
+			status,
+			create_by,
+			create_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{hrSalary.id},
+			#{hrEmployee.id},
+			#{name},
+			#{mustWorkDays},
+			#{realWorkDays},
+			#{extraWorkDays},
+			#{leaveDays},
+			#{absentDays},
+			#{baseSalary},
+			#{postSalary},
+			#{bonusSalary},
+			#{overtimeSalary},
+			#{shouldAmt},
+			#{socialAmt},
+			#{fundAmt},
+			#{taxAmt},
+			#{seductSalary},
+			#{realAmt},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_salary_detail SET
+						hr_salary_id = #{hrSalary.id},
+			hr_employee_id = #{hrEmployee.id},
+			name = #{name},
+			must_work_days = #{mustWorkDays},
+			real_work_days = #{realWorkDays},
+			extra_work_days = #{extraWorkDays},
+			leave_days = #{leaveDays},
+			absent_days = #{absentDays},
+			base_salary = #{baseSalary},
+			post_salary = #{postSalary},
+			bonus_salary = #{bonusSalary},
+			overtime_salary = #{overtimeSalary},
+			should_amt = #{shouldAmt},
+			social_amt = #{socialAmt},
+			fund_amt = #{fundAmt},
+			tax_amt = #{taxAmt},
+			seduct_salary = #{seductSalary},
+			real_amt = #{realAmt},
+			status = #{status},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_salary_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE hr_salary_id = #{hrSalaryId}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrSalaryDetail" statementType="STATEMENT">
+		select * FROM hr_salary_detail  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

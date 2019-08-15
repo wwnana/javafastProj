@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaTopicRecordDao">
+    
+	<sql id="oaTopicRecordColumns">
+		a.id AS "id",
+		a.oa_topic_id AS "oaTopic.id",
+		a.user_id AS "user.id",
+		a.notes AS "notes",
+		a.thumbs AS "thumbs",
+		a.create_date AS "createDate",
+		u3.name AS "user.name",
+		u3.photo AS"user.photo"
+	</sql>
+	
+	<sql id="oaTopicRecordJoins">
+		LEFT JOIN oa_topic b ON b.id = a.oa_topic_id
+		LEFT JOIN sys_user u3 ON u3.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="OaTopicRecord">
+		SELECT 
+			<include refid="oaTopicRecordColumns"/>
+		FROM oa_topic_record a
+		<include refid="oaTopicRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaTopicRecord">
+		SELECT 
+			<include refid="oaTopicRecordColumns"/>
+		FROM oa_topic_record a
+		<include refid="oaTopicRecordJoins"/>
+		<where>
+			
+			<if test="oaTopic != null and oaTopic.id != null and oaTopic.id != ''">
+				AND a.oa_topic_id = #{oaTopic.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaTopicRecord">
+		SELECT 
+			<include refid="oaTopicRecordColumns"/>
+		FROM oa_topic_record a
+		<include refid="oaTopicRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_topic_record(
+			id,
+			oa_topic_id,
+			user_id,
+			notes,
+			thumbs,
+			create_date
+		) VALUES (
+			#{id},
+			#{oaTopic.id},
+			#{user.id},
+			#{notes},
+			#{thumbs},
+			#{createDate}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_topic_record SET
+						oa_topic_id = #{oaTopic.id},
+			user_id = #{user.id},
+			notes = #{notes},
+			thumbs = #{thumbs}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM oa_topic_record
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE oa_topic_id = #{oaTopic.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaTopicRecord" statementType="STATEMENT">
+		select * FROM oa_topic_record  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

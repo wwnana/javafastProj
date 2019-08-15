@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.qws.dao.QwsSuiteNoticeDao">
+    
+	<sql id="qwsSuiteNoticeColumns">
+		a.id AS "id",
+		a.request_url AS "requestUrl",
+		a.request_body AS "requestBody",
+		a.msg_signature AS "msgSignature",
+		a.timestamp AS "timestamp",
+		a.nonce AS "nonce",
+		a.echostr AS "echostr",
+		a.suite_id AS "suiteId",
+		a.info_type AS "infoType",
+		a.suite_ticket AS "suiteTicket",
+		a.auth_code AS "authCode",
+		a.auth_corp_id AS "authCorpId",
+		a.change_type AS "changeType",
+		a.user_id AS "user.id",
+		a.party_id AS "partyId",
+		a.create_date AS "createDate",
+		a.status AS "status",
+		u14.name AS "user.name"
+	</sql>
+	
+	<sql id="qwsSuiteNoticeJoins">
+		LEFT JOIN sys_user u14 ON u14.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="QwsSuiteNotice">
+		SELECT 
+			<include refid="qwsSuiteNoticeColumns"/>
+		FROM qws_suite_notice a
+		<include refid="qwsSuiteNoticeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="QwsSuiteNotice">
+		SELECT 
+			<include refid="qwsSuiteNoticeColumns"/>
+		FROM qws_suite_notice a
+		<include refid="qwsSuiteNoticeJoins"/>
+		<where>
+			
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="QwsSuiteNotice">
+		SELECT 
+			<include refid="qwsSuiteNoticeColumns"/>
+		FROM qws_suite_notice a
+		<include refid="qwsSuiteNoticeJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO qws_suite_notice(
+			id,
+			request_url,
+			request_body,
+			msg_signature,
+			timestamp,
+			nonce,
+			echostr,
+			suite_id,
+			info_type,
+			suite_ticket,
+			auth_code,
+			auth_corp_id,
+			change_type,
+			user_id,
+			party_id,
+			create_date,
+			status
+		) VALUES (
+			#{id},
+			#{requestUrl},
+			#{requestBody},
+			#{msgSignature},
+			#{timestamp},
+			#{nonce},
+			#{echostr},
+			#{suiteId},
+			#{infoType},
+			#{suiteTicket},
+			#{authCode},
+			#{authCorpId},
+			#{changeType},
+			#{user.id},
+			#{partyId},
+			#{createDate},
+			#{status}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE qws_suite_notice SET
+						request_url = #{requestUrl},
+			request_body = #{requestBody},
+			msg_signature = #{msgSignature},
+			timestamp = #{timestamp},
+			nonce = #{nonce},
+			echostr = #{echostr},
+			suite_id = #{suiteId},
+			info_type = #{infoType},
+			suite_ticket = #{suiteTicket},
+			auth_code = #{authCode},
+			auth_corp_id = #{authCorpId},
+			change_type = #{changeType},
+			user_id = #{user.id},
+			party_id = #{partyId},
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM qws_suite_notice
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="QwsSuiteNotice" statementType="STATEMENT">
+		select * FROM qws_suite_notice  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 获取最新的 suite_ticket -->
+	<select id="findListForSuiteTicket" resultType="QwsSuiteNotice">
+		SELECT a.suite_ticket AS "suiteTicket" FROM qws_suite_notice a WHERE info_type = 'suite_ticket' ORDER BY a.create_date DESC LIMIT 1
+	</select>
+	
+</mapper>

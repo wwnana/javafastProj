@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.cg.dao.CgTableDao">
+    
+	<sql id="cgTableColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.comments AS "comments",
+		a.class_name AS "className",
+		a.parent_table AS "parentTable",
+		a.parent_table_fk AS "parentTableFk",
+		a.cg_category AS "cgCategory",
+		a.package_name AS "packageName",
+		a.module_name AS "moduleName",
+		a.sub_module_name AS "subModuleName",
+		a.function_name AS "functionName",
+		a.function_name_simple AS "functionNameSimple",
+		a.function_author AS "functionAuthor",
+		a.page_model AS "pageModel",
+		a.tree_data AS "treeData",
+		a.is_list_checkbox AS "isListCheckbox",
+		a.is_table_select AS "isTableSelect",
+		a.is_excel AS "isExcel",
+		a.is_synch AS "isSynch",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks"
+	</sql>
+	
+	<sql id="cgTableJoins">
+	</sql>
+    
+	<select id="get" resultType="CgTable">
+		SELECT 
+			<include refid="cgTableColumns"/>
+		FROM cg_table a
+		<include refid="cgTableJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CgTable">
+		SELECT 
+			<include refid="cgTableColumns"/>
+		FROM cg_table a
+		<include refid="cgTableJoins"/>
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="comments != null and comments != ''">
+				AND a.comments LIKE 
+					<if test="dbName == 'oracle'">'%'||#{comments}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{comments}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{comments},'%')</if>
+			</if>
+			<if test="parentTable != null and parentTable != ''">
+				AND a.parent_table = #{parentTable}
+			</if>
+			<if test="isSynch != null and isSynch != ''">
+				AND a.is_synch = #{isSynch}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CgTable">
+		SELECT 
+			<include refid="cgTableColumns"/>
+		FROM cg_table a
+		<include refid="cgTableJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cg_table(
+			id,
+			name,
+			comments,
+			class_name,
+			parent_table,
+			parent_table_fk,
+			cg_category,
+			package_name,
+			module_name,
+			sub_module_name,
+			function_name,
+			function_name_simple,
+			function_author,
+			page_model,
+			tree_data,
+			is_list_checkbox,
+			is_table_select,
+			is_excel,
+			is_synch,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks
+		) VALUES (
+			#{id},
+			#{name},
+			#{comments},
+			#{className},
+			#{parentTable},
+			#{parentTableFk},
+			#{cgCategory},
+			#{packageName},
+			#{moduleName},
+			#{subModuleName},
+			#{functionName},
+			#{functionNameSimple},
+			#{functionAuthor},
+			#{pageModel},
+			#{treeData},
+			#{isListCheckbox},
+			#{isTableSelect},
+			#{isExcel},
+			#{isSynch},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cg_table SET
+						name = #{name},
+			comments = #{comments},
+			class_name = #{className},
+			parent_table = #{parentTable},
+			parent_table_fk = #{parentTableFk},
+			cg_category = #{cgCategory},
+			package_name = #{packageName},
+			module_name = #{moduleName},
+			sub_module_name = #{subModuleName},
+			function_name = #{functionName},
+			function_name_simple = #{functionNameSimple},
+			function_author = #{functionAuthor},
+			page_model = #{pageModel},
+			tree_data = #{treeData},
+			is_list_checkbox = #{isListCheckbox},
+			is_table_select = #{isTableSelect},
+			is_excel = #{isExcel},
+			is_synch = #{isSynch},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM cg_table
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CgTable" statementType="STATEMENT">
+		select * FROM cg_table  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

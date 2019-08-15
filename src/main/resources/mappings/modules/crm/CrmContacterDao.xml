@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmContacterDao">
+    
+	<sql id="crmContacterColumns">
+		a.id AS "id",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.birthday AS "birthday",
+		a.role_type AS "roleType",
+		a.job_type AS "jobType",
+		a.mobile AS "mobile",
+		a.tel AS "tel",
+		a.email AS "email",
+		a.wx AS "wx",
+		a.qq AS "qq",
+		a.is_default AS "isDefault",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u12.name AS "createBy.name",
+		a.own_by AS "ownBy.id",
+		u10.name AS "ownBy.name"
+	</sql>
+	
+	<sql id="crmContacterJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+		LEFT JOIN sys_user u10 ON u10.id = a.own_by
+	</sql>
+    
+	<select id="get" resultType="CrmContacter">
+		SELECT 
+			<include refid="crmContacterColumns"/>
+		FROM crm_contacter a
+		<include refid="crmContacterJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmContacter">
+		SELECT 
+			<include refid="crmContacterColumns"/>
+		FROM crm_contacter a
+		<include refid="crmContacterJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mobile}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mobile}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mobile},'%')</if>
+			</if>
+			<if test="qq != null and qq != ''">
+				AND a.qq = #{qq}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+				OR c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>)
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmContacter">
+		SELECT 
+			<include refid="crmContacterColumns"/>
+		FROM crm_contacter a
+		<include refid="crmContacterJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_contacter(
+			id,
+			customer_id,
+			name,
+			sex,
+			birthday,
+			role_type,
+			job_type,
+			mobile,
+			tel,
+			email,
+			wx,
+			qq,
+			is_default,
+			own_by,			
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id,
+			office_id
+		) VALUES (
+			#{id},
+			#{customer.id},
+			#{name},
+			#{sex},
+			#{birthday},
+			#{roleType},
+			#{jobType},
+			#{mobile},
+			#{tel},
+			#{email},
+			#{wx},
+			#{qq},
+			#{isDefault},
+			#{ownBy.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId},
+			#{officeId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_contacter SET
+						customer_id = #{customer.id},
+			name = #{name},
+			sex = #{sex},
+			birthday = #{birthday},
+			role_type = #{roleType},
+			job_type = #{jobType},
+			mobile = #{mobile},
+			tel = #{tel},
+			email = #{email},
+			wx = #{wx},
+			qq = #{qq},
+			is_default = #{isDefault},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_contacter SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmContacter" statementType="STATEMENT">
+		select * FROM crm_contacter  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM crm_contacter a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+		</where>
+			
+	</select>
+	
+	<!-- 放入公海 -->
+	<update id="throwToPool">
+		UPDATE crm_contacter SET 
+			own_by = NULL,
+			office_id = NULL 
+		WHERE customer_id = #{customer.id}
+	</update>
+	
+	<!-- 更新所有人 -->
+	<update id="updateOwnBy">
+		UPDATE crm_contacter SET 
+			own_by = #{ownBy.id},
+			office_id = #{officeId} 
+		WHERE customer_id = #{customer.id}
+	</update>
+	
+	<!-- 更新客户下面的联系人为非首要 -->
+	<update id="updateNotDefault">
+		UPDATE crm_contacter SET 
+			is_default = '0' 
+		WHERE customer_id = #{customer.id} AND id != #{id}
+	</update>
+</mapper>

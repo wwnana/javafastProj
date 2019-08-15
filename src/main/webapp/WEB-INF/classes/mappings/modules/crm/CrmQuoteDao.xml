@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmQuoteDao">
+    
+	<sql id="crmQuoteColumns">
+		a.id AS "id",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.contacter_id AS "contacter.id",
+		e.name AS "contacter.name",
+		e.mobile AS "contacter.mobile",
+		a.chance_id AS "chance.id",
+		chance.name AS "chance.name",
+		a.no AS "no",
+		a.amount AS "amount",
+		a.num AS "num",
+		a.startdate AS "startdate",
+		a.enddate AS "enddate",
+		a.status AS "status",
+		a.own_by AS "ownBy.id",
+		a.notes AS "notes",
+		a.files AS "files",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.account_id AS "accountId",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.office_id AS "officeId",
+		u10.name AS "ownBy.name",
+		u13.name AS "createBy.name",
+		u13.mobile AS "createBy.mobile",
+		u22.name AS "auditBy.name"
+	</sql>
+	
+	<sql id="crmQuoteJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN crm_contacter e ON e.id = a.contacter_id
+		LEFT JOIN crm_chance chance ON chance.id = a.chance_id
+		LEFT JOIN sys_user u10 ON u10.id = a.own_by
+		LEFT JOIN sys_user u13 ON u13.id = a.create_by
+		LEFT JOIN sys_user u22 ON u22.id = a.audit_by
+	</sql>
+    
+	<select id="get" resultType="CrmQuote">
+		SELECT 
+			<include refid="crmQuoteColumns"/>
+		FROM crm_quote a
+		<include refid="crmQuoteJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmQuote">
+		SELECT 
+			<include refid="crmQuoteColumns"/>
+		FROM crm_quote a
+		<include refid="crmQuoteJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="contacter != null and contacter.id != null and contacter.id != ''">
+				AND a.contacter_id = #{contacter.id}
+			</if>
+			<if test="chance != null and chance.id != null and chance.id != ''">
+				AND a.chance_id = #{chance.id}
+			</if>
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="amount != null and amount != ''">
+				AND a.amount = #{amount}
+			</if>
+			<if test="startdate != null and startdate != ''">
+				AND a.startdate = #{startdate}
+			</if>
+			<if test="enddate != null and enddate != ''">
+				AND a.enddate = #{enddate}
+			</if>
+			<if test="beginStartdate != null and endStartdate != null and beginStartdate != '' and endStartdate != ''">
+				AND a.startdate BETWEEN #{beginStartdate} AND #{endStartdate}
+			</if>
+			<if test="beginEnddate != null and endEnddate != null and beginEnddate != '' and endEnddate != ''">
+				AND a.enddate BETWEEN #{beginEnddate} AND #{endEnddate}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmQuote">
+		SELECT 
+			<include refid="crmQuoteColumns"/>
+		FROM crm_quote a
+		<include refid="crmQuoteJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_quote(
+			id,
+			customer_id,
+			contacter_id,
+			chance_id,
+			no,
+			amount,
+			num,
+			startdate,
+			enddate,
+			status,
+			own_by,
+			notes,
+			files,
+			audit_by,
+			audit_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id,
+			office_id
+		) VALUES (
+			#{id},
+			#{customer.id},
+			#{contacter.id},
+			#{chance.id},
+			#{no},
+			#{amount},
+			#{num},
+			#{startdate},
+			#{enddate},
+			#{status},
+			#{ownBy.id},
+			#{notes},
+			#{files},
+			#{auditBy.id},
+			#{auditDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId},
+			#{officeId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_quote SET
+						customer_id = #{customer.id},
+			contacter_id = #{contacter.id},
+			chance_id = #{chance.id},
+			no = #{no},
+			amount = #{amount},
+			num = #{num},
+			startdate = #{startdate},
+			enddate = #{enddate},
+			status = #{status},
+			own_by = #{ownBy.id},
+			notes = #{notes},
+			files = #{files},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_quote SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmQuote" statementType="STATEMENT">
+		select * FROM crm_quote  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM crm_quote a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+		</where>
+			
+	</select>
+</mapper>

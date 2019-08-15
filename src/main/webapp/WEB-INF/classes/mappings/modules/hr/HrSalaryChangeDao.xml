@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.hr.dao.HrSalaryChangeDao">
+    
+	<sql id="hrSalaryChangeColumns">
+		a.id AS "id",
+		a.hr_employee_id AS "hrEmployee.id",
+		a.old_base_salary AS "oldBaseSalary",
+		a.base_salary AS "baseSalary",
+		a.change_range AS "changeRange",
+		a.effect_date AS "effectDate",
+		a.change_cause AS "changeCause",
+		a.status AS "status",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		h.name AS "hrEmployee.name",
+		u12.name AS "createBy.name",
+		u13.name AS "auditBy.name"
+	</sql>
+	
+	<sql id="hrSalaryChangeJoins">
+		LEFT JOIN hr_employee h ON h.id = a.hr_employee_id
+		LEFT JOIN sys_user u13 ON u13.id = a.audit_by
+		LEFT JOIN sys_user u12 ON u12.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="HrSalaryChange">
+		SELECT 
+			<include refid="hrSalaryChangeColumns"/>
+		FROM hr_salary_change a
+		<include refid="hrSalaryChangeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="HrSalaryChange">
+		SELECT 
+			<include refid="hrSalaryChangeColumns"/>
+		FROM hr_salary_change a
+		<include refid="hrSalaryChangeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="hrEmployee != null and hrEmployee.id != null and hrEmployee.id != ''">
+				AND a.hr_employee_id = #{hrEmployee.id}
+			</if>
+			<if test="beginEffectDate != null and endEffectDate != null and beginEffectDate != '' and endEffectDate != ''">
+				AND a.effect_date BETWEEN #{beginEffectDate} AND #{endEffectDate}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="HrSalaryChange">
+		SELECT 
+			<include refid="hrSalaryChangeColumns"/>
+		FROM hr_salary_change a
+		<include refid="hrSalaryChangeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO hr_salary_change(
+			id,
+			hr_employee_id,
+			old_base_salary,
+			base_salary,
+			change_range,
+			effect_date,
+			change_cause,
+			status,
+			audit_by,
+			audit_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{hrEmployee.id},
+			#{oldBaseSalary},
+			#{baseSalary},
+			#{changeRange},
+			#{effectDate},
+			#{changeCause},
+			#{status},
+			#{auditBy.id},
+			#{auditDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE hr_salary_change SET
+						hr_employee_id = #{hrEmployee.id},
+			old_base_salary = #{oldBaseSalary},
+			base_salary = #{baseSalary},
+			change_range = #{changeRange},
+			effect_date = #{effectDate},
+			change_cause = #{changeCause},
+			status = #{status},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE hr_salary_change SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="HrSalaryChange" statementType="STATEMENT">
+		select * FROM hr_salary_change  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

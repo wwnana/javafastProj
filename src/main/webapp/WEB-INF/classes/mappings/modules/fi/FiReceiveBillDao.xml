@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.fi.dao.FiReceiveBillDao">
+    
+	<sql id="fiReceiveBillColumns">
+		a.id AS "id",
+		a.no AS "no",
+		a.fi_receive_able_id AS "fiReceiveAble.id",
+		r.no AS "fiReceiveAble.no",
+		r.no AS "fiReceiveAble.name",
+		a.order_id AS "order.id",
+		o.no AS "order.no",
+		a.customer_id AS "customer.id",
+		c.name AS "customer.name",
+		a.amount AS "amount",
+		a.deal_date AS "dealDate",
+		a.fi_account_id AS "fiAccount.id",
+		f.name AS "fiAccount.name",
+		a.own_by AS "ownBy.id",
+		a.is_invoice AS "isInvoice",
+		a.invoice_amt AS "invoiceAmt",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.audit_by AS "auditBy.id",
+		a.audit_date AS "auditDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.account_id AS "accountId",
+		u8.name AS "ownBy.name",
+		u10.name AS "createBy.name",
+		u12.name AS "auditBy.name"
+	</sql>
+	
+	<sql id="fiReceiveBillJoins">
+		LEFT JOIN crm_customer c ON c.id = a.customer_id
+		LEFT JOIN fi_receive_able r ON r.id = a.fi_receive_able_id
+		LEFT JOIN fi_finance_account f ON f.id = fi_account_id
+		LEFT JOIN om_order o ON o.id = a.order_id
+		LEFT JOIN sys_user u8 ON u8.id = a.own_by
+		LEFT JOIN sys_user u10 ON u10.id = a.create_by
+		LEFT JOIN sys_user u12 ON u12.id = a.audit_by
+	</sql>
+    
+	<select id="get" resultType="FiReceiveBill">
+		SELECT 
+			<include refid="fiReceiveBillColumns"/>
+		FROM fi_receive_bill a
+		<include refid="fiReceiveBillJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FiReceiveBill">
+		SELECT 
+			<include refid="fiReceiveBillColumns"/>
+		FROM fi_receive_bill a
+		<include refid="fiReceiveBillJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="no != null and no != ''">
+				AND a.no = #{no}
+			</if>
+			<if test="fiReceiveAble != null and fiReceiveAble.id != null and fiReceiveAble.id != ''">
+				AND a.fi_receive_able_id = #{fiReceiveAble.id}
+			</if>
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+			<if test="customer != null and customer.name != null and customer.name != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer.name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer.name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer.name},'%')</if>
+			</if>
+			<if test="order != null and order.id != null and order.id != ''">
+				AND a.order_id = #{order.id}
+			</if>
+			<if test="beginDealDate != null and endDealDate != null and beginDealDate != '' and endDealDate != ''">
+				AND a.deal_date BETWEEN #{beginDealDate} AND #{endDealDate}
+			</if>
+			<if test="fiAccount != null and fiAccount.id != null and fiAccount.id != ''">
+				AND a.fi_account_id = #{fiAccount.id}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="isInvoice != null and isInvoice != ''">
+				AND a.is_invoice = #{isInvoice}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND c.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FiReceiveBill">
+		SELECT 
+			<include refid="fiReceiveBillColumns"/>
+		FROM fi_receive_bill a
+		<include refid="fiReceiveBillJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf} 		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO fi_receive_bill(
+			id,
+			no,
+			fi_receive_able_id,
+			customer_id,
+			order_id,
+			amount,
+			deal_date,
+			fi_account_id,
+			own_by,
+			is_invoice,
+			invoice_amt,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			account_id
+		) VALUES (
+			#{id},
+			#{no},
+			#{fiReceiveAble.id},
+			#{customer.id},
+			#{order.id},
+			#{amount},
+			#{dealDate},
+			#{fiAccount.id},
+			#{ownBy.id},
+			#{isInvoice},
+			#{invoiceAmt},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE fi_receive_bill SET
+						no = #{no},
+			fi_receive_able_id = #{fiReceiveAble.id},
+			customer_id = #{customer.id},
+			order_id = #{order.id},
+			amount = #{amount},
+			deal_date = #{dealDate},
+			fi_account_id = #{fiAccount.id},
+			own_by = #{ownBy.id},
+			is_invoice = #{isInvoice},
+			invoice_amt = #{invoiceAmt},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			audit_by = #{auditBy.id},
+			audit_date = #{auditDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE fi_receive_bill SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE
+		<if test="id != null and id != ''">
+			id = #{id}
+		</if>
+			 
+		<if test="fiReceiveAble != null and fiReceiveAble.id != null and fiReceiveAble.id != ''">
+			fi_receive_able_id = #{fiReceiveAble.id}
+		</if>
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FiReceiveBill" statementType="STATEMENT">
+		select * FROM fi_receive_bill  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) FROM fi_receive_bill a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="customer != null and customer.id != null and customer.id != ''">
+				AND a.customer_id = #{customer.id}
+			</if>
+		</where>			
+	</select>
+</mapper>

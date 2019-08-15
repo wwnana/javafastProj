@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.crm.dao.CrmCustomerDao">
+    
+	<sql id="crmCustomerColumnsForList">
+		a.id AS "id",
+		a.name AS "name",
+		a.customer_type AS "customerType",
+		a.customer_status AS "customerStatus",
+		a.customer_level AS "customerLevel",
+		a.industry_type AS "industryType",
+		a.sour_type AS "sourType",
+		a.contacter_name AS "contacterName",
+		a.mobile AS "mobile",
+		a.nextcontact_date AS "nextcontactDate",
+		a.nextcontact_note AS "nextcontactNote",
+		a.tags AS "tags",
+		a.own_by AS "ownBy.id",
+		a.is_pool as "isPool",
+		a.clue_id AS "crmClueId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.lock_flag AS "lockFlag",
+		a.del_flag AS "delFlag",
+		u10.name AS "ownBy.name",
+		u11.name AS "createBy.name",
+		u12.name AS "updateBy.name",
+		s.id AS "isStar"
+	</sql>
+	
+	<sql id="crmCustomerColumnsForGet">
+		a.id AS "id",
+		a.name AS "name",
+		a.customer_type AS "customerType",
+		a.customer_status AS "customerStatus",
+		a.customer_level AS "customerLevel",
+		a.contacter_name AS "contacterName",
+		a.mobile AS "mobile",
+		a.nextcontact_date AS "nextcontactDate",
+		a.nextcontact_note AS "nextcontactNote",
+		a.tags AS "tags",
+		a.own_by AS "ownBy.id",
+		a.is_pool as "isPool",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.lock_flag AS "lockFlag",
+		a.del_flag AS "delFlag",
+		u10.name AS "ownBy.name",
+		u10.photo AS "ownBy.photo",
+		u11.name AS "createBy.name",
+		u12.name AS "updateBy.name",
+		s.id AS "isStar",
+		a.clue_id AS "crmClueId",
+		a.industry_type AS "industryType",
+		a.sour_type AS "sourType",
+		a.nature_type AS "natureType",
+		a.scale_type AS "scaleType",
+		a.coin AS "coin",
+		a.phone AS "phone",
+		a.fax AS "fax",
+		a.province AS "province",
+		a.city AS "city",
+		a.dict AS "dict",
+		a.address AS "address",
+		a.bankaccountname AS "bankaccountname",
+		a.bankaccountno AS "bankaccountno",
+		a.remarks AS "remarks"
+	</sql>
+	
+	<sql id="crmCustomerJoins">
+		LEFT JOIN sys_user u10 ON u10.id = a.own_by
+		LEFT JOIN sys_user u11 ON u11.id = a.create_by
+		LEFT JOIN sys_user u12 ON u12.id = a.update_by
+		LEFT JOIN (select * from crm_customer_star where own_by=#{currentUser.id}) s ON s.customer_id = a.id 
+	</sql>
+    
+	<select id="get" resultType="CrmCustomer">
+		SELECT 
+			<include refid="crmCustomerColumnsForGet"/>
+		FROM crm_customer a
+		<include refid="crmCustomerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CrmCustomer">
+		SELECT 
+			<include refid="crmCustomerColumnsForList"/>
+		FROM crm_customer a
+		<include refid="crmCustomerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="customerType != null and customerType != ''">
+				AND a.customer_type = #{customerType}
+			</if>
+			<if test="customerStatus != null and customerStatus != ''">
+				AND a.customer_status = #{customerStatus}
+			</if>
+			<if test="customerLevel != null and customerLevel != ''">
+				AND a.customer_level = #{customerLevel}
+			</if>
+			<if test="contacterName != null and contacterName != ''">
+				AND a.contacter_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{contacterName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{contacterName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{contacterName},'%')</if>
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mobile}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mobile}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mobile},'%')</if>
+			</if>
+			<if test="beginNextcontactDate != null and endNextcontactDate != null and beginNextcontactDate != '' and endNextcontactDate != ''">
+				AND a.nextcontact_date BETWEEN #{beginNextcontactDate} AND #{endNextcontactDate}
+			</if>
+			<if test="nextcontactDate != null and nextcontactDate != ''">
+				AND a.nextcontact_date = #{nextcontactDate}
+			</if>
+			<if test="tags != null and tags != ''">
+				AND a.tags LIKE 
+					<if test="dbName == 'oracle'">'%'||#{tags}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{tags}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{tags},'%')</if>
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="beginUpdateDate != null and endUpdateDate != null and beginUpdateDate != '' and endUpdateDate != ''">
+				AND a.update_date BETWEEN #{beginUpdateDate} AND #{endUpdateDate}
+			</if>
+			<if test="isStar != null and isStar != ''">
+				AND TRIM(s.id) != ''
+			</if>
+			
+			<if test="industryType != null and industryType != ''">
+				AND a.industry_type = #{industryType}
+			</if>
+			<if test="sourType != null and sourType != ''">
+				AND a.sour_type = #{sourType}
+			</if>
+			<if test="natureType != null and natureType != ''">
+				AND a.nature_type = #{natureType}
+			</if>
+			<if test="scaleType != null and scaleType != ''">
+				AND a.scale_type = #{scaleType}
+			</if>
+			<if test="province != null and province != ''">
+				AND a.province = #{province}
+			</if>
+			<if test="city != null and city != ''">
+				AND a.city = #{city}
+			</if>
+			<if test="dict != null and dict != ''">
+				AND a.dict = #{dict}
+			</if>
+			<if test="isPool != null and isPool != ''">
+				AND a.is_pool = #{isPool}
+			</if>
+			<if test="keywords != null and keywords != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+					 OR 
+					 a.contacter_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+					)
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CrmCustomer">
+		SELECT 
+			a.id AS "id",
+		a.name AS "name",
+		a.customer_type AS "customerType",
+		a.customer_status AS "customerStatus",
+		a.customer_level AS "customerLevel",
+		a.contacter_name AS "contacterName",
+		a.mobile AS "mobile",
+		a.nextcontact_date AS "nextcontactDate",
+		a.nextcontact_note AS "nextcontactNote",
+		a.tags AS "tags",
+		a.own_by AS "ownBy.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		u10.name AS "ownBy.name",
+		u11.name AS "createBy.name" 
+		
+		FROM crm_customer a 
+		LEFT JOIN crm_customer_type t ON t.id = a.customer_type
+		LEFT JOIN sys_user u10 ON u10.id = a.own_by
+		LEFT JOIN sys_user u11 ON u11.id = a.create_by 
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="keywords != null and keywords != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{keywords}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{keywords}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{keywords},'%')</if>
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO crm_customer(
+			id,
+			name,
+			customer_type,
+			customer_status,
+			customer_level,
+			contacter_name,
+			mobile,
+			nextcontact_date,
+			nextcontact_note,
+			tags,
+			own_by,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			account_id,
+			office_id,
+			industry_type,
+			sour_type,
+			nature_type,
+			scale_type,
+			coin,
+			phone,
+			fax,
+			province,
+			city,
+			dict,
+			address,
+			bankaccountname,
+		    bankaccountno,
+			remarks,
+			is_pool,
+			clue_id
+		) VALUES (
+			#{id},
+			#{name},
+			#{customerType},
+			#{customerStatus},
+			#{customerLevel},
+			#{contacterName},
+			#{mobile},
+			#{nextcontactDate},
+			#{nextcontactNote},
+			#{tags},
+			#{ownBy.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{accountId},
+			#{officeId},
+			#{industryType},
+			#{sourType},
+			#{natureType},
+			#{scaleType},
+			#{coin},
+			#{phone},
+			#{fax},
+			#{province},
+			#{city},
+			#{dict},
+			#{address},
+			#{bankaccountname},
+			#{bankaccountno},
+			#{remarks},
+			#{isPool},
+			#{crmClueId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE crm_customer SET
+						name = #{name},
+			customer_type = #{customerType},
+			customer_status = #{customerStatus},
+			customer_level = #{customerLevel},
+			contacter_name = #{contacterName},
+			mobile = #{mobile},
+			nextcontact_date = #{nextcontactDate},
+			nextcontact_note = #{nextcontactNote},
+			tags = #{tags},
+			own_by = #{ownBy.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			
+			industry_type = #{industryType},
+			sour_type = #{sourType},
+			nature_type = #{natureType},
+			scale_type = #{scaleType},
+			coin = #{coin},
+			phone = #{phone},
+			fax = #{fax},
+			province = #{province},
+			city = #{city},
+			dict = #{dict},
+			address = #{address},
+			bankaccountname = #{bankaccountname},
+		    bankaccountno = #{bankaccountno},
+			remarks = #{remarks},
+			is_pool = #{isPool},
+			clue_id = #{crmClueId}
+			
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 锁定数据 -->
+	<update id="lock">
+		UPDATE crm_customer SET 
+			lock_flag = #{LOCK_FLAG_LOCK}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="unLock">
+		UPDATE crm_customer SET 
+			lock_flag = #{LOCK_FLAG_NORMAL}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE crm_customer SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CrmCustomer" statementType="STATEMENT">
+		select * FROM crm_customer  where ${propertyName} = '${value}'
+	</select>
+
+	<!-- 查询记录数 -->
+	<select id="findCount" resultType="Long">
+		SELECT COUNT(0) as count FROM crm_customer a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} AND a.is_pool = '0' 
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findDelList" resultType="CrmCustomer">
+		SELECT 
+			<include refid="crmCustomerColumnsForList"/>
+		FROM crm_customer a
+		<include refid="crmCustomerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_DELETE}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="customerType != null and customerType != null and customerType != ''">
+				AND a.customer_type = #{customerType}
+			</if>
+			<if test="customerStatus != null and customerStatus != ''">
+				AND a.customer_status = #{customerStatus}
+			</if>
+			<if test="customerLevel != null and customerLevel != ''">
+				AND a.customer_level = #{customerLevel}
+			</if>
+			<if test="contacterName != null and contacterName != ''">
+				AND a.contacter_name = #{contacterName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="beginNextcontactDate != null and endNextcontactDate != null and beginNextcontactDate != '' and endNextcontactDate != ''">
+				AND a.nextcontact_date BETWEEN #{beginNextcontactDate} AND #{endNextcontactDate}
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 还原  -->
+	<update id="replay">
+		UPDATE crm_customer SET 
+			del_flag = #{DEL_FLAG_NORMAL}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 放入公海 -->
+	<update id="throwToPool">
+		UPDATE crm_customer SET 
+			own_by = NULL,
+			office_id = NULL,
+			is_pool = '1' 
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新所有人 -->
+	<update id="updateOwnBy">
+		UPDATE crm_customer SET 
+			own_by = #{ownBy.id},
+			office_id = #{officeId},
+			is_pool = #{isPool},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新客户状态 -->
+	<update id="updateStatus">
+		UPDATE crm_customer SET 
+			customer_status = #{customerStatus},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate} 
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findListForExport" resultType="CrmCustomer">
+		SELECT 
+			<include refid="crmCustomerColumnsForGet"/>
+		FROM crm_customer a
+		<include refid="crmCustomerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="customerType != null and customerType != ''">
+				AND a.customer_type = #{customerType}
+			</if>
+			<if test="customerStatus != null and customerStatus != ''">
+				AND a.customer_status = #{customerStatus}
+			</if>
+			<if test="customerLevel != null and customerLevel != ''">
+				AND a.customer_level = #{customerLevel}
+			</if>
+			<if test="contacterName != null and contacterName != ''">
+				AND a.contacter_name = #{contacterName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="beginNextcontactDate != null and endNextcontactDate != null and beginNextcontactDate != '' and endNextcontactDate != ''">
+				AND a.nextcontact_date BETWEEN #{beginNextcontactDate} AND #{endNextcontactDate}
+			</if>
+			<if test="nextcontactDate != null and nextcontactDate != ''">
+				AND a.nextcontact_date = #{nextcontactDate}
+			</if>
+			<if test="tags != null and tags != ''">
+				AND a.tags LIKE 
+					<if test="dbName == 'oracle'">'%'||#{tags}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{tags}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{tags},'%')</if>
+			</if>
+			<if test="ownBy != null and ownBy.id != null and ownBy.id != ''">
+				AND a.own_by = #{ownBy.id}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by = #{createBy.id}
+			</if>
+			<if test="beginCreateDate != null and endCreateDate != null and beginCreateDate != '' and endCreateDate != ''">
+				AND a.create_date BETWEEN #{beginCreateDate} AND #{endCreateDate}
+			</if>
+			<if test="isStar != null and isStar != ''">
+				AND TRIM(s.id) != ''
+			</if>
+			
+			<if test="industryType != null and industryType != ''">
+				AND a.industry_type = #{industryType}
+			</if>
+			<if test="sourType != null and sourType != ''">
+				AND a.sour_type = #{sourType}
+			</if>
+			<if test="natureType != null and natureType != ''">
+				AND a.nature_type = #{natureType}
+			</if>
+			<if test="scaleType != null and scaleType != ''">
+				AND a.scale_type = #{scaleType}
+			</if>
+			<if test="province != null and province != ''">
+				AND a.province = #{province}
+			</if>
+			<if test="city != null and city != ''">
+				AND a.city = #{city}
+			</if>
+			<if test="dict != null and dict != ''">
+				AND a.dict = #{dict}
+			</if>
+			<if test="isPool != null and isPool != ''">
+				AND a.is_pool = #{isPool}
+			</if>
+		</where>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 查询超N天未联系的客户 -->
+	<select id="findOverdueList" resultType="CrmCustomer">
+		SELECT 
+			a.id AS "id",
+			a.name AS "name",
+			a.own_by AS "ownBy.id" 
+		FROM crm_customer a WHERE a.account_id = #{accountId} AND a.is_pool='0' AND customer_status!='2' a.del_flag = '0' 
+		<![CDATA[and a.update_date <= DATE_SUB(CURDATE(), INTERVAL #{dayNum} DAY)]]>
+	</select>
+	
+	<!-- 根据名称获取客户列表 -->
+	<select id="findListByCustomerName" resultType="CrmCustomer">
+		SELECT a.id AS "id",a.name AS "name" FROM crm_customer a WHERE a.account_id=#{accountId} AND a.name = #{name} AND a.del_flag = '0'
+		<if test="id != null and id != ''">
+			AND a.id != #{id}
+		</if>
+	</select>
+	
+	<select id="getGeneralCountByCustomer" resultType="CrmCustomer">
+		SELECT a.id AS "id",a.name AS "name",
+		
+			(select COALESCE(sum(c.sale_amount),0) from crm_chance c where c.customer_id=a.id and c.del_flag='0'
+			) as "totalChanceAmt",
+			
+			(select COALESCE(sum(c.amount),0) from om_order c where c.customer_id=a.id and c.status='1' and c.del_flag='0'
+			) as "totalOrderAmt",
+			
+			(select COALESCE(sum(c.amount),0) from fi_receive_bill c where c.customer_id=a.id and c.status='1' and c.del_flag='0'
+			) as "totalReceiveAmt",
+			
+			(select COALESCE(sum(c.amount),0) from fi_payment_bill c where c.customer_id=a.id and c.status='1' and c.del_flag='0'
+			) as "totalRefundAmt"
+		FROM crm_customer a WHERE id = #{id}
+	</select>
+</mapper>

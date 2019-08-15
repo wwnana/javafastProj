@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.sys.dao.SysPanelDao">
+    
+	<sql id="sysPanelColumns">
+		a.id AS "id",
+		a.panel_id AS "panelId",
+		a.user_id AS "userId",
+		d.value AS "value",
+		d.label AS "label"
+	</sql>
+	
+	<sql id="sysPanelJoins">
+		LEFT JOIN sys_panel a ON d.value = a.panel_id AND a.user_id=#{currentUser.id}
+	</sql>
+    
+	<select id="get" resultType="SysPanel">
+		SELECT 
+			<include refid="sysPanelColumns"/>
+		FROM sys_panel d
+		<include refid="sysPanelJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findCurrentList" resultType="SysPanel">
+		SELECT a.panel_id AS "panelId" FROM sys_panel a WHERE a.user_id=#{currentUser.id}
+	</select>
+	
+	<select id="findList" resultType="SysPanel">
+		SELECT 
+			<include refid="sysPanelColumns"/>
+		FROM sys_dict d 
+		<include refid="sysPanelJoins"/>
+		<where>
+			d.type='panel_type' 
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysPanel">
+		SELECT 
+			<include refid="sysPanelColumns"/>
+		FROM sys_panel a
+		<include refid="sysPanelJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_panel(
+			id,
+			panel_id,
+			user_id,
+			account_id
+		) VALUES (
+			#{id},
+			#{panelId},
+			#{userId},
+			#{accountId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE sys_panel SET
+						panel_id = #{panelId},
+			user_id = #{userId}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		DELETE FROM sys_panel
+		WHERE user_id = #{currentUser.id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="SysPanel" statementType="STATEMENT">
+		select * FROM sys_panel  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>
