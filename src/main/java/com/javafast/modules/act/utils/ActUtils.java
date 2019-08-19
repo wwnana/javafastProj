@@ -39,6 +39,8 @@ public class ActUtils {
 	public static final String[] PD_TEST_AUDIT = new String[]{"test_audit", "oa_test_audit"};
 	public static final String[] PD_PROJECT_IMPL = new String[]{"project_impl", "oa_project_impl"};
 	public static final String[] PD_PROJECT_CONS = new String[]{"project_cons", "oa_project_cons"};
+	public static final String[] PD_PROJ_CONS = new String[]{"project_cons", "oa_proj_cons"};
+	
 	
 	
 //	/**

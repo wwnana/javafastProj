@@ -98,17 +98,6 @@ public class OaProjectConController extends BaseController {
 					||"audit01".equals(taskDefKey)||"audit02".equals(taskDefKey)) {
 				view = "oaProjectConForm";
 			}
-			
-			switch(taskDefKey) {
-			case "audit00":
-				oaProjectCon.setUserId1(UserUtils.getUser().getId());
-			case "audit01":
-				oaProjectCon.setUserId2(UserUtils.getUser().getId());
-			case "audit02":
-				oaProjectCon.setUserId3(UserUtils.getUser().getId());
-			default:
-				view  = "oaProjectConForm";
-			}
 		}else {
 			oaProjectCon.setUser(UserUtils.getUser());
 			oaProjectCon.setOffice(UserUtils.getUser().getOffice());

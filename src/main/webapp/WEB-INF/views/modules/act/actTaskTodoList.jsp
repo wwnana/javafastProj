@@ -101,7 +101,8 @@
 										</c:if>
 									</td>
 									<td>
-										<a target="_blank" href="${pageContext.request.contextPath}/act/diagram-viewer?processDefinitionId=${task.processDefinitionId}&processInstanceId=${task.processInstanceId}">${task.name}</a>
+										<%-- <a target="_blank" href="${pageContext.request.contextPath}/act/diagram-viewer?processDefinitionId=${task.processDefinitionId}&processInstanceId=${task.processInstanceId}">${task.name}</a>
+										 --%><a target="_blank" href="${ctx}/act/task/processMap/${task.processDefinitionId}/${task.processInstanceId}">${task.name}</a>
 									</td><%--
 									<td>${task.description}</td> --%>
 									<td>

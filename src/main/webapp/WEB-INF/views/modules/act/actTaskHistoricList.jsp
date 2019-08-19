@@ -83,10 +83,13 @@
 								<c:set var="project" value="${act.project}" />
 								<tr>
 									<td>
-										<a href="${ctx}/act/task/form?taskId=${task.id}&taskName=${fns:urlEncode(task.name)}&taskDefKey=${task.taskDefinitionKey}&procInsId=${task.processInstanceId}&procDefId=${task.processDefinitionId}&status=${status}">${fns:abbr(not empty vars.map.title ? vars.map.title : task.id, 60)}</a>
+										${fns:abbr(not empty vars.map.title ? vars.map.title : task.id, 60)}
+										<%-- <a href="${ctx}/act/task/form?taskId=${task.id}&taskName=${fns:urlEncode(task.name)}&taskDefKey=${task.taskDefinitionKey}&procInsId=${task.processInstanceId}&procDefId=${task.processDefinitionId}&status='finish'&id=${project.id}">
+										${fns:abbr(not empty vars.map.title ? vars.map.title : task.id, 60)}</a> --%>
 									</td>
 									<td>
-										<a target="_blank" href="${pageContext.request.contextPath}/act/diagram-viewer?processDefinitionId=${task.processDefinitionId}&processInstanceId=${task.processInstanceId}">${task.name}</a><%--
+										${task.name}
+										<%--<a target="_blank" href="${pageContext.request.contextPath}/act/diagram-viewer?processDefinitionId=${task.processDefinitionId}&processInstanceId=${task.processInstanceId}">${task.name}</a>
 										<a target="_blank" href="${ctx}/act/task/trace/photo/${task.processDefinitionId}/${task.executionId}">${task.name}</a>
 										<a target="_blank" href="${ctx}/act/task/trace/info/${task.processInstanceId}">${task.name}</a> --%>
 									</td><%--
@@ -97,7 +100,8 @@
 									<td><fmt:formatDate value="${task.endTime}" type="both"/></td>
 									<td>
 										<a href="${ctx}/act/task/form?taskId=${task.id}&taskName=${fns:urlEncode(task.name)}&taskDefKey=${task.taskDefinitionKey}&procInsId=${task.processInstanceId}&procDefId=${task.processDefinitionId}&status=${status}&id=${project.id}">详情</a>
-									</td>
+									 
+									 </td>
 								</tr>
 							</c:forEach>
 						</tbody>
