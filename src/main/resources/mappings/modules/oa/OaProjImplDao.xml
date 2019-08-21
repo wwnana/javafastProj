@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javafast.modules.oa.dao.OaProjImplDao">
+    
+	<sql id="oaProjImplColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.proj_id AS "project.id",
+		a.status AS "status",
+		a.user_id AS "user.id",
+		a.user_name AS "userName",
+		a.office_id AS "office.id",
+		a.office_name AS "officeName",
+		a.files AS "files",
+		a.audit_id AS "auditId",
+		a.audit_name AS "auditName",
+		a.audit_text AS "auditText",
+		a.create_by AS "createBy.id",
+		a.create_by_name AS "createByName",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_by_name AS "updateByName",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		p5.name AS "project.name"
+	</sql>
+	
+	<sql id="oaProjImplJoins">
+		LEFT JOIN oa_project p5 ON p5.id = a.proj_id
+	</sql>
+    
+	<select id="get" resultType="OaProjImpl">
+		SELECT 
+			<include refid="oaProjImplColumns"/>
+		FROM oa_proj_impl a
+		<include refid="oaProjImplJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getProName" resultType="OaProjImpl">
+		SELECT 
+			<include refid="oaProjImplColumns"/>
+		FROM oa_proj_impl a
+		<include refid="oaProjImplJoins"/>
+		WHERE a.proc_ins_id = #{insId}
+	</select>
+	
+	<select id="findLastTask" resultType="OaProjImpl">
+		SELECT 
+			<include refid="oaProjImplColumns"/>
+		FROM oa_proj_impl a
+		<include refid="oaProjImplJoins"/>
+		WHERE a.proc_ins_id = #{procInsId} and a.status = #{status}
+	</select>
+	
+	<select id="findList" resultType="OaProjImpl">
+		SELECT 
+			<include refid="oaProjImplColumns"/>
+		FROM oa_proj_impl a
+		<include refid="oaProjImplJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaProjImpl">
+		SELECT 
+			<include refid="oaProjImplColumns"/>
+		FROM oa_proj_impl a
+		<include refid="oaProjImplJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_proj_impl(
+			id,
+			proc_ins_id,
+			proj_id,
+			status,
+			user_id,
+			user_name,
+			office_id,
+			office_name,
+			files,
+			audit_id,
+			audit_name,
+			audit_text,
+			create_by,
+			create_by_name,
+			create_date,
+			update_by,
+			update_by_name,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{procInsId},
+			#{project.id},
+			#{status},
+			#{user.id},
+			#{userName},
+			#{office.id},
+			#{officeName},
+			#{files},
+			#{audit.id},
+			#{auditName},
+			#{auditText},
+			#{createBy.id},
+			#{createByName},
+			#{createDate},
+			#{updateBy.id},
+			#{updateByName},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE oa_proj_impl SET
+						proc_ins_id = #{procInsId},
+			proj_id = #{project.id},
+			status = #{status},
+			user_id = #{user.id},
+			user_name = #{userName},
+			office_id = #{office.id},
+			office_name = #{officeName},
+			files = #{files},
+			audit_id = #{audit.id},
+			audit_name = #{auditName},
+			audit_text = #{auditText},
+			create_by_name = #{createByName},
+			update_by = #{updateBy.id},
+			update_by_name = #{updateByName},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateAuditText">
+		UPDATE oa_proj_impl SET 
+			audit_text = #{auditText},
+			audit_id = #{audit.id},
+			audit_name = #{auditName},
+			update_by = #{updateBy.id}, 
+			update_by_name = #{updateByName},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE oa_proj_impl SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="OaProjImpl" statementType="STATEMENT">
+		select * FROM oa_proj_impl  where ${propertyName} = '${value}'
+	</select>
+
+</mapper>

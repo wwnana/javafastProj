@@ -65,7 +65,7 @@ import com.javafast.modules.act.utils.ActUtils;
 import com.javafast.modules.act.utils.ProcessDefCache;
 import com.javafast.modules.act.utils.ProcessDefUtils;
 import com.javafast.modules.oa.service.OaProjConsService;
-import com.javafast.modules.oa.service.OaProjectImpleService;
+import com.javafast.modules.oa.service.OaProjImplService;
 import com.javafast.modules.sys.entity.User;
 import com.javafast.modules.sys.utils.UserUtils;
 
@@ -102,7 +102,7 @@ public class ActTaskService extends BaseService {
 	private OaProjConsService oaProjConsService;
 	@Autowired
 	@Lazy
-	private OaProjectImpleService oaProjectImpleService;
+	private OaProjImplService oaProjImplService;
 	
 	/**
 	 * 获取待办列表
@@ -151,8 +151,8 @@ public class ActTaskService extends BaseService {
 					e.setProject(oaProjConsService.getProName(insId).getProject());
 				}
 			}else if(tableName.contains("project_impl")) {
-				if(oaProjectImpleService.getProName(insId)!=null)
-					e.setProject(oaProjectImpleService.getProName(insId).getProject());
+				if(oaProjImplService.getProName(insId)!=null)
+					e.setProject(oaProjImplService.getProName(insId).getProject());
 			}
 			
 			result.add(e);
@@ -194,8 +194,8 @@ public class ActTaskService extends BaseService {
 				if(oaProjConsService.getProName(insId)!=null)
 					e.setProject(oaProjConsService.getProName(insId).getProject());
 			}else if(tableName.contains("project_impl")) {
-				if(oaProjectImpleService.getProName(insId)!=null)
-					e.setProject(oaProjectImpleService.getProName(insId).getProject());
+				if(oaProjImplService.getProName(insId)!=null)
+					e.setProject(oaProjImplService.getProName(insId).getProject());
 			}
 			
 			
@@ -253,8 +253,8 @@ public class ActTaskService extends BaseService {
 				if(oaProjConsService.getProName(insId)!=null)
 					e.setProject(oaProjConsService.getProName(insId).getProject());
 			}else if(tableName.contains("project_impl")) {
-				if(oaProjectImpleService.getProName(insId)!=null)
-					e.setProject(oaProjectImpleService.getProName(insId).getProject());
+				if(oaProjImplService.getProName(insId)!=null)
+					e.setProject(oaProjImplService.getProName(insId).getProject());
 			}
 			
 			actList.add(e);
