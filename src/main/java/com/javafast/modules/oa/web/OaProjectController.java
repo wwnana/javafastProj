@@ -40,6 +40,7 @@ import com.javafast.common.web.BaseController;
 import com.javafast.common.utils.StringUtils;
 import com.javafast.common.utils.excel.ExportExcel;
 import com.javafast.common.utils.excel.ImportExcel;
+import com.javafast.modules.act.entity.Act;
 import com.javafast.modules.act.service.ActTaskService;
 import com.javafast.modules.act.web.ActTaskController;
 import com.javafast.modules.crm.entity.CrmCustomer;
@@ -126,7 +127,7 @@ public class OaProjectController extends BaseController {
 	 */
 	@RequiresPermissions(value="oa:oaProject:view")
 	@RequestMapping(value = "view")
-	public String view(OaProject oaProject, Model model,String category, HttpServletRequest request, HttpServletResponse response) {
+	public String view(OaProject oaProject,Model model,String category, HttpServletRequest request, HttpServletResponse response) {
 		
 		//更新阅读状态
 		if (StringUtils.isNotBlank(oaProject.getId())){
@@ -154,6 +155,7 @@ public class OaProjectController extends BaseController {
 	    page = actTaskService.processList(page, category);
 		model.addAttribute("page", page);
 		model.addAttribute("category", category);
+		
 		
 		return "modules/oa/oaProjectIndex";
 	}

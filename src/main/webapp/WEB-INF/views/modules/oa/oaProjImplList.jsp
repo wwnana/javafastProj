@@ -40,7 +40,7 @@
 							<input id="pageNo" name="pageNo" type="hidden" value="${page.pageNo}"/>
 							<input id="pageSize" name="pageSize" type="hidden" value="${page.pageSize}"/>
 							<table:sortColumn id="orderBy" name="orderBy" value="${page.orderBy}" callback="sortOrRefresh();"/><!-- 支持排序 -->
-							<table:searchRow></table:searchRow>
+							
 								<div class="form-group">
 									<button class="btn btn-white btn-sm " onclick="search()"><i class="fa fa-search"></i> 查询</button>
 									<button class="btn btn-white btn-sm " onclick="resetSearch()"><i class="fa fa-refresh"></i> 重置</button>
@@ -55,6 +55,7 @@
 					<thead>
 						<tr>
 							<th width="30px"><input type="checkbox" class="i-checks"></th>
+							<th class="sort-column ">项目名称</th>
 							<th class="sort-column a.update_date">更新时间</th>
 							<th class="sort-column a.remarks">备注信息</th>
 							<th width="200px">操作</th>
@@ -64,6 +65,7 @@
 					<c:forEach items="${page.list}" var="oaProjImpl">
 						<tr>
 							<td><input type="checkbox" id="${oaProjImpl.id}" class="i-checks"></td>
+							<td>${oaProjImpl.project.name}</td>
 							<td>
 								<a href="${ctx}/oa/oaProjImpl/view?id=${oaProjImpl.id}" title="查看">
 								<fmt:formatDate value="${oaProjImpl.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/>

@@ -62,6 +62,7 @@
 					<thead>
 						<tr>
 							<th><input type="checkbox" class="i-checks"></th>
+							<th class="sort-column ">项目名称</th>
 							<th class="sort-column a.update_date">更新时间</th>
 							<th class="sort-column a.remarks">备注信息</th>
 							<th>操作</th>
@@ -71,6 +72,7 @@
 					<c:forEach items="${page.list}" var="oaProjImpl">
 						<tr>
 							<td><input type="checkbox" id="${oaProjImpl.id}" class="i-checks"></td>
+							<td>${oaProjImpl.project.name}</td>
 							<td class="codelabel"><fmt:formatDate value="${oaProjImpl.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
 							<td>${oaProjImpl.remarks}</td>
 							<td>

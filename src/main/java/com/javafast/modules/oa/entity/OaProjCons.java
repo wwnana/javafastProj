@@ -23,6 +23,11 @@ public class OaProjCons extends ActEntity<OaProjCons> {
 	private User audit;		// 审批人
 	private String auditText;		// 审批意见
 	private Office office;//申请用户的所属部门
+	private String userName;
+	private String auditName;
+	private String createByName;
+	private String updateByName;
+	private String officeName;
 	
 	public OaProjCons() {
 		super();
@@ -104,5 +109,47 @@ public class OaProjCons extends ActEntity<OaProjCons> {
 	public void setOffice(Office office) {
 		this.office = office;
 	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getAuditName() {
+		return auditName;
+	}
+
+	public void setAuditName(String auditName) {
+		this.auditName = auditName;
+	}
+
+	public String getCreateByName() {
+		return createByName;
+	}
+
+	public void setCreateByName(String createByName) {
+		this.createByName = createByName;
+	}
+
+	public String getUpdateByName() {
+		return updateByName;
+	}
+
+	public void setUpdateByName(String updateByName) {
+		this.updateByName = updateByName;
+	}
+
+	public String getOfficeName() {
+		return officeName;
+	}
+
+	public void setOfficeName(String officeName) {
+		this.officeName = officeName;
+	}
+
+	
 
 }

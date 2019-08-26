@@ -18,12 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import org.hibernate.validator.constraints.Length;
 import com.javafast.modules.sys.entity.User;
 import com.javafast.modules.sys.utils.UserUtils;
 import com.google.common.collect.Lists;
 import com.javafast.common.utils.DateUtils;
-import com.javafast.common.utils.MyBeanUtils;
 import com.javafast.common.config.Global;
 import com.javafast.common.persistence.Page;
 import com.javafast.common.web.BaseController;
@@ -31,7 +29,6 @@ import com.javafast.common.utils.StringUtils;
 import com.javafast.common.utils.excel.ExportExcel;
 import com.javafast.common.utils.excel.ImportExcel;
 import com.javafast.modules.oa.entity.OaProjCons;
-import com.javafast.modules.oa.entity.OaProjectCon;
 import com.javafast.modules.oa.service.OaProjConsService;
 import com.javafast.modules.oa.service.OaProjectService;
 
@@ -78,6 +75,7 @@ public class OaProjConsController extends BaseController {
 	@RequiresPermissions(value={"oa:oaProjCons:view","oa:oaProjCons:add","oa:oaProjCons:edit"},logical=Logical.OR)
 	@RequestMapping(value = "form")
 	public String form(OaProjCons oaProjCons, Model model) {
+		User currUser = UserUtils.getUser();
 		String view = "oaProjConsStart";
 		String sta = oaProjCons.getAct().getTaskDefKey();
 		//显示历史记录中的详情
@@ -114,17 +112,23 @@ public class OaProjConsController extends BaseController {
 				String status = "form"+oaProjCons.getAct().getTaskDefKey().substring(5);
 				String procInsId = oaProjCons.getAct().getProcInsId();
 				OaProjCons oaProjCons1 = oaProjConsService.findLastTask(procInsId,status);
-				oaProjCons1.setAudit(UserUtils.getUser());
+				oaProjCons1.setAudit(currUser);
+				oaProjCons1.setAuditName(currUser.getName());
 				oaProjCons1.setAct(oaProjCons.getAct());
+				oaProjCons1.setUpdateByName(currUser.getName());
 				model.addAttribute("oaProjCons", oaProjCons1);
 				return "modules/oa/"+view;
 			}
 		}
-		oaProjCons.setUser(UserUtils.getUser());//设置申请人
-		oaProjCons.setOffice(UserUtils.getUser().getOffice());//设置申请人部门
+		oaProjCons.setUser(currUser);//设置申请人
+		oaProjCons.setOffice(currUser.getOffice());//设置申请人部门
 		oaProjCons.setProcInsId(oaProjCons.getAct().getProcInsId());//设置流程实例ID
 		oaProjCons.setStatus(oaProjCons.getAct().getTaskDefKey());//设置状态
 		oaProjCons.setProject(oaProjectService.get(oaProjCons.getAct().getProjectId()));
+		oaProjCons.setUserName(currUser.getName());
+		oaProjCons.setOfficeName(currUser.getOffice().getName());
+		oaProjCons.setCreateByName(currUser.getName());
+		oaProjCons.setUpdateByName(currUser.getName());
 		model.addAttribute("oaProjCons", oaProjCons);
 		return "modules/oa/"+view;
 	}

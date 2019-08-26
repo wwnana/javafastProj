@@ -158,6 +158,6 @@ public class OaProjImpl extends ActEntity<OaProjImpl> {
 	public void setUpdateByName(String updateByName) {
 		this.updateByName = updateByName;
 	}
-	
+
 	
 }

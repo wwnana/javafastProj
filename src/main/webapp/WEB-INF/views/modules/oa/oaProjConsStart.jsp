@@ -52,9 +52,13 @@
 		<form:hidden id="flag" path="act.flag"/>
 		<form:hidden path="project.id" />
 		<form:hidden path="user.id"/>
+		<form:hidden path="userName"/>
 		<form:hidden path="office.id"/>
+		<form:hidden path="officeName"/>
 		<form:hidden path="procInsId"/>
 		<form:hidden path="status"/>
+		<form:hidden path="createByName"/>
+		<form:hidden path="updateByName"/>
 		
 			<h4 class="page-header">基本信息</h4>
 			<div class="row">
@@ -62,7 +66,7 @@
 					<div class="form-group">
 						<label class="col-sm-4 control-label"><font color="red">*</font> 申请姓名：</label>
 						<div class="col-sm-8">
-							${fns:getUser().getName()}
+							${oaProjCons.userName}
 						</div>
 					</div>
 				</div>
@@ -72,7 +76,7 @@
 					<div class="form-group">
 						<label class="col-sm-4 control-label"><font color="red">*</font> 归属部门：</label>
 						<div class="col-sm-8">
-							${fns:getUser().getOffice().getName()}
+							${oaProjCons.officeName}
 						</div>
 					</div>
 				</div>

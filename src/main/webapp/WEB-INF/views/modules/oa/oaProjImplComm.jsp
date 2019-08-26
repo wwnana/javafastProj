@@ -119,6 +119,7 @@
 				</shiro:hasPermission>
 				<input id="btnCancel" class="btn" type="button" value="返 回" onclick="history.go(-1)"/>
 			</div>
+			<act:histoicFlow procInsId="${oaProjImpl.procInsId}"/>
 		</form:form>
 	</div>
 </div>

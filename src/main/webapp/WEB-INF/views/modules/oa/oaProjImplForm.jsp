@@ -128,6 +128,7 @@
 					</div>
 				</div>
 			</div>
+			<act:histoicFlow procInsId="${oaProjImpl.procInsId}"/>
 		</form:form>
 	</div>
 </div>

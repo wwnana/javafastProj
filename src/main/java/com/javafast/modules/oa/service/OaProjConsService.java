@@ -57,8 +57,13 @@ public class OaProjConsService extends CrudService<OaProjConsDao, OaProjCons> {
 		else{
 			oaProjCons.preInsert();
 			dao.insert(oaProjCons);
-
-			oaProjCons.getAct().setComment(("yes".equals(oaProjCons.getAct().getFlag())?"[提交] ":"[驳回] ")+oaProjCons.getAct().getComment());
+			if(oaProjCons.getStatus().contains("form")) {
+				oaProjCons.getAct().setComment(("yes".equals(oaProjCons.getAct().getFlag())?"[提交] ":" "));
+			}
+			else {
+				oaProjCons.getAct().setComment(("yes".equals(oaProjCons.getAct().getFlag())?"[提交] ":"[驳回] ")+oaProjCons.getAct().getComment());
+				
+			}
 			
 			
 			// 完成流程任务
@@ -83,6 +88,7 @@ public class OaProjConsService extends CrudService<OaProjConsDao, OaProjCons> {
 	public void auditSave(OaProjCons oaProjCons) {
 		// 设置意见
 		oaProjCons.getAct().setComment(("yes".equals(oaProjCons.getAct().getFlag())?"[同意] ":"[驳回] ")+oaProjCons.getAct().getComment());
+		
 		
 		oaProjCons.preUpdate();
 				

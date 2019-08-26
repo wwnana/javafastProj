@@ -6,7 +6,7 @@
 		a.id AS "id",
 		a.proc_ins_id AS "procInsId",
 		a.proj_id AS "project.id",
-		a.status AS "s",
+		a.status AS "status",
 		a.user_id AS "user.id",
 		a.files AS "files",
 		a.audit_id AS "audit.id",
@@ -18,17 +18,16 @@
 		a.update_date AS "updateDate",
 		a.remarks AS "remarks",
 		a.del_flag AS "delFlag",
-		u5.name AS "user.name",
-		p6.name AS "project.name",
-		o3.name AS "office.name",
-		u6.name AS "audit.name"
+		a.user_name AS "userName",
+		a.office_name AS "officeName",
+		a.audit_name AS "auditName",
+		a.create_by_name AS "createByName",
+		a.update_by_name AS "updateByName",
+		p6.name AS "project.name"
 	</sql>
 	
 	<sql id="oaProjConsJoins">
-		LEFT JOIN sys_user u5 ON u5.id = a.user_id
 		LEFT JOIN oa_project p6 ON p6.id = a.proj_id
-		LEFT JOIN sys_office o3 ON o3.id = a.office_id
-		LEFT JOIN sys_user u6 ON u6.id = a.audit_id
 	</sql>
     
 	<select id="get" resultType="OaProjCons">
@@ -111,7 +110,12 @@
 			update_by,
 			update_date,
 			remarks,
-			del_flag
+			del_flag,
+			user_name,
+			office_name,
+			audit_name,
+			create_by_name,
+			update_by_name
 		) VALUES (
 			#{id},
 			#{procInsId},
@@ -127,7 +131,12 @@
 			#{updateBy.id},
 			#{updateDate},
 			#{remarks},
-			#{delFlag}
+			#{delFlag},
+			#{userName},
+			#{officeName},
+			#{auditName},
+			#{createByName},
+			#{updateByName}
 		)
 	</insert>
 
@@ -143,7 +152,12 @@
 			office_id = #{office.id},
 			update_by = #{updateBy.id},
 			update_date = #{updateDate},
-			remarks = #{remarks}
+			remarks = #{remarks},
+			user_name = #{userName},
+			office_name = #{officeName},
+			audit_name = #{auditName},
+			create_by_name = #{createByName},
+			update_by_name = #{updateByName}
 		WHERE id = #{id}
 	</update>
 	
@@ -151,7 +165,9 @@
 		UPDATE oa_proj_cons SET 
 			audit_text = #{auditText},
 			audit_id = #{audit.id},
+			audit_name = #{auditName},
 			update_by = #{updateBy.id}, 
+			update_by_name = #{updateByName},
 			update_date = #{updateDate}
 		WHERE id = #{id}
 	</update>

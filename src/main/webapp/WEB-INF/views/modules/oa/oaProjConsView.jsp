@@ -44,7 +44,7 @@
 						<label class="col-sm-4 control-label">申请用户名称：</label>
 						<div class="col-sm-8">
 							<p class="form-control-static">
-							${oaProjCons.user.name}
+							${oaProjCons.userName}
 							</p>
 						</div>
 					</div>
@@ -54,7 +54,7 @@
 						<label class="col-sm-4 control-label">申请用户部门：</label>
 						<div class="col-sm-8">
 							<p class="form-control-static">
-							${oaProjCons.office.name}
+							${oaProjCons.officeName}
 							</p>
 						</div>
 					</div>
@@ -80,7 +80,7 @@
 						<label class="col-sm-4 control-label">审批人：</label>
 						<div class="col-sm-8">
 							<p class="form-control-static">
-							${oaProjCons.audit.id}
+							${oaProjCons.auditName}
 							</p>
 						</div>
 					</div>
@@ -103,7 +103,7 @@
 							<label class="col-sm-4 control-label">创建者：</label>
 							<div class="col-sm-8">
 								<p class="form-control-static">
-								${oaProjCons.createBy.id}
+								${oaProjCons.createByName}
 								</p>
 							</div>
 						</div>
@@ -113,7 +113,7 @@
 						<label class="col-sm-4 control-label">更新者：</label>
 						<div class="col-sm-8">
 							<p class="form-control-static">
-							${oaProjCons.updateBy.id}
+							${oaProjCons.updateByName}
 							</p>
 						</div>
 					</div>

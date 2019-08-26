@@ -47,8 +47,10 @@
 					<form:hidden path="act.procInsId"/>
 					<form:hidden path="act.procDefId"/>
 					<form:hidden id="flag" path="act.flag"/>
-					<form:hidden path="project.id"/>
 					<form:hidden path="audit.id"/>
+					<form:hidden path="auditName"/>
+					<form:hidden path="updateByName"/>
+					
 					<sys:message content="${message}"/>
 					<h4 class="page-header">申请信息</h4>
 						<div class="row">
@@ -57,7 +59,7 @@
 									<label class="col-sm-4 control-label">姓名：</label>
 									<div class="col-sm-8">
 										<p class="form-control-static">
-											${oaProjCons.user.name }
+											${oaProjCons.userName }
 										</p>
 									</div>
 								</div>
@@ -70,7 +72,7 @@
 									<label class="col-sm-4 control-label">部门：</label>
 									<div class="col-sm-8">
 										<p class="form-control-static">
-											${oaProjCons.office.name }
+											${oaProjCons.officeName }
 										</p>
 									</div>
 								</div>
@@ -142,7 +144,7 @@
 						</shiro:hasPermission>
 						<input id="btnCancel" class="btn" type="button" value="返 回" onclick="history.go(-1)"/>
 					</div>
-					<act:histoicFlow procInsId="${oaProjCons.act.procInsId}"/>
+					<act:histoicFlow procInsId="${oaProjCons.procInsId}"/>
 				</form:form>
 				<br/>
 			</div>

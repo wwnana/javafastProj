@@ -269,6 +269,7 @@
 					<div id="tab-4" class="tab-pane">
 			 			<div class="panel-body">
 			 				<div class="table-responsive">
+			 				
 			 				<table id="contentTable" class="table table-bordered table-striped table-hover">
 							<thead>
 								<tr>
