@@ -27,5 +27,7 @@ public interface OaProjectDao extends CrudDao<OaProject> {
 	 * @return
 	 */
 	public Long findCount(OaProject oaProject);
+
+	public String getProjNum(String status);
 	
 }

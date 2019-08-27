@@ -100,7 +100,8 @@
 					<div class="form-group">
 						<label class="col-sm-4 control-label"> 备注信息：</label>
 						<div class="col-sm-8">
-							<form:textarea path="remarks" htmlEscape="false" rows="4" maxlength="255" class="form-control "/>
+							<%-- <form:textarea path="remarks" htmlEscape="false" rows="4" maxlength="255" class="form-control "/>
+						 --%><textarea rows="4" cols="20" name="remarks" class="form-control"></textarea>
 						</div>
 					</div>
 				</div>

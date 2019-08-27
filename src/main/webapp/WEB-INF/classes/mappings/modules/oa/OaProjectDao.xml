@@ -190,4 +190,13 @@
 			</if>
 		</where>			
 	</select>
+	
+	<!-- 项目统计 -->
+	<select id="getProjNum" resultType="String">
+		SELECT COUNT(0) AS count FROM oa_project a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+				AND a.status = #{status}
+		</where>			
+	</select>
 </mapper>

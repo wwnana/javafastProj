@@ -103,4 +103,12 @@ public class OaProjectService extends CrudService<OaProjectDao, OaProject> {
 	public Long findCount(OaProject oaProject){
 		return dao.findCount(oaProject);
 	}
+
+	/**
+	 * 统计项目
+	 * @return
+	 */
+	public String getProjNum(String status) {
+		return dao.getProjNum(status);
+	}
 }
