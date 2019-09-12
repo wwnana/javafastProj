@@ -2,7 +2,7 @@
 <%@ include file="/WEB-INF/views/include/taglib.jsp"%>
 <html>
 <head>
-	<title>审批管理</title>
+	<title>项目实施流程审批管理</title>
 	<meta name="decorator" content="default"/>
 	<script type="text/javascript">
 		$(document).ready(function() {
@@ -29,7 +29,7 @@
 <div class="wrapper-content">
 		<div class="ibox">
 			<div class="ibox-title">
-				<h5>审批流程 </h5>
+				<h5>项目实施流程审批 </h5>
 			</div>
 			<div class="ibox-content">
 			<sys:message content="${message}"/>

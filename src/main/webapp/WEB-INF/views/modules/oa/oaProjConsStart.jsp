@@ -2,7 +2,7 @@
 <%@ include file="/WEB-INF/views/include/taglib.jsp"%>
 <html>
 <head>
-	<title>项目实施咨询表编辑</title>
+	<title>项目咨询流程表编辑</title>
 	<meta name="decorator" content="default"/>
 	<script type="text/javascript">
 		var validateForm;
@@ -38,7 +38,7 @@
 <div class="wrapper-content">
 <div class="ibox">
 	<div class="ibox-title">
-		<h5>项目实施咨询表${not empty oaProjCons.id?'修改':'添加'}</h5>
+		<h5>项目咨询流程表${not empty oaProjCons.id?'修改':'添加'}</h5>
 	</div>
 	<div class="ibox-content">
 		<sys:message content="${message}"/>

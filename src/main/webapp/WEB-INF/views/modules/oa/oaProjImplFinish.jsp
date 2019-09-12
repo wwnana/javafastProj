@@ -2,7 +2,7 @@
 <%@ include file="/WEB-INF/views/include/taglib.jsp"%>
 <html>
 <head>
-	<title>项目咨询流程表编辑</title>
+	<title>项目实施流程表编辑</title>
 	<meta name="decorator" content="default"/>
 	<script type="text/javascript">
 		var validateForm;
@@ -38,7 +38,7 @@
 <div class="wrapper-content">
 <div class="ibox">
 	<div class="ibox-title">
-		<h5>项目咨询流程表${not empty oaProjImpl.id?'修改':'添加'}</h5>
+		<h5>项目实施流程表${not empty oaProjImpl.id?'修改':'添加'}</h5>
 	</div>
 	<div class="ibox-content">
 		<sys:message content="${message}"/>
@@ -67,7 +67,7 @@
 						<div class="col-sm-8">
 							<%-- <sys:treeselect id="user" name="user.id" value="${oaProjectCon.user.id}" labelName="user.name" labelValue="${oaProjectCon.user.name}"
 								title="用户" url="/sys/office/treeData?type=3" cssClass="form-control required recipient" allowClear="true" notAllowSelectParent="true"/> --%>
-							${fns:getUser().getName() }
+							${oaProjImpl.userName }
 						</div>
 					</div>
 				</div>
@@ -79,7 +79,8 @@
 						<div class="col-sm-8">
 							<%-- <sys:treeselect id="office" name="office.id" value="${oaProjectCon.office.id}" labelName="office.name" labelValue="${oaProjectCon.office.name}"
 								title="部门" url="/sys/office/treeData?type=2" cssClass="form-control required recipient" allowClear="true" notAllowSelectParent="true"/> --%>
-							${fns:getUser().getOffice().getName() }
+							${oaProjImpl.officeName }
+							
 						</div>
 					</div>
 				</div>

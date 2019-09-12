@@ -1,5 +1,6 @@
 package com.javafast.modules.oa.dao;
 
+import org.apache.ibatis.annotations.Param;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.Date;
@@ -40,4 +41,23 @@ public interface OaTaskDao extends CrudDao<OaTask> {
 	 * 查询项目完成任务数
 	 */
 	public int findProFinCount(OaTask oaTask);
+	
+	/**
+	 * 根据流程阶段名称查询所有任务
+	 */
+	public List<OaTask> findTaskByProc(@Param("projId") String projId,@Param("procDef") String procDef);
+
+	/**
+	 * 查询用户提交的流程表单对应的任务项，将开始状态改为完成状态
+	 * @param taskName
+	 * @param projId
+	 * @param userId
+	 * @param procDef
+	 * @return
+	 */
+	public OaTask getTaskByName(@Param("taskName")String taskName, @Param("projId")String projId, 
+			@Param("userId")String userId);
+
+	public List<OaTask> findTaskByStatus(@Param("projId")String projId, @Param("status")String status);
+	
 }

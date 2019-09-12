@@ -77,9 +77,6 @@
 								<shiro:hasPermission name="oa:oaProjImpl:view">
 									<a href="${ctx}/oa/oaProjImpl/view?id=${oaProjImpl.id}" class="btn btn-info btn-xs" title="查看"><i class="fa fa-search-plus"></i> 查看</a>
 								</shiro:hasPermission>
-								<shiro:hasPermission name="oa:oaProjImpl:edit">
-			    					<a href="${ctx}/oa/oaProjImpl/form?id=${oaProjImpl.id}" class="btn btn-success btn-xs" title="修改"><i class="fa fa-pencil"></i> 修改</a>
-								</shiro:hasPermission>
 								
 								<shiro:hasPermission name="oa:oaProjImpl:del">
 									<a href="${ctx}/oa/oaProjImpl/delete?id=${oaProjImpl.id}" onclick="return confirmx('确认要删除该项目实施流程表吗？', this.href)" class="btn btn-danger btn-xs" title="删除"><i class="fa fa-trash"></i> 删除</a> 

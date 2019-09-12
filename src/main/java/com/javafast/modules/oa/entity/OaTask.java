@@ -40,6 +40,8 @@ public class OaTask extends DataEntity<OaTask> {
 	private Date endEndDate;		// 结束 截止日期
 	private Date beginCreateDate;		// 开始 创建时间
 	private Date endCreateDate;		// 结束 创建时间
+	
+	private String procDef;//关联流程定义
 	private List<OaTaskRecord> oaTaskRecordList = Lists.newArrayList();		// 子表列表
 	
 	private boolean isSelf;		// 是否只查询自己的任务
@@ -276,6 +278,14 @@ public class OaTask extends DataEntity<OaTask> {
 
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
+	}
+
+	public String getProcDef() {
+		return procDef;
+	}
+
+	public void setProcDef(String procDef) {
+		this.procDef = procDef;
 	}
 
 	

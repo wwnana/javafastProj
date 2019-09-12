@@ -166,6 +166,7 @@
 			    					<a href="${ctx}/oa/oaTask/form?id=${oaTask.id}"  title="修改">修改</a>
 									<a href="${ctx}/oa/oaTask/delete?id=${oaTask.id}" onclick="return confirmx('确认要删除该任务吗？', this.href)" title="删除">删除</a>
 								</shiro:hasPermission>
+								
 							</td>
 						</tr>
 					</c:forEach>

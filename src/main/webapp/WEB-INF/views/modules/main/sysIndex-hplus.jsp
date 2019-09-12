@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="renderer" content="webkit">
-    <title>${fns:getSysAccount().systemName} - ${fns:getConfig('productName')}</title>
+    <title>${fns:getSysAccount().systemName} </title>
     <%@ include file="/WEB-INF/views/include/hplushead.jsp"%>
     <script src="${ctxStatic}/common/inspinia.js?v=3.2.0"></script>
 	<script src="${ctxStatic}/common/contabs-hplus.js"></script> 

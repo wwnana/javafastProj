@@ -56,6 +56,7 @@
 			<if test=" procInsId != null">
 				AND a.proc_ins_id = #{procInsId}
 			</if>
+			AND a.audit_id is NULL
 		</where>
 	</select>
 	<select id="findList" resultType="OaProjCons">

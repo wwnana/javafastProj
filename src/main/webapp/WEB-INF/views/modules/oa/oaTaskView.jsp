@@ -54,16 +54,16 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">任务名称</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">任务名称</label>
+						<div class="col-sm-7">
 							<p class="form-control-static">${oaTask.name}</p>
 						</div>
 					</div>
 				</div>
 				<div class="col-sm-6">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">任务编号</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">任务编号</label>
+						<div class="col-sm-7">
 							<p class="form-control-static">${oaTask.no}</p>
 						</div>
 					</div>
@@ -72,8 +72,8 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">任务类型</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">任务类型</label>
+						<div class="col-sm-7">
 							<p class="form-control-static">${fns:getDictLabel(oaTask.relationType, 'relation_type', '')}</p>
 						</div>
 					</div>
@@ -81,8 +81,8 @@
 				<c:if test="${not empty oaTask.relationName}">
 				<div class="col-sm-6" id="select_div">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">关联${fns:getDictLabel(oaTask.relationType, 'relation_type', '')}</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">关联${fns:getDictLabel(oaTask.relationType, 'relation_type', '')}</label>
+						<div class="col-sm-7">
 							<p class="form-control-static">
 								<a href="#" onclick="toView('${oaTask.relationType}', '${oaTask.relationId}')">${oaTask.relationName}</a>
 							</p>
@@ -94,16 +94,16 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">优先级</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">优先级</label>
+						<div class="col-sm-7">
 							<p class="form-control-static">${fns:getDictLabel(oaTask.levelType, 'level_type', '')}</p>
 						</div>
 					</div>
 				</div>
 				<div class="col-sm-6">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">截止日期</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">截止日期</label>
+						<div class="col-sm-7">
 							<p class="form-control-static"><fmt:formatDate value="${oaTask.endDate}" pattern="yyyy-MM-dd"/></p>
 						</div>
 					</div>
@@ -112,8 +112,8 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">当前进度</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">当前进度</label>
+						<div class="col-sm-7">
 							<p class="form-control-static">
 							${oaTask.schedule}%
 	                        </p>
@@ -122,8 +122,8 @@
 				</div>
 				<div class="col-sm-6">
 					<div class="view-group">
-						<label class="col-sm-4 control-label">任务状态</label>
-						<div class="col-sm-8">
+						<label class="col-sm-5 control-label">任务状态</label>
+						<div class="col-sm-7">
 							<p class="form-control-static">${fns:getDictLabel(oaTask.status, 'task_status', '')}</p>
 						</div>
 					</div>

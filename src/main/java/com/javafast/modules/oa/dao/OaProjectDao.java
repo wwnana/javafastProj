@@ -1,5 +1,6 @@
 package com.javafast.modules.oa.dao;
 
+import org.apache.ibatis.annotations.Param;
 import org.hibernate.validator.constraints.Length;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -29,5 +30,7 @@ public interface OaProjectDao extends CrudDao<OaProject> {
 	public Long findCount(OaProject oaProject);
 
 	public String getProjNum(String status);
+
+	public void updateSchedule(@Param("projId")String projId, @Param("schedule")int schedule);
 	
 }

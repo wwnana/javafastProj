@@ -1,5 +1,7 @@
 package com.javafast.modules.oa.web;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,38 +19,28 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.hibernate.validator.constraints.Length;
-
-import java.util.Date;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.javafast.modules.sys.entity.SysDynamic;
-import com.javafast.modules.sys.entity.User;
-import com.javafast.modules.sys.service.SysDynamicService;
-import com.javafast.modules.sys.utils.Contants;
-import com.javafast.modules.sys.utils.DynamicUtils;
-import com.javafast.modules.sys.utils.UserUtils;
-
-import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Lists;
+import com.javafast.common.config.Global;
+import com.javafast.common.persistence.Page;
 import com.javafast.common.utils.DateUtils;
 import com.javafast.common.utils.IdUtils;
 import com.javafast.common.utils.MyBeanUtils;
-import com.javafast.common.config.Global;
-import com.javafast.common.persistence.Page;
-import com.javafast.common.web.BaseController;
 import com.javafast.common.utils.StringUtils;
 import com.javafast.common.utils.excel.ExportExcel;
 import com.javafast.common.utils.excel.ImportExcel;
+import com.javafast.common.web.BaseController;
 import com.javafast.modules.crm.entity.CrmCustomer;
 import com.javafast.modules.crm.service.CrmCustomerService;
 import com.javafast.modules.oa.entity.OaProject;
 import com.javafast.modules.oa.entity.OaTask;
-import com.javafast.modules.oa.entity.OaTaskRecord;
 import com.javafast.modules.oa.service.OaProjectService;
 import com.javafast.modules.oa.service.OaTaskService;
+import com.javafast.modules.sys.entity.SysDynamic;
+import com.javafast.modules.sys.service.SysDynamicService;
+import com.javafast.modules.sys.utils.Contants;
+import com.javafast.modules.sys.utils.DynamicUtils;
+import com.javafast.modules.sys.utils.UserUtils;
 
 /**
  * 任务Controller
@@ -70,6 +62,9 @@ public class OaTaskController extends BaseController {
 	
 	@Autowired
 	private SysDynamicService sysDynamicService;
+	
+//	@Autowired
+//	private ActDao actDao;
 	
 	@ModelAttribute
 	public OaTask get(@RequestParam(required=false) String id) {
@@ -125,7 +120,7 @@ public class OaTaskController extends BaseController {
 			int diffDay = DateUtils.differentDaysByMillisecond(new Date(), oaTask.getEndDate());
 			model.addAttribute("diffDay", diffDay);		
 		}
-				
+		
 		model.addAttribute("oaTask", oaTask);
 		return "modules/oa/oaTaskIndex";
 	}
@@ -135,8 +130,13 @@ public class OaTaskController extends BaseController {
 	 */
 	@RequiresPermissions(value={"oa:oaTask:view","oa:oaTask:add","oa:oaTask:edit"},logical=Logical.OR)
 	@RequestMapping(value = "form")
-	public String form(OaTask oaTask, Model model) {
-		
+	public String form(OaTask oaTask, Model model,RedirectAttributes redirectAttributes) {
+		//添加任务前判断项目状态是否处于进行中
+		OaProject oaProj = oaProjectService.get(oaTask.getRelationId());
+		if(oaProj!=null && !"1".equals(oaProj.getStatus())) {
+			addMessage(redirectAttributes, "当前项目状态未在进行中");
+			return "redirect:"+Global.getAdminPath()+"/oa/oaProject/view?id="+oaTask.getRelationId();
+		}
 		if(oaTask.getIsNewRecord()){
 			oaTask.setNo("RW"+IdUtils.getId());
 			oaTask.setSchedule(0);
@@ -165,8 +165,18 @@ public class OaTaskController extends BaseController {
 		if (StringUtils.isNotBlank(oaTask.getId())){
 			oaTaskService.updateReadFlag(oaTask);
 		}
-				
+		
+		//List<String> procList = actDao.findProcDefName();
+		List<String> procList = new ArrayList<String>();
+		procList.add("项目咨询流程");
+		procList.add("项目实施流程-可执行方案");
+		procList.add("项目实施流程-详细方案");
+		procList.add("项目实施流程-任务计划书反馈");
+		procList.add("项目实施流程-子系统验收");
+		
 		model.addAttribute("oaTask", oaTask);
+		model.addAttribute("procList",procList);
+		
 		return "modules/oa/oaTaskForm";
 	}
 
@@ -175,9 +185,10 @@ public class OaTaskController extends BaseController {
 	 */
 	@RequiresPermissions(value={"oa:oaTask:add","oa:oaTask:edit"},logical=Logical.OR)
 	@RequestMapping(value = "save")
+	
 	public String save(OaTask oaTask, Model model, RedirectAttributes redirectAttributes) {
 		if (!beanValidator(model, oaTask)){
-			return form(oaTask, model);
+			return form(oaTask, model,redirectAttributes);
 		}
 		
 		try{
@@ -329,20 +340,20 @@ public class OaTaskController extends BaseController {
 		String proId = t.getRelationId();
 		OaProject project = oaProjectService.get(proId);
 		
+		//完成
 		if("2".equals(oaTask.getStatus()))
 			t.setSchedule(100);
 		
 		oaTaskService.update(t);
-		
+		//开始
 		if("1".equals(oaTask.getStatus())){
 			DynamicUtils.addDynamic(Contants.OBJECT_OA_TYPE_TASK, Contants.ACTION_TYPE_START, oaTask.getId(), oaTask.getName(), null);
 		}
+		//完成
 		if("2".equals(oaTask.getStatus())){
-			int proSche = oaTaskService.findSchedule(oaTask);
-			project.setSchedule(proSche); 
-			oaProjectService.save(project);
 			DynamicUtils.addDynamic(Contants.OBJECT_OA_TYPE_TASK, Contants.ACTION_TYPE_END, oaTask.getId(), oaTask.getName(), null);
 		}
+		//关闭
 		if("3".equals(oaTask.getStatus())){
 			DynamicUtils.addDynamic(Contants.OBJECT_OA_TYPE_TASK, Contants.ACTION_TYPE_CLOSE, oaTask.getId(), oaTask.getName(), null);
 		}

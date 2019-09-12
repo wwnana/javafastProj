@@ -33,14 +33,15 @@ public class ActUtils {
 	 * 定义流程定义KEY，必须以“PD_”开头
 	 * 组成结构：string[]{"流程标识","业务主表表名"}
 	 */
-	//ActUtils.PD_LEAVE[0]
-	//public static final String[] PD_LEAVE = new String[]{"leave", "oa_leave"};
 	public static final String[] PD_LEAVE = new String[]{"leave_audit", "oa_leave"};
 	public static final String[] PD_TEST_AUDIT = new String[]{"test_audit", "oa_test_audit"};
-	public static final String[] PD_PROJECT_IMPL = new String[]{"project_impl", "oa_project_impl"};
-	public static final String[] PD_PROJECT_CONS = new String[]{"project_cons", "oa_project_cons"};
 	public static final String[] PD_PROJ_CONS = new String[]{"project_cons", "oa_proj_cons"};
 	public static final String[] PD_PROJ_IMPL = new String[]{"project_impl", "oa_proj_impl"};
+	public static final String[] PD_CONS_TEST = new String[]{"testProjCons", "oa_proj_cons"};
+	public static final String[] PD_IMPL_FST = new String[]{"testProjImplFst", "oa_proj_impl"};
+	public static final String[] PD_IMPL_SEC = new String[]{"testProjImplSec", "oa_proj_impl"};
+	public static final String[] PD_IMPL_THD = new String[]{"testProjImplThd", "oa_proj_impl"};
+	public static final String[] PD_IMPL_FOUR = new String[]{"testProjImplFour", "oa_proj_impl"};
 	
 	
 //	/**

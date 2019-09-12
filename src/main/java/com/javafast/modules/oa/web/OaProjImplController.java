@@ -18,25 +18,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import org.hibernate.validator.constraints.Length;
-import com.javafast.modules.sys.entity.User;
-import com.javafast.modules.sys.utils.UserUtils;
-import com.javafast.modules.sys.entity.Office;
-import javax.validation.constraints.NotNull;
-
 import com.google.common.collect.Lists;
-import com.javafast.common.utils.DateUtils;
-import com.javafast.common.utils.MyBeanUtils;
 import com.javafast.common.config.Global;
 import com.javafast.common.persistence.Page;
-import com.javafast.common.web.BaseController;
+import com.javafast.common.utils.DateUtils;
 import com.javafast.common.utils.StringUtils;
 import com.javafast.common.utils.excel.ExportExcel;
 import com.javafast.common.utils.excel.ImportExcel;
-import com.javafast.modules.oa.entity.OaProjCons;
+import com.javafast.common.web.BaseController;
 import com.javafast.modules.oa.entity.OaProjImpl;
+import com.javafast.modules.oa.entity.OaProject;
+import com.javafast.modules.oa.entity.OaTask;
 import com.javafast.modules.oa.service.OaProjImplService;
 import com.javafast.modules.oa.service.OaProjectService;
+import com.javafast.modules.oa.service.OaTaskService;
+import com.javafast.modules.sys.entity.User;
+import com.javafast.modules.sys.utils.Contants;
+import com.javafast.modules.sys.utils.DynamicUtils;
+import com.javafast.modules.sys.utils.UserUtils;
 
 /**
  * 项目实施流程表Controller
@@ -51,6 +50,8 @@ public class OaProjImplController extends BaseController {
 	private OaProjImplService oaProjImplService;
 	@Autowired
 	private OaProjectService oaProjectService;
+	@Autowired
+	private OaTaskService oaTaskService;
 	
 	@ModelAttribute
 	public OaProjImpl get(@RequestParam(required=false) String id) {
@@ -80,10 +81,30 @@ public class OaProjImplController extends BaseController {
 	 */
 	@RequiresPermissions(value={"oa:oaProjImpl:view","oa:oaProjImpl:add","oa:oaProjImpl:edit"},logical=Logical.OR)
 	@RequestMapping(value = "form")
-	public String form(OaProjImpl oaProjImpl, Model model) {
+	public String form(OaProjImpl oaProjImpl, Model model,RedirectAttributes redirectAttributes) {
+		//添加任务前判断项目状态是否处于进行中
+		OaProject oaProj = oaProjectService.get(oaProjImpl.getAct().getProjectId());
+		if(oaProj!=null && !"1".equals(oaProj.getStatus())) {
+			addMessage(redirectAttributes, "当前项目状态未在进行中");
+			return "redirect:"+Global.getAdminPath()+"/oa/oaProject/view?id="+oaProjImpl.getAct().getProjectId();
+		}
 		User currUser = UserUtils.getUser();
 		String view="oaProjImplStart";
+		//if (StringUtils.isBlank(oaProjImpl.getId())){
+
+			//设置任务的状态为开始
+			List<OaTask> oaTaskList = oaTaskService.findTaskByStatus(oaProjImpl.getAct().getProjectId(),"0");
+			if(oaTaskList != null && oaTaskList.size()>0) {
+				for(OaTask oaTask : oaTaskList) {
+					//DynamicUtils.addDynamic(Contants.OBJECT_OA_TYPE_TASK, Contants.ACTION_TYPE_START, oaTask.getId(), oaTask.getName(), null);
+					oaTask.setStatus("1");
+					oaTaskService.save(oaTask);
+				}
+			}
+		//}
+		
 		if (StringUtils.isNotBlank(oaProjImpl.getId())){
+			
 			// 环节编号
 			String taskDefKey = oaProjImpl.getAct().getTaskDefKey();
 			// 查看工单
@@ -93,9 +114,9 @@ public class OaProjImplController extends BaseController {
 				view = "oaProjImplFinish";
 			}
 			// 成员提交表单环节
-			else if(taskDefKey.contains("form0")||taskDefKey.contains("form2")
+			else if(taskDefKey.contains("form0")||taskDefKey.contains("form2")||taskDefKey.contains("form1")
 					||taskDefKey.contains("form5")||taskDefKey.contains("form4")
-					||"form60".equals(taskDefKey)||"form30".equals(taskDefKey)
+					||taskDefKey.contains("form6")||"form30".equals(taskDefKey)
 					||"form70".equals(taskDefKey)||"form90".equals(taskDefKey)) {
 				view = "oaProjImplForm";
 			//项目负责人决策
@@ -107,7 +128,7 @@ public class OaProjImplController extends BaseController {
 			//审核环节
 			else if(taskDefKey.contains("audit0")||taskDefKey.contains("audit2")
 					||taskDefKey.equals("audit40")||taskDefKey.equals("audit60")
-					||taskDefKey.equals("audit70")) {
+					||taskDefKey.equals("audit70")||taskDefKey.contains("audit1")) {
 				view = "oaProjImplAudit";
 				String status = "form"+taskDefKey.substring(5);
 				String procInsId = oaProjImpl.getAct().getProcInsId();
@@ -151,9 +172,17 @@ public class OaProjImplController extends BaseController {
 	@RequestMapping(value = "save")
 	public String save(OaProjImpl oaProjImpl, Model model, RedirectAttributes redirectAttributes) {
 		if (!beanValidator(model, oaProjImpl)){
-			return form(oaProjImpl, model);
+			return form(oaProjImpl, model,redirectAttributes);
 		}
 		oaProjImplService.save(oaProjImpl);
+		//对应任务状态改为完成
+		OaTask oaTask = oaTaskService.getTaskByName(oaProjImpl.getAct().getTaskName(),
+				oaProjImpl.getProject().getId(),oaProjImpl.getUser().getId());
+		if(oaTask!=null && oaTask.getStatus().equals("1")) {
+			//DynamicUtils.addDynamic(Contants.OBJECT_OA_TYPE_TASK, Contants.ACTION_TYPE_END, oaTask.getId(), oaTask.getName(), null);
+			oaTask.setStatus("2");
+			oaTaskService.save(oaTask);
+		}
 		addMessage(redirectAttributes, "提交审批'" + oaProjImpl.getUser().getName() + "'成功");
 		return "redirect:" + adminPath + "/act/task/todo/";
 	}
@@ -166,11 +195,11 @@ public class OaProjImplController extends BaseController {
 	 */
 	@RequiresPermissions("oa:oaProjCons:edit")
 	@RequestMapping(value = "saveAudit", method = RequestMethod.POST)
-	public String saveAudit(OaProjImpl oaProjImpl, Model model) {
+	public String saveAudit(OaProjImpl oaProjImpl, Model model,RedirectAttributes redirectAttributes) {
 		if (StringUtils.isBlank(oaProjImpl.getAct().getFlag())
 				|| StringUtils.isBlank(oaProjImpl.getAct().getComment())){
 			addMessage(model, "请填写审核意见。");
-			return form(oaProjImpl, model);
+			return form(oaProjImpl, model,redirectAttributes);
 		}
 		oaProjImplService.auditSave(oaProjImpl);
 		return "redirect:" + adminPath + "/act/task/todo/";

@@ -218,8 +218,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">任务类型：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">任务类型：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">${fns:getDictLabel(oaTask.relationType, 'relation_type', '')}</p>
 											</div>
 										</div>
@@ -229,8 +229,8 @@
 								<div class="row">
 									<div class="col-sm-12" id="select_div">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">关联${fns:getDictLabel(oaTask.relationType, 'relation_type', '')}：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">关联${fns:getDictLabel(oaTask.relationType, 'relation_type', '')}：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 													<a href="#" onclick="toView('${oaTask.relationType}', '${oaTask.relationId}')">${oaTask.relationName}</a>
 												</p>
@@ -243,8 +243,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">截止日期：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">截止日期：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												<fmt:formatDate value="${oaTask.endDate}" pattern="yyyy-MM-dd"/>
 												</p>
@@ -256,8 +256,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">状态：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">状态：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												${fns:getDictLabel(oaTask.status, 'task_status', '')}
 												</p>
@@ -268,8 +268,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">优先级：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">优先级：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">${fns:getDictLabel(oaTask.levelType, 'level_type', '')}</p>
 											</div>
 										</div>
@@ -278,8 +278,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">创建者：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">创建者：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												${oaTask.createBy.name}
 												</p>
@@ -290,8 +290,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">创建时间：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">创建时间：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												<fmt:formatDate value="${oaTask.createDate}" pattern="yyyy-MM-dd"/>
 												</p>
@@ -302,8 +302,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">负责人：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">负责人：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												${oaTask.ownBy.name}
 												</p>
@@ -314,8 +314,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">抄送给：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">抄送给：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												<c:forEach items="${oaTask.oaTaskRecordList}" var="oaTaskRecord">
 													<c:if test="${oaTaskRecord.user.name != oaTask.ownBy.name}">

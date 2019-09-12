@@ -23,6 +23,7 @@
 		a.update_date AS "updateDate",
 		a.del_flag AS "delFlag",
 		a.account_id AS "accountId",
+		a.procDef AS "procDef",
 		u12.name AS "ownBy.name",
 		u14.name AS "createBy.name",
 		u16.name AS "updateBy.name"
@@ -125,6 +126,49 @@
 		</choose>
 	</select>
 	
+	<select id="findTaskList" resultType="OaTask">
+		SELECT 
+			<include refid="oaTaskColumns"/>
+		FROM oa_task a
+		<include refid="oaTaskJoins"/>
+		<where>
+			a.del_flag = 0 AND a.relation_id = #{id}
+		</where>
+	</select>
+	
+	<select id="findTaskByStatus" resultType="OaTask">
+		SELECT 
+			<include refid="oaTaskColumns"/>
+		FROM oa_task a
+		<include refid="oaTaskJoins"/>
+		<where>
+			a.del_flag = 0 AND a.relation_id = #{projId} AND a.status = #{status}
+		</where>
+	</select>
+	
+	<select id="findTaskByProc" resultType="OaTask">
+		SELECT 
+			<include refid="oaTaskColumns"/>
+		FROM oa_task a
+		<include refid="oaTaskJoins"/>
+		<where>
+			a.del_flag = 0 AND a.relation_id = #{projId} AND a.procDef = #{procDef} 
+		</where>
+	</select>
+	
+	<select id="getTaskByName" resultType="OaTask">
+		SELECT 
+			<include refid="oaTaskColumns"/>
+		FROM oa_task a
+		<include refid="oaTaskJoins"/>
+		<where>
+			a.del_flag = 0 
+			AND a.name = #{taskName}
+			AND a.relation_id = #{projId}
+			AND a.own_By = #{userId}
+		</where>
+	</select>
+	
 	<insert id="insert">
 		INSERT INTO oa_task(
 			id,
@@ -147,7 +191,8 @@
 			update_date,
 			del_flag,
 			account_id,
-			office_id
+			office_id,
+			procDef
 		) VALUES (
 			#{id},
 			#{no},
@@ -169,7 +214,8 @@
 			#{updateDate},
 			#{delFlag},
 			#{accountId},
-			#{officeId}
+			#{officeId},
+			#{procDef}
 		)
 	</insert>
 
@@ -191,7 +237,8 @@
 			create_by = #{createBy.id},
 			create_date = #{createDate},
 			update_by = #{updateBy.id},
-			update_date = #{updateDate}
+			update_date = #{updateDate},
+			procDef = #{procDef}
 		WHERE id = #{id}
 	</update>
 

@@ -148,4 +148,25 @@ public class OaTaskService extends CrudService<OaTaskDao, OaTask> {
 		
 		return super.findList(oaTask);
 	}
+
+	public List<OaTask> findTaskByProc(String projId,String procDef) {
+		List<OaTask> list = dao.findTaskByProc(projId,procDef);
+		if(list != null && list.size() > 0) {
+			return list;
+		}
+		return null;
+	}
+
+	//任务名称  项目id  责任人id   流程名称
+	public OaTask getTaskByName(String taskName, String projId, String userId) {
+		return dao.getTaskByName(taskName,projId,userId);
+	}
+
+	public List<OaTask> findTaskByStatus(String projId, String status) {
+		List<OaTask> list = dao.findTaskByStatus(projId,status);
+		if(list != null && list.size() > 0) {
+			return list;
+		}
+		return null;
+	}
 }

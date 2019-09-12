@@ -232,7 +232,7 @@ public class ActTaskController extends BaseController {
 	}
 	
 	/**
-	 * 获取跟踪信息
+	 * 获取跟踪信息   DefaultProcessDiagramGenerator
 	 */
 	@RequestMapping(value = "processMap/{procDefId}/{proInstId}")
 	public String processMap(@PathVariable("procDefId")String procDefId,@PathVariable("proInstId") String proInstId, Model model) 

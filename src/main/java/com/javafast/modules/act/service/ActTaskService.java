@@ -64,6 +64,7 @@ import com.javafast.modules.act.service.creator.SimpleRuntimeActivityDefinitionE
 import com.javafast.modules.act.utils.ActUtils;
 import com.javafast.modules.act.utils.ProcessDefCache;
 import com.javafast.modules.act.utils.ProcessDefUtils;
+import com.javafast.modules.oa.entity.OaProject;
 import com.javafast.modules.oa.service.OaProjConsService;
 import com.javafast.modules.oa.service.OaProjImplService;
 import com.javafast.modules.sys.entity.User;
@@ -111,7 +112,6 @@ public class ActTaskService extends BaseService {
 	 */
 	public List<Act> todoList(Act act){
 		String userId = UserUtils.getUser().getLoginName();//ObjectUtils.toString(UserUtils.getUser().getId());
-		
 		List<Act> result = new ArrayList<Act>();
 		
 		// =============== 已经签收的任务  ===============
@@ -142,17 +142,20 @@ public class ActTaskService extends BaseService {
 //			e.setProcExecUrl(ActUtils.getProcExeUrl(task.getProcessDefinitionId()));
 			e.setStatus("todo");
 			
+			
 			//根据流程实例id获取项目名称
 			String insId = task.getProcessInstanceId();
+			
 			String defId = task.getProcessDefinitionId();
 			String tableName = defId.split(":")[0];
-			if(tableName.contains("project_cons")) {
+			if(tableName.contains("project_cons")||tableName.contains("testProjCons")) {
 				if(oaProjConsService.getProName(insId)!=null) {
 					e.setProject(oaProjConsService.getProName(insId).getProject());
 				}
-			}else if(tableName.contains("project_impl")) {
-				if(oaProjImplService.getProName(insId)!=null)
-					e.setProject(oaProjImplService.getProName(insId).getProject());
+//			}else if(tableName.contains("project_impl")) {
+			}else {
+					if(oaProjImplService.getProName(insId)!=null)
+						e.setProject(oaProjImplService.getProName(insId).getProject());
 			}
 			
 			result.add(e);
@@ -186,18 +189,19 @@ public class ActTaskService extends BaseService {
 //			e.setProcExecUrl(ActUtils.getProcExeUrl(task.getProcessDefinitionId()));
 			e.setStatus("claim");
 			
+			
 			//根据流程实例id获取项目名称
 			String insId = task.getProcessInstanceId();
 			String defId = task.getProcessDefinitionId();
 			String tableName = defId.split(":")[0];
-			if(tableName.contains("project_cons")) {
+			if(tableName.contains("project_cons")||tableName.contains("testProjCons")) {
 				if(oaProjConsService.getProName(insId)!=null)
 					e.setProject(oaProjConsService.getProName(insId).getProject());
-			}else if(tableName.contains("project_impl")) {
+//			}else if(tableName.contains("project_impl")) {
+			}else {
 				if(oaProjImplService.getProName(insId)!=null)
 					e.setProject(oaProjImplService.getProName(insId).getProject());
 			}
-			
 			
 			result.add(e);
 		}
@@ -249,10 +253,11 @@ public class ActTaskService extends BaseService {
 			String insId = histTask.getProcessInstanceId();
 			String defId = histTask.getProcessDefinitionId();
 			String tableName = defId.split(":")[0];
-			if(tableName.contains("project_cons")) {
+			if(tableName.contains("project_cons")||tableName.contains("testProjCons")) {
 				if(oaProjConsService.getProName(insId)!=null)
 					e.setProject(oaProjConsService.getProName(insId).getProject());
-			}else if(tableName.contains("project_impl")) {
+			//}else if(tableName.contains("project_impl")) {
+			}else {
 				if(oaProjImplService.getProName(insId)!=null)
 					e.setProject(oaProjImplService.getProName(insId).getProject());
 			}

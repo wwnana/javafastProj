@@ -16,6 +16,7 @@ import com.javafast.modules.act.service.ActTaskService;
 import com.javafast.modules.act.utils.ActUtils;
 import com.javafast.modules.oa.dao.OaProjImplDao;
 import com.javafast.modules.oa.entity.OaProjImpl;
+import com.javafast.modules.oa.entity.OaProject;
 
 /**
  * 项目实施流程表Service
@@ -28,6 +29,8 @@ public class OaProjImplService extends CrudService<OaProjImplDao, OaProjImpl> {
 
 	@Autowired
 	private ActTaskService actTaskService;
+	@Autowired
+	private OaProjectService oaProjectService;
 	
 	public OaProjImpl get(String id) {
 		return super.get(id);
@@ -43,13 +46,30 @@ public class OaProjImplService extends CrudService<OaProjImplDao, OaProjImpl> {
 	
 	@Transactional(readOnly = false)
 	public void save(OaProjImpl oaProjImpl) {
+		int x=50;
 		// 流程开始表单申请
 		if (StringUtils.isBlank(oaProjImpl.getId())){
 			oaProjImpl.preInsert();
 			dao.insert(oaProjImpl);
-			
 			// 启动流程
-			actTaskService.startProcess(ActUtils.PD_PROJ_IMPL[0], ActUtils.PD_PROJ_IMPL[1], oaProjImpl.getId());
+			//actTaskService.startProcess(ActUtils.PD_PROJ_IMPL[0], ActUtils.PD_PROJ_IMPL[1], oaProjImpl.getId());
+			if(oaProjImpl.getAct().getProcDefId().contains("testProjImplFst")) {
+				actTaskService.startProcess(ActUtils.PD_IMPL_FST[0], ActUtils.PD_IMPL_FST[1], oaProjImpl.getId());
+			}else if(oaProjImpl.getAct().getProcDefId().contains("testProjImplSec")) {
+				x=65;
+				actTaskService.startProcess(ActUtils.PD_IMPL_SEC[0], ActUtils.PD_IMPL_SEC[1], oaProjImpl.getId());
+			}else if(oaProjImpl.getAct().getProcDefId().contains("testProjImplThd")) {
+				x=80;
+				actTaskService.startProcess(ActUtils.PD_IMPL_THD[0], ActUtils.PD_IMPL_THD[1], oaProjImpl.getId());
+			}else if(oaProjImpl.getAct().getProcDefId().contains("testProjImplFour")) {
+				x=80;
+				actTaskService.startProcess(ActUtils.PD_IMPL_FOUR[0], ActUtils.PD_IMPL_FOUR[1], oaProjImpl.getId());
+			}
+			
+			//设置项目的进度条
+			String projId = oaProjImpl.getProject().getId();
+			oaProjectService.updateSchedule(projId,x);
+		
 		}
 		// 表单申请		
 		else{
@@ -59,6 +79,11 @@ public class OaProjImplService extends CrudService<OaProjImplDao, OaProjImpl> {
 				oaProjImpl.getAct().setComment(("yes".equals(oaProjImpl.getAct().getFlag())?"[提交] ":" ")+oaProjImpl.getAct().getComment());
 			}
 			else {
+				if(oaProjImpl.getStatus().contains("apply_end")) {
+					//设置项目的进度条
+					String projId = oaProjImpl.getProject().getId();
+					oaProjectService.updateSchedule(projId,100);
+				}
 				oaProjImpl.getAct().setComment(("yes".equals(oaProjImpl.getAct().getFlag())?"[提交] ":"[驳回] ")+oaProjImpl.getAct().getComment());
 				
 			}
@@ -91,7 +116,9 @@ public class OaProjImplService extends CrudService<OaProjImplDao, OaProjImpl> {
 
 	@Transactional(readOnly = false)
 	public void auditSave(OaProjImpl oaProjImpl) {
-		
+		if(oaProjImpl.getAct().getComment()==null||"".equals(oaProjImpl.getAct().getComment())) {
+			return;
+		}
 		
 		// 设置意见
 		oaProjImpl.getAct().setComment(("yes".equals(oaProjImpl.getAct().getFlag())?"[同意] ":"[驳回] ")+oaProjImpl.getAct().getComment());

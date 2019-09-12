@@ -52,6 +52,7 @@
 		FROM oa_proj_impl a
 		<include refid="oaProjImplJoins"/>
 		WHERE a.proc_ins_id = #{procInsId} and a.status = #{status}
+		 and a.audit_id is NULL
 	</select>
 	
 	<select id="findList" resultType="OaProjImpl">

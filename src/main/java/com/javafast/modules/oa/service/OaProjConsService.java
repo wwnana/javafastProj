@@ -1,9 +1,13 @@
 package com.javafast.modules.oa.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-
+import org.activiti.engine.RepositoryService;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -13,10 +17,11 @@ import com.google.common.collect.Maps;
 import com.javafast.common.persistence.Page;
 import com.javafast.common.service.CrudService;
 import com.javafast.common.utils.StringUtils;
-import com.javafast.modules.oa.entity.OaProjCons;
 import com.javafast.modules.act.service.ActTaskService;
 import com.javafast.modules.act.utils.ActUtils;
 import com.javafast.modules.oa.dao.OaProjConsDao;
+import com.javafast.modules.oa.entity.OaProjCons;
+import com.javafast.modules.oa.entity.OaProject;
 
 /**
  * 项目咨询流程表Service
@@ -30,6 +35,8 @@ public class OaProjConsService extends CrudService<OaProjConsDao, OaProjCons> {
 	@Autowired
 	@Lazy
 	private ActTaskService actTaskService;
+	@Autowired
+	private OaProjectService oaProjectService;
 
 	public OaProjCons get(String id) {
 		return super.get(id);
@@ -51,16 +58,28 @@ public class OaProjConsService extends CrudService<OaProjConsDao, OaProjCons> {
 			dao.insert(oaProjCons);
 			
 			// 启动流程
-			actTaskService.startProcess(ActUtils.PD_PROJ_CONS[0], ActUtils.PD_PROJ_CONS[1], oaProjCons.getId());
+			//actTaskService.startProcess(ActUtils.PD_PROJ_CONS[0], ActUtils.PD_PROJ_CONS[1], oaProjCons.getId());
+			actTaskService.startProcess(ActUtils.PD_CONS_TEST[0], ActUtils.PD_CONS_TEST[1], oaProjCons.getId());
+			
 		}
-		// 表单申请		
+		// 表单申请	
 		else{
 			oaProjCons.preInsert();
 			dao.insert(oaProjCons);
 			if(oaProjCons.getStatus().contains("form")) {
 				oaProjCons.getAct().setComment(("yes".equals(oaProjCons.getAct().getFlag())?"[提交] ":" "));
+				if("form10".contentEquals(oaProjCons.getStatus())) {
+					//设置项目的进度条
+					String projId = oaProjCons.getProject().getId();
+					oaProjectService.updateSchedule(projId,30);
+				}
 			}
 			else {
+				if(oaProjCons.getStatus().contains("apply_end")) {
+					//设置项目的进度条
+					String projId = oaProjCons.getProject().getId();
+					oaProjectService.updateSchedule(projId,50);
+				}
 				oaProjCons.getAct().setComment(("yes".equals(oaProjCons.getAct().getFlag())?"[提交] ":"[驳回] ")+oaProjCons.getAct().getComment());
 				
 			}
@@ -86,6 +105,9 @@ public class OaProjConsService extends CrudService<OaProjConsDao, OaProjCons> {
 
 	@Transactional(readOnly = false)
 	public void auditSave(OaProjCons oaProjCons) {
+		if(oaProjCons.getAct().getComment()==null || "".equals(oaProjCons.getAct().getComment())) {
+			return;
+		}
 		// 设置意见
 		oaProjCons.getAct().setComment(("yes".equals(oaProjCons.getAct().getFlag())?"[同意] ":"[驳回] ")+oaProjCons.getAct().getComment());
 		

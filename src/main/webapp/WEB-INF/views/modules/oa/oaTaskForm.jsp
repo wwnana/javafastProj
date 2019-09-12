@@ -161,6 +161,18 @@
 					</div>
 				</div>
 			</div>
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label"><font color="red">*</font> 任务阶段</label>
+						<div class="col-sm-8">
+							<form:select path="procDef" class="form-control" onchange="showRelation()">
+								<form:options items="${procList}"  htmlEscape="false"/>
+							</form:select>
+						</div>
+					</div>
+				</div>
+			</div>
 			
 			<%-- 
 			<div class="row">

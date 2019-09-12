@@ -168,6 +168,13 @@
 			office_id = #{officeId}
 		WHERE id = #{id}
 	</update>
+	
+	<update id="updateSchedule">
+		UPDATE oa_project SET
+			schedule = #{schedule}
+		WHERE id = #{projId}
+	</update>
+	
 
 	<update id="delete">
 		UPDATE oa_project SET 

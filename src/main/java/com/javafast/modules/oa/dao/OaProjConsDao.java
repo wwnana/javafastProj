@@ -22,5 +22,8 @@ public interface OaProjConsDao extends CrudDao<OaProjCons> {
 	void updateAuditText(OaProjCons oaProjCons);
 
 	List<OaProjCons> getProName(String insId);
+
+	
+	
 	
 }

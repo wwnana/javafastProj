@@ -111,4 +111,8 @@ public class OaProjectService extends CrudService<OaProjectDao, OaProject> {
 	public String getProjNum(String status) {
 		return dao.getProjNum(status);
 	}
+
+	public void updateSchedule(String projId, int schedule) {
+		dao.updateSchedule(projId,schedule);
+	}
 }

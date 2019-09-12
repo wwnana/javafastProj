@@ -163,20 +163,24 @@
 								<thead>
 									<tr>
 										<th width="30px"><input type="checkbox" class="i-checks"></th>
-										<th>任务名称</th>
+										<th width="100px">任务阶段</th>
+										<th width="100px">任务名称</th>
 										<th width="100px">负责人</th>
 										
 										<th width="100px">截止日期</th>
-										<th width="100px">优先级</th>
+										<th width="70px">优先级</th>
 										
-										<th width="100px">任务状态</th>
-										<th width="200px">操作</th>
+										<th width="80px">任务状态</th>
+										<th width="170px">操作</th>
 									</tr>
 								</thead>
 								<tbody>
 								<c:forEach items="${oaTaskList}" var="oaTask">
 									<tr>
 										<td><input type="checkbox" id="${oaTask.id}" class="i-checks"></td>
+										<td>
+											${oaTask.procDef}
+										</td>
 										<td>
 											<a href="${ctx}/oa/oaTask/view?id=${oaTask.id}">${oaTask.name}</a>
 										</td>
@@ -200,7 +204,7 @@
 			
 										<td>
 											 
-												<c:if test="${oaTask.status != 1}">
+											<%-- 	<c:if test="${oaTask.status != 1}">
 													<a href="${ctx}/oa/oaTask/deal?id=${oaTask.id}&status=1&proId=${oaTask.relationId}" onclick="return confirmx('确认要启动该任务吗？', this.href)" title="启动">开始</a>
 												</c:if>
 												<c:if test="${oaTask.status == 1}">
@@ -212,7 +216,7 @@
 												</c:if>
 												<c:if test="${oaTask.status == 2}">
 													<span class="text-muted">完成</span>
-												</c:if>
+												</c:if> --%>
 												
 												<c:if test="${oaTask.status != 3}">
 													<a href="${ctx}/oa/oaTask/deal?id=${oaTask.id}&status=3&proId=${oaTask.relationId}" onclick="return confirmx('确认要关闭该任务吗？', this.href)" title="关闭">关闭</a>
@@ -230,6 +234,7 @@
 								</c:forEach>
 								</tbody>
 							</table>
+							<a href="${ctx}/oa/oaProjModel/startPro?id=${oaProject.id}" title="提交">部署模型</a>
 							</div>
 							<%--任务 结束 --%>
 			 			</div>
@@ -331,8 +336,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">开始日期：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">开始日期：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												<fmt:formatDate value="${oaProject.startDate}" pattern="yyyy-MM-dd"/>
 												</p>
@@ -343,8 +348,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">截止日期：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">截止日期：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												<fmt:formatDate value="${oaProject.endDate}" pattern="yyyy-MM-dd"/>
 												</p>
@@ -356,8 +361,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">状态：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">状态：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 													<span class="<c:if test='${oaProject.status == 1}'>text-success</c:if><c:if test='${oaProject.status == 2}'>text-info</c:if><c:if test='${oaProject.status == 3}'>text-muted</c:if>">
 														${fns:getDictLabel(oaProject.status, 'task_status', '')}
@@ -370,8 +375,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">进度：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">进度：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												${oaProject.schedule}%
 												</p>
@@ -382,8 +387,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">创建者：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">创建者：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												${oaProject.createBy.name}
 												</p>
@@ -394,8 +399,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">创建时间：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">创建时间：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												<fmt:formatDate value="${oaProject.createDate}" pattern="yyyy-MM-dd"/>
 												</p>
@@ -406,8 +411,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">负责人：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">负责人：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												${oaProject.ownBy.name}
 												</p>
@@ -418,8 +423,8 @@
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="view-group">
-											<label class="col-sm-4 control-label">参与人：</label>
-											<div class="col-sm-8">
+											<label class="col-sm-5 control-label">参与人：</label>
+											<div class="col-sm-7">
 												<p class="form-control-static">
 												<c:forEach items="${oaProject.oaProjectRecordList}" var="oaProjectRecord">
 													<c:if test="${oaProjectRecord.user.name != oaProject.ownBy.name}">

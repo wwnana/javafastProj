@@ -18,19 +18,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.javafast.modules.sys.entity.User;
-import com.javafast.modules.sys.utils.UserUtils;
 import com.google.common.collect.Lists;
-import com.javafast.common.utils.DateUtils;
 import com.javafast.common.config.Global;
 import com.javafast.common.persistence.Page;
-import com.javafast.common.web.BaseController;
+import com.javafast.common.utils.DateUtils;
 import com.javafast.common.utils.StringUtils;
 import com.javafast.common.utils.excel.ExportExcel;
 import com.javafast.common.utils.excel.ImportExcel;
+import com.javafast.common.web.BaseController;
 import com.javafast.modules.oa.entity.OaProjCons;
+import com.javafast.modules.oa.entity.OaProject;
+import com.javafast.modules.oa.entity.OaTask;
 import com.javafast.modules.oa.service.OaProjConsService;
 import com.javafast.modules.oa.service.OaProjectService;
+import com.javafast.modules.oa.service.OaTaskService;
+import com.javafast.modules.sys.entity.User;
+import com.javafast.modules.sys.utils.Contants;
+import com.javafast.modules.sys.utils.DynamicUtils;
+import com.javafast.modules.sys.utils.UserUtils;
 
 /**
  * 项目咨询流程表Controller
@@ -45,6 +50,8 @@ public class OaProjConsController extends BaseController {
 	private OaProjConsService oaProjConsService;
 	@Autowired
 	private OaProjectService oaProjectService;
+	@Autowired
+	private OaTaskService oaTaskService;
 	
 	@ModelAttribute
 	public OaProjCons get(@RequestParam(required=false) String id) {
@@ -74,42 +81,53 @@ public class OaProjConsController extends BaseController {
 	 */
 	@RequiresPermissions(value={"oa:oaProjCons:view","oa:oaProjCons:add","oa:oaProjCons:edit"},logical=Logical.OR)
 	@RequestMapping(value = "form")
-	public String form(OaProjCons oaProjCons, Model model) {
+	public String form(OaProjCons oaProjCons, Model model,RedirectAttributes redirectAttributes) {
+		//添加任务前判断项目状态是否处于进行中
+		OaProject oaProj = oaProjectService.get(oaProjCons.getAct().getProjectId());
+		if(oaProj!=null && !"1".equals(oaProj.getStatus())) {
+			addMessage(redirectAttributes, "当前项目状态未在进行中");
+			return "redirect:"+Global.getAdminPath()+"/oa/oaProject/view?id="+oaProjCons.getAct().getProjectId();
+		}
 		User currUser = UserUtils.getUser();
 		String view = "oaProjConsStart";
-		String sta = oaProjCons.getAct().getTaskDefKey();
-		//显示历史记录中的详情
-		if(oaProjCons.getAct().getStatus().equals("finish")) {
-			view="oaProjConsView";
-			String status = "";
-			if(oaProjCons.getAct().getTaskDefKey().equals("apply_end")) {
-				status="apply_end";
-			}else {
-				status = "form"+sta.substring(sta.length()-2, sta.length());
+		//if (StringUtils.isBlank(oaProjCons.getId())){
+			//设置任务的状态为开始
+			List<OaTask> oaTaskList = oaTaskService.findTaskByStatus(oaProjCons.getAct().getProjectId(),"0");
+			if(oaTaskList != null && oaTaskList.size()>0) {
+				for(OaTask oaTask : oaTaskList) {
+					//DynamicUtils.addDynamic(Contants.OBJECT_OA_TYPE_TASK, Contants.ACTION_TYPE_START, oaTask.getId(), oaTask.getName(), null);
+					oaTask.setStatus("1");
+					oaTaskService.save(oaTask);
+				}
 			}
-			String procInsId = oaProjCons.getAct().getProcInsId();
-			OaProjCons oaProjCons2 = oaProjConsService.findLastTask(procInsId,status);
-			model.addAttribute("oaProjCons", oaProjCons2);
-			return "modules/oa/"+view;
-		}
+		//}
+		//环节编号
+		String taskDefKey = oaProjCons.getAct().getTaskDefKey();
 		if (StringUtils.isNotBlank(oaProjCons.getId())){
-
-			// 环节编号
-			String taskDefKey = oaProjCons.getAct().getTaskDefKey();
-			// 查看工单
-			if(oaProjCons.getAct().isFinishTask()){
-				view = "oaProjConsView";
-			}else if("apply_end".equals(taskDefKey)) {
+			//显示历史记录中的详情
+			if(oaProjCons.getAct().isFinishTask()) {
+				String status = "";
+				if(taskDefKey.equals("apply_end")) {
+					status="apply_end";
+				}else if(StringUtils.isNotBlank(taskDefKey)){
+					status = "form"+taskDefKey.substring(taskDefKey.length()-2, taskDefKey.length());
+				}
+				String procInsId = oaProjCons.getAct().getProcInsId();
+				OaProjCons oaProjCons2 = oaProjConsService.findLastTask(procInsId,status);
+				model.addAttribute("oaProjCons", oaProjCons2);
+				return "modules/oa/oaProjConsView";
+			}
+			if("apply_end".equals(taskDefKey)) {
 				view = "oaProjConsFinish";
 			}
 			// 成员提交表单环节
-			else if(taskDefKey.contains("form0")||"form10".equals(taskDefKey)) {
+			if(taskDefKey.contains("form0")||"form10".equals(taskDefKey)) {
 				view = "oaProjConsForm";
 			}
 			//审核环节
 			else if(taskDefKey.contains("audit0")||"audit10".equals(taskDefKey)) {
 				view = "oaProjConsAudit";
-				String status = "form"+oaProjCons.getAct().getTaskDefKey().substring(5);
+				String status = "form"+taskDefKey.substring(5);
 				String procInsId = oaProjCons.getAct().getProcInsId();
 				OaProjCons oaProjCons1 = oaProjConsService.findLastTask(procInsId,status);
 				oaProjCons1.setAudit(currUser);
@@ -123,7 +141,7 @@ public class OaProjConsController extends BaseController {
 		oaProjCons.setUser(currUser);//设置申请人
 		oaProjCons.setOffice(currUser.getOffice());//设置申请人部门
 		oaProjCons.setProcInsId(oaProjCons.getAct().getProcInsId());//设置流程实例ID
-		oaProjCons.setStatus(oaProjCons.getAct().getTaskDefKey());//设置状态
+		oaProjCons.setStatus(taskDefKey);//设置状态
 		oaProjCons.setProject(oaProjectService.get(oaProjCons.getAct().getProjectId()));
 		oaProjCons.setUserName(currUser.getName());
 		oaProjCons.setOfficeName(currUser.getOffice().getName());
@@ -151,10 +169,18 @@ public class OaProjConsController extends BaseController {
 	@RequestMapping(value = "save")
 	public String save(OaProjCons oaProjCons, Model model, RedirectAttributes redirectAttributes) {
 		if (!beanValidator(model, oaProjCons)){
-			return form(oaProjCons, model);
+			return form(oaProjCons, model,redirectAttributes);
 		}
 		oaProjConsService.save(oaProjCons);
-		addMessage(redirectAttributes, "提交审批'" + oaProjCons.getUser().getName() + "'成功");
+		//对应任务状态改为完成
+		OaTask oaTask = oaTaskService.getTaskByName(oaProjCons.getAct().getTaskName(),
+				oaProjCons.getProject().getId(),oaProjCons.getUser().getId());
+		if(oaTask!=null && oaTask.getStatus().equals("1")) {
+			//DynamicUtils.addDynamic(Contants.OBJECT_OA_TYPE_TASK, Contants.ACTION_TYPE_END, oaTask.getId(), oaTask.getName(), null);
+			oaTask.setStatus("2");
+			oaTaskService.save(oaTask);
+		}
+		addMessage(redirectAttributes, "提交审批'" + oaProjCons.getUser().getName() + "成功");
 		return "redirect:" + adminPath + "/act/task/todo/";
 	}
 	
@@ -166,11 +192,11 @@ public class OaProjConsController extends BaseController {
 	 */
 	@RequiresPermissions("oa:oaProjCons:edit")
 	@RequestMapping(value = "saveAudit", method = RequestMethod.POST)
-	public String saveAudit(OaProjCons oaProjCons, Model model) {
+	public String saveAudit(OaProjCons oaProjCons, Model model,RedirectAttributes redirectAttributes) {
 		if (StringUtils.isBlank(oaProjCons.getAct().getFlag())
 				|| StringUtils.isBlank(oaProjCons.getAct().getComment())){
 			addMessage(model, "请填写审核意见。");
-			return form(oaProjCons, model);
+			return form(oaProjCons, model,redirectAttributes);
 		}
 		oaProjConsService.auditSave(oaProjCons);
 		return "redirect:" + adminPath + "/act/task/todo/";
